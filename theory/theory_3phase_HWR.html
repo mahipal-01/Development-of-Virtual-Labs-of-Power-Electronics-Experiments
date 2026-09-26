@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Three Phase Half-Wave Controlled Rectifier – Theory</title>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath:  [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']],
+        processEscapes: true,
+        tags: 'none'
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+      startup: { typeset: true }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --surface: #ffffff;
+      --surface2: #f7f8fa;
+      --border: #d0d5dd;
+      --border2: #e4e7ec;
+      --text: #1a1f2e;
+      --text2: #4a5568;
+      --text3: #8898aa;
+      --accent: #0057b8;
+      --accent-lt: #dbeafe;
+      --green: #16a34a;
+      --green-lt: #dcfce7;
+      --orange: #c2440b;
+      --orange-lt: #fff0e6;
+      --purple: #6d28d9;
+      --teal: #0891b2;
+      --teal-lt: #cffafe;
+      --emf: #b91c1c;
+      --emf-lt: #fee2e2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Times New Roman', Times, serif;
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1.5px solid var(--border);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      height: 44px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .toolbar-logo {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1f2e;
+      letter-spacing: -0.3px;
+      padding-right: 20px;
+      border-right: 1px solid var(--border2);
+      margin-right: 16px;
+      white-space: nowrap;
+    }
+    .toolbar-logo span { font-weight: 400; }
+    .tb-nav {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 44px;
+    }
+    .tb-nav a {
+      height: 44px;
+      padding: 0 18px;
+      background: none;
+      border: none;
+      border-right: 1px solid var(--border2);
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .tb-nav a:hover { background: var(--accent-lt); color: var(--accent); }
+    .tb-nav a.active {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ── Banner ── */
+    .exp-banner {
+      background: var(--surface);
+      border-bottom: 2px solid var(--border);
+      padding: 18px 28px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .exp-tag {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .exp-title {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .exp-title span { color: var(--accent); }
+    .exp-subtitle {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 11.5px;
+      color: var(--text3);
+      margin-top: 5px;
+      letter-spacing: 0.2px;
+    }
+
+    /* ── Main layout ── */
+    .page-body {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 28px 28px 0;
+    }
+
+    /* ── Section headings ── */
+    .section-heading {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin: 36px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-heading .sh-num {
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-heading:first-child { margin-top: 0; }
+
+    /* ── Text ── */
+    .content-block {
+      font-size: 15px;
+      line-height: 1.85;
+      color: var(--text2);
+      margin-bottom: 14px;
+      text-align: justify;
+    }
+
+    /* ── Note box ── */
+    .note-box {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 14px;
+      color: #92400e;
+      line-height: 1.75;
+    }
+    .note-box b { color: #78350f; }
+
+    /* ── Formula box ── */
+    .fbox {
+      background: var(--surface2);
+      border: 1.5px solid var(--border2);
+      border-radius: 6px;
+      padding: 13px 18px;
+      margin: 12px 0;
+      text-align: center;
+      overflow-x: auto;
+    }
+    .fbox:hover {
+      border-color: var(--accent);
+      background: #f0f6ff;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    /* ── Formula label ── */
+    .fbox-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      text-align: left;
+    }
+
+    /* ── Formula grid (two-col) ── */
+    .fgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .fgrid .fbox { margin: 0; }
+
+    /* ── Sub-section label ── */
+    .sub-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin: 20px 0 8px;
+      padding: 5px 12px;
+      background: var(--accent-lt);
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    /* ── Image placeholder cards ── */
+    .fig-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 20px 0 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .fig-header {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border2);
+      padding: 7px 14px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      color: var(--text3);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .fig-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+    .fig-body { padding: 0; }
+    .fig-body svg { display: block; width: 100%; }
+    .fig-body img {
+      display: block;
+      width: 100%;
+      object-fit: contain;
+      max-height: 420px;
+      mix-blend-mode: darken;
+    }
+    .fig-caption {
+      font-size: 12px;
+      color: var(--text3);
+      text-align: center;
+      padding: 8px 14px 12px;
+      font-style: italic;
+      border-top: 1px solid var(--border2);
+      background: var(--surface2);
+    }
+
+    /* ── Advantage / Disadvantage / Application cards ── */
+    .list-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border2);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+    }
+    .list-card ol, .list-card ul {
+      padding-left: 22px;
+      font-size: 14.5px;
+      color: var(--text2);
+      line-height: 1.85;
+    }
+    .list-card li { margin-bottom: 5px; }
+
+    /* ── Two-col grid for Adv / Disadv / App ── */
+    .adv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    /* ── Applications single card ── */
+    .list-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border2);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+    }
+    .list-card ol, .list-card ul {
+      padding-left: 22px;
+      font-size: 14.5px;
+      color: var(--text2);
+      line-height: 1.85;
+    }
+    .list-card li { margin-bottom: 5px; }
+
+    /* ── Footer ── */
+    .footer {
+      background: var(--surface);
+      border-top: 1.5px solid var(--border);
+      padding: 18px 28px;
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text3);
+      margin-top: 40px;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── Fade in ── */
+    .fade-in { animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 700px) {
+      .fgrid    { grid-template-columns: 1fr; }
+      .adv-grid { grid-template-columns: 1fr; }
+      .page-body { padding: 16px; }
+      .exp-title { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Toolbar ── -->
+<div class="toolbar">
+  <div class="toolbar-logo">3&Phi;-SCR<span>/HWR</span> Virtual Lab</div>
+  <nav class="tb-nav">
+    <a href="theory_3phase_HWR.html" class="active">📖 Theory</a>
+    <a href="simulation.html">⚙ Simulation</a>
+  </nav>
+</div>
+
+<!-- ── Banner ── -->
+<div class="exp-banner">
+  <div class="exp-tag">Theory · Power Electronics · Rectifiers</div>
+  <div class="exp-title">
+    Three Phase Half-Wave Controlled Rectifier &mdash;
+    <span>R Load</span> &amp; <span>R-L Load</span>
+  </div>
+  <div class="exp-subtitle">
+    SCR-based controlled rectification · Three-phase supply · Firing angle α · Thyristors T<sub>1</sub>, T<sub>2</sub>, T<sub>3</sub> · 50 Hz system
+  </div>
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="page-body fade-in">
+
+  <!-- ══════════════════════════════
+       INTRODUCTION
+  ══════════════════════════════ -->
+  <div class="section-heading">
+    <span class="sh-num">i</span>
+    Introduction
+  </div>
+
+  <p class="content-block">
+    A three-phase half-wave controlled rectifier is an electrical circuit used for converting alternating current
+    (AC) into direct current (DC) by controlling the flow of current through a load. It is called a
+    <em>half-wave</em> rectifier because it rectifies only one half of each input waveform per phase.
+  </p>
+
+  <p class="content-block">
+    The working principle can be summarised across the following key stages:
+  </p>
+
+  <p class="content-block">
+    <strong>1. Input:</strong> The rectifier is connected to a three-phase AC power source. The AC voltage waveform
+    consists of three phases: phase A, phase B, and phase C.
+  </p>
+  <p class="content-block">
+    <strong>2. Rectification:</strong> Each phase of the AC source is connected to a thyristor, forming a thyristor
+    bridge. When the input voltage is positive in one phase, the corresponding thyristor conducts provided that a gate
+    trigger is given, allowing current to flow through the load.
+  </p>
+  <p class="content-block">
+    <strong>3. Control:</strong> In a controlled rectifier, the current flow through the thyristor (also known as a
+    Silicon Controlled Rectifier or SCR) is governed by the gate signal. The thyristor acts as a switch that can be
+    turned on or off depending on the control signal applied to its gate.
+  </p>
+  <p class="content-block">
+    <strong>4. Triggering:</strong> Thyristors are triggered at specific points in the input waveform by applying a
+    pulse signal to the gate at the desired firing angle α. The firing angle determines the portion of the input
+    waveform during which the thyristor conducts current.
+  </p>
+  <p class="content-block">
+    <strong>5. Conduction:</strong> Once triggered, the thyristor turns on and allows current to flow through the
+    load until the end of the half-cycle or until the thyristor is turned off.
+  </p>
+  <p class="content-block">
+    <strong>6. Commutation:</strong> When the input waveform crosses zero or becomes negative, natural commutation
+    occurs, turning off the conducting thyristor. This happens because the forward voltage across the thyristor drops
+    below its holding voltage.
+  </p>
+  <p class="content-block">
+    <strong>7. Output:</strong> The load receives a pulsating DC voltage consisting of positive half-cycles. By
+    controlling the firing angle α of the thyristors, the average output voltage can be varied, enabling regulation
+    of the power delivered to the load.
+  </p>
+
+  <div class="note-box">
+    <b>Important Note:</b> The three-phase half-wave controlled rectifier is a simplified configuration and may
+    require additional components — such as filters and smoothing capacitors — to reduce ripple and provide a
+    smoother DC output. Overall, it provides a means to convert three-phase AC power to pulsating DC power by
+    controlling the firing of thyristors in each phase.
+  </div>
+
+  <!-- ══════════════════════════════
+       SECTION 1 — R LOAD
+  ══════════════════════════════ -->
+  <div class="section-heading">
+    <span class="sh-num">1</span>
+    Three Phase Half Wave Controlled Rectifier with Resistive (R) Load
+  </div>
+
+  <!-- Fig 1 — Circuit -->
+  <div class="fig-card">
+    <div class="fig-header">
+        <span class="fig-dot"></span>
+        Fig. 1 — R Load Circuit Diagram
+    </div>
+
+    <div class="fig-body">
+        <img src="THW_R_load_circuit.png" alt="R Load Circuit Diagram" style="width:100%; height:auto; border-radius:6px;">
+    </div>
+
+    <div class="fig-caption">
+        Fig. 1: Three Phase Half Wave Controlled Rectifier with R Load
+    </div>
+</div>
+
+  <p class="content-block">
+    The circuit consists of a delta–star transformer and three thyristors T<sub>1</sub>, T<sub>2</sub>, T<sub>3</sub>
+    connected on the secondary star-connected winding and a resistive load. When V<sub>a</sub> is positive,
+    T<sub>1</sub> becomes forward biased and conducts. During the negative cycle of V<sub>a</sub>, T<sub>1</sub>
+    turns off. Similarly, T<sub>2</sub> and T<sub>3</sub> conduct only during the positive cycles of V<sub>b</sub>
+    and V<sub>c</sub> respectively.
+  </p>
+
+  <p class="content-block">
+    The average output voltage can be varied by varying the firing angles of the thyristors. In the waveforms below,
+    V<sub>a</sub> is denoted as V<sub>an</sub>, V<sub>b</sub> as V<sub>bn</sub> and V<sub>c</sub> as V<sub>cn</sub>.
+  </p>
+
+  <!-- Fig 2 — Waveform -->
+  <div class="fig-card">
+  <div class="fig-header">
+    <span class="fig-dot" style="background:#0057b8;"></span>
+    Fig. 2 — R Load Waveforms
+  </div>
+
+  <div class="fig-body">
+    <img src="THW_R_load_waveform.png" alt="R Load Waveforms" style="width:100%; height:auto; border-radius:6px;">
+  </div>
+
+  <div class="fig-caption">
+    Fig. 2: input voltage, output voltage, load current, load voltage, voltage across thyristors T1, T2 and T3 (V<sub>T1</sub>, V<sub>T2</sub> and V<sub>T3</sub>), gate pulse (V<sub>GP1</sub>, V<sub>GP2</sub>, V<sub>GP3</sub>)
+  </div>
+</div>
+
+  <!-- Case 1: alpha < 30 -->
+  <div class="sub-label">Case 1: &alpha; &lt; 30°</div>
+
+  <p class="content-block">
+    For firing angles less than 30°, each thyristor conducts for a full 120° interval and the output voltage waveform
+    has no zero-voltage gaps. The expressions for average and RMS output voltage and current are:
+  </p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 1 — Average Output Voltage (α &lt; 30°)</div>
+    \[
+      V_o = \frac{1}{\dfrac{2\pi}{3}} \int_{\alpha+\frac{\pi}{6}}^{\alpha+\frac{5\pi}{6}}
+            V_{mp}\sin\omega t\; d(\omega t)
+          = \frac{3\sqrt{3}}{2\pi}\,V_{mp}\cos\alpha
+          = \frac{3}{2\pi}\,V_{ml}\cos\alpha
+    \]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 2 — Average Output Current (α &lt; 30°)</div>
+    \[
+      I_o = \frac{V_o}{R} = \frac{3}{2\pi R}\,V_{ml}\cos\alpha
+    \]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 3 — RMS Output Voltage (α &lt; 30°)</div>
+    \[
+      V_{o\,(rms)} = \sqrt{3}\,V_{mp}
+      \left[\frac{1}{6} + \frac{\sqrt{3}}{8\pi}\cos 2\alpha\right]^{1/2}
+      = V_{ml}\left[\frac{1}{6} + \frac{\sqrt{3}}{8\pi}\cos 2\alpha\right]^{1/2}
+    \]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 4 — RMS Output Current (α &lt; 30°)</div>
+    \[
+      I_{o\,rms} = \frac{V_{o\,rms}}{R}
+                 = \frac{\sqrt{3}\,V_{mp}}{R}
+                   \left[\frac{1}{6} + \frac{\sqrt{3}}{8\pi}\cos 2\alpha\right]^{1/2}
+    \]
+  </div>
+
+  <!-- Case 2: alpha > 30 -->
+  <div class="sub-label">Case 2: &alpha; &gt; 30°</div>
+
+  <p class="content-block">
+    For firing angles greater than 30°, the output voltage waveform contains zero-voltage gaps during which all
+    thyristors are off. The upper limit of integration reduces to π (end of positive half-cycle):
+  </p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 5 — Average Output Voltage (α &gt; 30°)</div>
+    \[
+      V_o = \frac{1}{\dfrac{2\pi}{3}} \int_{\alpha+\frac{\pi}{6}}^{\pi}
+            V_{mp}\sin\omega t\; d(\omega t)
+          = \frac{3}{2\pi}\,V_{mp}\!\left[1 + \cos(\alpha + 30^\circ)\right]
+    \]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 6 — Average Output Current (α &gt; 30°)</div>
+    \[
+      I_o = \frac{V_o}{R} = \frac{3}{2\pi R}\,V_{mp}\!\left[1 + \cos(\alpha + 30^\circ)\right]
+    \]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 7 — RMS Output Voltage (α &gt; 30°)</div>
+    \[
+      V_{o\,(rms)} = \frac{\sqrt{3}\,V_{mp}}{2\sqrt{\pi}}
+      \left[\left(\frac{5\pi}{6} - \alpha\right)
+      + \frac{1}{2}\sin\!\left(2\alpha + \frac{\pi}{3}\right)\right]^{1/2}
+    \]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 8 — RMS Output Current (α &gt; 30°)</div>
+    \[
+      I_{o\,(rms)} = \frac{V_{o\,(rms)}}{R}
+                   = \frac{\sqrt{3}\,V_{mp}}{2\sqrt{\pi}\,R}
+                     \left[\left(\frac{5\pi}{6} - \alpha\right)
+                     + \frac{1}{2}\sin\!\left(2\alpha + \frac{\pi}{3}\right)\right]^{1/2}
+    \]
+  </div>
+
+  <!-- ══════════════════════════════
+       SECTION 2 — RL LOAD
+  ══════════════════════════════ -->
+  <div class="section-heading">
+    <span class="sh-num">2</span>
+    Three Phase Half Wave Controlled Rectifier with R-L Load
+  </div>
+
+  <!-- Fig 3 — Circuit -->
+  <div class="fig-card">
+    <div class="fig-header">
+        <span class="fig-dot"></span>
+        Fig. 1 — R-L Load Circuit Diagram
+    </div>
+
+    <div class="fig-body">
+        <img src="THW_RL_load_circuit.png" alt="R-L Load Circuit Diagram" style="width:100%; height:auto; border-radius:6px;">
+    </div>
+
+    <div class="fig-caption">
+        Fig. 1: Three Phase Half Wave Controlled Rectifier with R-L Load
+    </div>
+</div>
+
+  <p class="content-block">
+    The circuit consists of a delta–star transformer and three thyristors T<sub>1</sub>, T<sub>2</sub>,
+    T<sub>3</sub> connected on the secondary star-connected winding and an R-L load.
+  </p>
+
+  <p class="content-block">
+    When V<sub>a</sub> is positive, T<sub>1</sub> becomes forward biased and conducts. During the negative cycle of
+    V<sub>a</sub>, the current through T<sub>1</sub> is not zero due to the inductor in the load — so T<sub>1</sub>
+    remains ON during the negative cycle of V<sub>a</sub>. When V<sub>b</sub> is positive, T<sub>2</sub> is
+    triggered and the load current is transferred from T<sub>1</sub> to T<sub>2</sub>; at this instant T<sub>1</sub>
+    turns OFF.
+  </p>
+
+  <p class="content-block">
+    Similarly, during the negative cycle of V<sub>b</sub>, T<sub>2</sub> remains ON due to the inductor. When
+    T<sub>3</sub> is triggered during the positive cycle of V<sub>c</sub>, the load current is transferred from
+    T<sub>2</sub> to T<sub>3</sub>, and T<sub>2</sub> turns OFF. T<sub>3</sub> conducts during the negative cycle
+    of V<sub>c</sub> and turns OFF when T<sub>1</sub> is triggered again. The average output voltage can be varied
+    by varying the firing angles of the thyristors.
+  </p>
+
+  <!-- Fig 4 — Waveform -->
+  <div class="fig-card">
+  <div class="fig-header">
+    <span class="fig-dot" style="background:#0057b8;"></span>
+    Fig. 2 — R-L Load Waveforms
+  </div>
+
+  <div class="fig-body">
+    <img src="THW_RL_load_waveform.png" alt="R-L Load Waveforms" style="width:100%; height:auto; border-radius:6px;">
+  </div>
+
+  <div class="fig-caption">
+    Fig. 2: input voltage, output voltage, load current, load voltage, voltage across thyristors T1, T2 and T3 (V<sub>T1</sub>, V<sub>T2</sub> and V<sub>T3</sub>), gate pulse (V<sub>GP1</sub>, V<sub>GP2</sub>, V<sub>GP3</sub>)
+  </div>
+</div>
+
+  <p class="content-block">
+    For the R-L load, due to the continuous current conduction maintained by the inductance, the integration
+    limits span the full 120° interval for all values of α. The average and RMS output voltage and current are:
+  </p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 9 — Average Output Voltage (R-L Load)</div>
+    \[
+      V_o = \frac{1}{\dfrac{2\pi}{3}} \int_{\alpha+\frac{\pi}{6}}^{\alpha+\frac{5\pi}{6}}
+            V_{mp}\sin\omega t\; d(\omega t)
+          = \frac{3\sqrt{3}}{2\pi}\,V_{mp}\cos\alpha
+          = \frac{3}{2\pi}\,V_{ml}\cos\alpha
+    \]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 10 — Average Output Current (R-L Load)</div>
+    \[
+      I_o = \frac{V_o}{R} = \frac{3}{2\pi R}\,V_{ml}\cos\alpha
+    \]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 11 — RMS Output Voltage (R-L Load)</div>
+    \[
+      V_{o\,(rms)} = \sqrt{3}\,V_{mp}
+      \left[\frac{1}{6} + \frac{\sqrt{3}}{8\pi}\cos 2\alpha\right]^{1/2}
+      = V_{ml}\left[\frac{1}{6} + \frac{\sqrt{3}}{8\pi}\cos 2\alpha\right]^{1/2}
+    \]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 12 — RMS Output Current (R-L Load)</div>
+    \[
+      I_{o\,rms} = \frac{V_{o\,rms}}{R}
+                 = \frac{\sqrt{3}\,V_{mp}}{R}
+                   \left[\frac{1}{6} + \frac{\sqrt{3}}{8\pi}\cos 2\alpha\right]^{1/2}
+    \]
+  </div>
+
+  <!-- ══════════════════════════════
+       SECTION 3 — ADVANTAGES / DISADVANTAGES / APPLICATIONS
+  ══════════════════════════════ -->
+  <div class="section-heading">
+    <span class="sh-num">3</span>
+    Advantages, Disadvantages &amp; Applications
+  </div>
+
+  <div class="adv-grid">
+
+    <div class="list-card">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+        Advantages
+      </div>
+      <ol>
+        <li>High efficiency in AC-to-DC power conversion — reduced power loss by utilizing only one half-cycle per phase.</li>
+        <li>Reduced ripple content due to the balanced three-phase waveform, improving output voltage stability.</li>
+        <li>Lower harmonic distortion compared to single-phase rectifiers, contributing to improved power quality.</li>
+        <li>Capable of handling higher power loads — suitable for industrial motor drives, EV power supplies, and large-scale battery charging.</li>
+        <li>Improved reliability through three-phase redundancy — if one phase fails, the other two continue to deliver power.</li>
+        <li>Better power factor correction capabilities compared to single-phase rectifiers, reducing reactive power and improving energy efficiency.</li>
+      </ol>
+    </div>
+
+    <div class="list-card">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+        Disadvantages
+      </div>
+      <ol>
+        <li>Only half of each input waveform is utilised, resulting in a lower average output voltage compared to full-wave rectifiers.</li>
+        <li>Significant harmonic distortion in the rectified output, increasing EMI and reducing power quality.</li>
+        <li>Discontinuous current drawn from the AC supply causes poor power factor and increased line losses.</li>
+        <li>Not suitable for driving inductive loads without freewheeling diodes — the intermittent output restricts applicability.</li>
+        <li>Precise voltage regulation is challenging, especially under varying load conditions.</li>
+        <li>High-voltage transients during thyristor switching increase stress on components, reducing reliability.</li>
+        <li>Additional control circuitry for firing-angle management adds complexity and cost.</li>
+        <li>Reduced overall efficiency compared to full-wave topologies, leading to increased power losses.</li>
+      </ol>
+    </div>
+
+    <div class="list-card">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.8px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+        Applications
+      </div>
+      <ol>
+        <li>Motor Drives — speed control of DC motors in industrial applications.</li>
+        <li>Welding Equipment — providing controlled DC power for arc welding machines.</li>
+        <li>Power Quality Control — harmonic mitigation and reactive power compensation systems.</li>
+        <li>Battery Charging Systems — high-power charging for industrial and EV battery banks.</li>
+        <li>Power Supplies — DC power supplies for electrochemical processes, electrolysis, and plating.</li>
+      </ol>
+    </div>
+
+  </div>
+
+</div><!-- /.page-body -->
+
+<!-- Footer -->
+<div class="footer">
+  <p>© 2026 Virtual Labs &nbsp;|&nbsp; Power Electronics Laboratory</p>
+  <p>Developed for educational purposes &nbsp;|&nbsp; <a href="#">Report Issues</a> &nbsp;|&nbsp; <a href="#">Feedback</a></p>
+  <p style="margin-top:6px;font-size:10.5px;color:#aab2bf;">Last Updated: April 2026</p>
+</div>
+
+<script>
+  window.addEventListener('load', function () {
+    if (window.MathJax) MathJax.typeset();
+  });
+</script>
+</body>
+</html>

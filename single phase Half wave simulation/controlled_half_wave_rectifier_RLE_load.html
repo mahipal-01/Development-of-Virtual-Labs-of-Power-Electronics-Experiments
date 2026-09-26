@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Single Phase Half Wave Controlled Rectifier — R-L-E Load</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#f0f4f8; --surface:#ffffff; --surface2:#f8fafc; --surface3:#f1f5f9;
+      --border:#e2e8f0; --border2:#edf2f7; --text:#0f172a; --text2:#475569; --text3:#94a3b8;
+      --accent:#2563eb; --accent-lt:#eff6ff; --accent-dk:#1d4ed8;
+      --green:#16a34a; --green-lt:#f0fdf4; --orange:#ea580c; --orange-lt:#fff7ed;
+      --purple:#7c3aed; --red:#dc2626;
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+      --shadow:0 4px 6px -1px rgba(0,0,0,0.07),0 2px 4px -1px rgba(0,0,0,0.04);
+      --radius:8px; --radius-lg:12px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;color:var(--text);min-height:100vh;}
+    .toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:0;height:52px;box-shadow:var(--shadow-sm);position:sticky;top:0;z-index:200;}
+    .toolbar-logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--text);letter-spacing:-0.5px;padding-right:20px;border-right:1px solid var(--border2);margin-right:16px;white-space:nowrap;display:flex;align-items:center;gap:8px;}
+    .toolbar-logo-icon{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;}
+    .toolbar-logo span{color:var(--text3);font-weight:400;}
+    .tb-btn{height:52px;padding:0 16px;background:none;border:none;border-right:1px solid var(--border2);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:7px;transition:background 0.15s,color 0.15s;white-space:nowrap;}
+    .tb-btn:hover{background:var(--accent-lt);color:var(--accent);}
+    .tb-btn.run{background:var(--accent);color:#fff;font-weight:600;border-right-color:var(--accent-dk);box-shadow:inset 0 -2px 0 rgba(0,0,0,0.15);}
+    .tb-btn.run:hover{background:var(--accent-dk);}
+    .tb-btn.live-active{background:var(--green-lt);color:var(--green);}
+    .tb-btn.reset-btn{margin-left:auto;border-right:none;border-left:1px solid var(--border2);}
+    .tb-btn:disabled{opacity:0.4;cursor:not-allowed;}
+    .exp-banner{background:linear-gradient(135deg,#1e3a5f 0%,#1a1f6e 50%,#2d1b69 100%);padding:100px 30px 20px;position:relative;overflow:hidden;}
+    .exp-banner::before{content:'';
+    position:absolute;
+    inset:0;
+    background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+    .exp-banner-inner{position:relative;z-index:1;}
+    .exp-tag{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1.5px;color:rgba(255,255,255,0.55);text-transform:uppercase;margin-bottom:10px;}
+    .exp-tag-dot{width:6px;height:6px;border-radius:50%;background:#60a5fa;}
+    .exp-title{font-size:26px;font-weight:700;color:#fff;letter-spacing:-0.5px;line-height:1.2;margin-bottom:8px;}
+    .exp-title span{color:#60a5fa;}
+    .exp-subtitle{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.5;}
+    .exp-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+    .exp-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.65);border-radius:20px;font-size:11px;font-weight:500;padding:4px 12px;}
+    .workspace{display:grid;grid-template-columns:300px 1fr;gap:0;min-height:calc(100vh - 52px);}
+    .sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;max-height:calc(100vh - 52px);position:sticky;top:52px;}
+    .sidebar-section{border-bottom:1px solid var(--border2);padding:16px;}
+    .section-title{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:1.4px;color:var(--text3);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .section-title::after{content:'';flex:1;height:1px;background:var(--border2);}
+    .field{margin-bottom:13px;}
+    .field:last-child{margin-bottom:0;}
+    .field-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:2px;}
+    .field-unit{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);background:var(--accent-lt);border:1px solid rgba(37,99,235,0.15);padding:1px 6px;border-radius:4px;font-weight:600;}
+    .field-hint{font-size:10px;color:var(--text3);font-style:italic;}
+    input[type="number"]{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;padding:8px 12px;outline:none;transition:border-color 0.15s,box-shadow 0.15s;}
+    input[type="number"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,0.1);background:#fff;}
+    .alpha-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .alpha-badge{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);min-width:52px;text-align:right;}
+    input[type="range"]{-webkit-appearance:none;width:100%;height:6px;background:var(--border);border-radius:3px;outline:none;cursor:pointer;}
+    input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 1px 6px rgba(37,99,235,0.4);cursor:pointer;transition:transform 0.15s;}
+    input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+    .slider-ticks{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);margin-top:4px;}
+    .metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .ext-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+    .metric-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;position:relative;overflow:hidden;}
+    .metric-card .mlabel{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.4px;margin-bottom:3px;font-family:'JetBrains Mono',monospace;}
+    .metric-card .mval{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--text);line-height:1.2;}
+    .metric-card .munit{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+    @keyframes numFlash{0%{opacity:0.3;transform:scale(0.95)}100%{opacity:1;transform:scale(1)}}
+    .flash{animation:numFlash 0.3s ease;}
+    .info-panel{background:var(--surface);border-bottom:1px solid var(--border);}
+    .tab-bar{display:flex;align-items:center;gap:6px;padding:8px 20px;background:var(--surface2);border-bottom:1px solid var(--border2);flex-wrap:wrap;}
+    .tab-btn{padding:9px 18px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;border-radius:8px;border:1.5px solid transparent;cursor:pointer;transition:all 0.18s;white-space:nowrap;display:flex;align-items:center;gap:7px;}
+    #tab-proc{background:#f0fdf4;color:#15803d;border-color:#86efac;}
+    #tab-proc:hover{background:#dcfce7;border-color:#4ade80;}
+    #tab-proc.active-proc{background:#16a34a;color:#fff;border-color:#15803d;}
+    #tab-nom{background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;}
+    #tab-nom:hover{background:#dbeafe;border-color:#60a5fa;}
+    #tab-nom.active-nom{background:#2563eb;color:#fff;border-color:#1d4ed8;}
+    #tab-math{background:#faf5ff;color:#7c3aed;border-color:#c4b5fd;}
+    #tab-math:hover{background:#ede9fe;border-color:#a78bfa;}
+    #tab-math.active-math{background:#7c3aed;color:#fff;border-color:#6d28d9;}
+    .tab-content{display:none;padding:28px 32px 32px;}
+    .tab-content.active{display:block;}
+    .tts-bar{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;margin-bottom:24px;max-width:820px;}
+    .tts-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:7px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;transition:background 0.15s,color 0.15s;}
+    .tts-btn.play{background:var(--green);color:#fff;}
+    .tts-btn.play:hover{background:#15803d;}
+    .tts-btn.pause{background:var(--orange);color:#fff;}
+    .tts-btn.stop{background:var(--surface);color:var(--text2);border:1px solid var(--border);}
+    .tts-progress-wrap{flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden;}
+    .tts-progress-bar{height:100%;width:0%;background:var(--green);border-radius:2px;transition:width 0.3s linear;}
+    .tts-speed-select{font-family:'Inter',sans-serif;font-size:12px;padding:3px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text2);cursor:pointer;outline:none;}
+    .nomen-box{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);padding:28px 36px;max-width:2000px;box-shadow:var(--shadow);border-top:3px solid var(--accent);}
+    .nomen-list{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:14px 48px;}
+    .nomen-list li{display:flex;align-items:baseline;font-family:'Times New Roman',Times,serif;font-size:25px;line-height:1.4;}
+    .nomen-list li::before{content:'·';font-size:20px;margin-right:10px;flex-shrink:0;color:var(--accent);line-height:1;}
+    .nomen-sym{font-style:italic;font-weight:700;margin-right:6px;white-space:nowrap;color:var(--text);}
+    .nomen-desc{font-weight:400;color:var(--text2);}
+    .procedure-box{max-width:2000px;}
+    .proc-step{display:flex;gap:16px;margin-bottom:16px;align-items:flex-start;padding:12px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);transition:border-color 0.15s;}
+    .proc-num{min-width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .proc-text{font-size:20px;color:var(--text2);line-height:1.65;font-family:'Times New Roman',Times,serif;}
+    .proc-text strong{color:var(--text);}
+    .proc-step.tts-highlight{border-color:var(--accent);background:var(--accent-lt);}
+    .proc-step.tts-highlight .proc-num{background:var(--accent);}
+    .math-box{max-width:2000px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .math-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;border-top:2px solid var(--accent);}
+    .math-card-title{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;}
+    .math-formula{font-family:'Times New Roman',Times,serif;font-size:20px;font-weight:600;color:var(--text);line-height:1.6;}
+    .math-note{font-size:11.5px;color:var(--text3);margin-top:7px;font-style:italic;font-family:'Times New Roman',Times,serif;}
+    .circuit-banner{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 28px 20px;}
+    .circuit-banner-title{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1.2px;color:var(--text3);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .circuit-banner-title::after{content:'';flex:1;height:1px;background:var(--border2);}
+    #wc-wrap{display:flex;width:100%;height:690px;background:#fafbfc;border-bottom:1px solid var(--border);}
+    #wc-circuit{flex:1;position:relative;overflow:auto;background:#fff;cursor:default;min-width:0;border-right:1px solid var(--border);}
+    #wc-inner{position:relative;width:1400px;height:690px;background-image:linear-gradient(rgba(37,99,235,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,0.07) 1px,transparent 1px),linear-gradient(rgba(37,99,235,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,0.03) 1px,transparent 1px);background-size:100px 100px,100px 100px,20px 20px,20px 20px;}
+    #wc-svg{position:absolute;top:0;left:0;width:1400px;height:690px;pointer-events:none;z-index:5;overflow:visible;}
+    .wc-comp{position:absolute;user-select:none;z-index:10;}
+    .wc-card{background:transparent;border-radius:6px;border:1.5px solid #b0bbd0;padding:5px 10px 7px;display:flex;flex-direction:column;align-items:center;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+    .wc-card.wc-vm{border-color:#aaa;background:#fff;}
+    .wc-lbl{font-family:monospace;font-weight:700;font-size:10px;letter-spacing:1px;color:#1a56a0;margin-bottom:2px;}
+    .wc-val{font-size:9px;color:#5a6880;margin-top:2px;font-family:monospace;}
+    .wc-pin{position:absolute;width:16px;height:16px;border-radius:50%;background:#0057b8;border:2.5px solid #fff;transform:translate(-50%,-50%);z-index:30;cursor:crosshair;transition:transform 0.15s,box-shadow 0.15s;box-shadow:0 1px 4px rgba(0,87,184,0.3);pointer-events:all;}
+    .wc-pin:hover{transform:translate(-50%,-50%) scale(1.6);box-shadow:0 0 10px rgba(0,87,184,0.6);}
+    .wc-pin.wc-done{background:#1a7a3c;}
+    .wc-pin.wc-active{background:#0057b8;box-shadow:0 0 12px rgba(0,87,184,0.6);transform:translate(-50%,-50%) scale(1.9);}
+    #wc-circuit.wc-wiring{cursor:crosshair;}
+    #wc-sidebar{width:375px;background:#fff;border-left:1px solid #d0d7e2;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
+    .wc-scard{padding:10px 12px;border-bottom:1px solid #d0d7e2;}
+    .wc-stitle{font-weight:700;font-size:9px;letter-spacing:1.5px;color:#1a56a0;text-transform:uppercase;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid #d0d7e2;}
+    .wc-chk{display:flex;align-items:flex-start;gap:7px;font-size:15px;color:#5a6880;padding:3px 4px;border-radius:4px;border:1px solid transparent;margin-bottom:2px;transition:all 0.3s;line-height:1.5;font-family:monospace;}
+    .wc-chk.wc-chk-done{color:#1a7a3c;border-color:rgba(26,122,60,0.25);background:rgba(26,122,60,0.06);}
+    .wc-icon{width:14px;height:14px;border-radius:50%;border:1.5px solid #b0bbd0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;margin-top:1px;transition:all 0.3s;}
+    .wc-chk-done .wc-icon{background:#1a7a3c;border-color:#1a7a3c;color:#fff;}
+    .wc-chk.wc-vm-chk.wc-chk-done{color:#7b2fbe;border-color:rgba(123,47,190,0.25);background:rgba(123,47,190,0.05);}
+    .wc-chk.wc-vm-chk.wc-chk-done .wc-icon{border-color:#7b2fbe;background:#7b2fbe;color:#fff;}
+    .wc-divider{font-size:8px;font-weight:700;letter-spacing:1.2px;color:#8898aa;text-transform:uppercase;padding:4px 4px 2px;margin-top:4px;}
+    #wc-nextBtn{margin:10px;padding:10px;background:#1a2e5a;color:#fff;border:none;border-radius:6px;font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:all 0.2s;}
+    #wc-nextBtn:disabled{opacity:0.4;cursor:not-allowed;}
+    #wc-nextBtn.wc-unlocked{background:#0057b8;box-shadow:0 2px 10px rgba(0,87,184,0.4);animation:pulse 1.5s infinite;}
+    @keyframes pulse{0%,100%{box-shadow:0 2px 10px rgba(0,87,184,0.4);}50%{box-shadow:0 2px 20px rgba(0,87,184,0.7);}}
+    .wc-ubtn{margin:0 10px 10px;padding:7px;background:transparent;border:1px solid #d0d7e2;color:#5a6880;font-size:10px;border-radius:5px;cursor:pointer;transition:all 0.2s;font-family:monospace;}
+    .wc-ubtn:hover{border-color:#c0392b;color:#c0392b;}
+    .wc-instr{font-size:10px;color:#5a6880;line-height:1.9;}
+    .wc-instr b{color:#1a2035;font-weight:700;}
+    #wc-autoBtn{padding:9px 18px;background:transparent;border:1.5px solid var(--green);color:var(--green);font-size:12.5px;font-weight:600;border-radius:8px;cursor:pointer;transition:all 0.18s;font-family:'Inter',sans-serif;}
+    #wc-autoBtn:hover{background:rgba(22,163,74,0.08);}
+    #wc-demoBtn{padding:9px 18px;background:transparent;border:1.5px solid #f59e0b;color:#b45309;font-size:12.5px;font-weight:600;border-radius:8px;cursor:pointer;transition:all 0.18s;font-family:'Inter',sans-serif;}
+    #wc-demoBtn:hover{background:#fffbeb;}
+    #wc-demoBtn.active{background:#f59e0b;color:#fff;}
+    #wc-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#c0392b;color:#fff;font-size:12px;font-family:monospace;font-weight:700;padding:9px 22px;border-radius:7px;pointer-events:none;opacity:0;transition:opacity 0.25s;z-index:9999;white-space:nowrap;}
+    #wc-toast.show{opacity:1;}
+    @keyframes pulseDemo{0%{box-shadow:0 0 0 0 rgba(234,179,8,0.8);}70%{box-shadow:0 0 0 12px rgba(234,179,8,0);}100%{box-shadow:0 0 0 0 rgba(234,179,8,0);}}
+    .wc-pin.demo-target{background:#eab308!important;border-color:#fff!important;animation:pulseDemo 1.5s infinite;transform:translate(-50%,-50%) scale(1.5)!important;z-index:40;}
+    #demo-banner{display:none;background:rgba(0,55,120,0.93);color:#fff;z-index:50;padding:8px 16px;font-family:monospace;font-size:10px;align-items:center;gap:5px;border-bottom:2px solid #0057b8;position:absolute;top:0;left:0;right:275px;}
+    .canvas-area{background:var(--bg);padding:18px 20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
+    .plot-card{background:#fff;border:1.5px solid var(--border);border-radius:6px;overflow:hidden;}
+    .plot-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border2);background:var(--surface2);}
+    .plot-title{font-size:12px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:8px;}
+    .plot-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+    .plot-legend{display:flex;gap:14px;flex-wrap:wrap;}
+    .leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text3);}
+    .leg-line{width:18px;height:2.5px;border-radius:2px;}
+    canvas{display:block;width:100%;background:#fff;}
+    .status-strip{display:flex;align-items:center;gap:16px;background:var(--surface);border-top:1px solid var(--border2);padding:6px 20px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
+    .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 2px var(--green-lt);}
+    .status-dot.busy{background:var(--orange);box-shadow:0 0 0 2px var(--orange-lt);}
+    /* range badge */
+    .range-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9px;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:3px;padding:1px 5px;margin-left:4px;}
+    #introOverlay{position:fixed;inset:0;z-index:9000;background:rgba(10,15,30,0.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
+    #introModal{
+      background:#fff;
+      border-radius:16px;
+      width:100%;
+      max-width:2000px;
+      max-height:80vh;display:flex;flex-direction:column;box-shadow:0 25px 60px rgba(0,0,0,0.3);overflow:hidden;}
+    .intro-header{
+      background:linear-gradient(135deg,#1e3a5f,#1a1f6e,#2d1b69);
+      padding:20px 40px 40px;
+      position:relative;
+      flex-shrink:0;
+    }
+    .intro-header-tag{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;letter-spacing:1.8px;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:7px;}
+    .intro-header h1{font-size:40px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:6px;}
+    .intro-header h1 span{color:#60a5fa;}
+    .intro-header p{font-size:20px;color:rgba(255,255,255,0.5);}
+    .intro-close{position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.12);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .intro-close:hover{background:rgba(255,255,255,0.22);}
+    .intro-tts{display:flex;align-items:center;gap:8px;padding:10px 28px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-shrink:0;}
+    .intro-tts-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:7px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;transition:all 0.15s;}
+    .intro-tts-btn.play{background:#16a34a;color:#fff;}
+    .intro-tts-btn.pause{background:#ea580c;color:#fff;}
+    .intro-tts-btn.stop{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;}
+    .intro-tts-progress{flex:1;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;}
+    .intro-tts-bar{height:100%;width:0%;background:#16a34a;transition:width 0.3s;}
+    .intro-tts-status{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#94a3b8;white-space:nowrap;}
+    .intro-nav{display:flex;gap:0;padding:0 28px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-shrink:0;overflow-x:auto;}
+    .intro-nav-btn{padding:11px 18px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'Inter',sans-serif;font-size:20px;font-weight:500;color:#94a3b8;cursor:pointer;white-space:nowrap;transition:color 0.15s,border-color 0.15s;}
+    .intro-nav-btn:hover{color:#2563eb;}
+    .intro-nav-btn.active{color:#2563eb;border-bottom-color:#2563eb;font-weight:600;}
+    .intro-body{overflow-y:auto;flex:1;padding:0;}
+    .intro-section{display:none;padding:24px 28px 28px;}
+    .intro-section.active{display:block;}
+    .intro-section h3{font-size:25px;font-weight:700;color:#0f172a;margin-bottom:10px;margin-top:20px;display:flex;align-items:center;gap:8px;}
+    .intro-section h3:first-child{margin-top:0;}
+    .intro-section h3 .h-icon{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .intro-section p{font-family:'Times New Roman',Times,serif;font-size:25px;line-height:1.8;color:#1a1a1a;margin-bottom:12px;}
+    .intro-section p strong{color:#0f172a;}
+    .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 16px;}
+    .comp-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:13px 15px;border-left:3px solid #2563eb;}
+    .comp-card.green{border-left-color:#16a34a;}
+    .comp-card.purple{border-left-color:#7c3aed;}
+    .comp-card.orange{border-left-color:#ea580c;}
+    .comp-card.red{border-left-color:#dc2626;}
+    .comp-card-title{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;}
+    .comp-card p{font-size:20px;line-height:1.6;margin:0;color:#1a1a1a;}
+    .wave-list{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+    .wave-item{display:flex;align-items:flex-start;gap:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:11px 14px;}
+    .wave-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+    .wave-item strong{font-family:'JetBrains Mono',monospace;font-size:25px;color:#0f172a;}
+    .wave-item span{font-size:20px;color:#475569;font-family:'Times New Roman',Times,serif;}
+    .intro-footer{padding:14px 28px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;background:#f8fafc;flex-shrink:0;}
+    .intro-footer-hint{font-size:11.5px;color:#94a3b8;font-family:'JetBrains Mono',monospace;}
+    .intro-start-btn{padding:10px 28px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;}
+    .intro-start-btn:hover{background:#1d4ed8;}
+    @media(max-width:800px){
+      .workspace{grid-template-columns:1fr;}
+      .sidebar{border-right:none;border-bottom:1px solid var(--border);max-height:none;position:static;}
+      #wc-wrap{flex-direction:column;height:auto;}
+      #wc-circuit{flex:1;height:400px;}
+      #wc-sidebar{width:100%;height:auto;}
+      .nomen-list{grid-template-columns:1fr;}
+      .math-box{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- INTRO MODAL -->
+<div id="introOverlay">
+  <div id="introModal">
+    <div class="intro-header">
+      <div class="intro-header-tag">⚡ Power Electronics · Virtual Lab</div>
+      <h1>Single Phase Half Wave Controlled Rectifier with <span>R-L-E Load</span></h1>
+      <p>Read the overview before starting — understand the experiment, components, waveforms and outputs.</p>
+      <button class="intro-close" onclick="closeIntro()" title="Close">✕</button>
+    </div>
+    <div class="intro-tts">
+      <button class="intro-tts-btn play" id="ittsPlay" onclick="ittsPlay()">▶ Read Aloud</button>
+      <button class="intro-tts-btn pause" id="ittsPause" onclick="ittsPause()" style="display:none;">⏸ Pause</button>
+      <button class="intro-tts-btn stop" id="ittsStop" onclick="ittsStop()" style="display:none;">⏹ Stop</button>
+      <div class="intro-tts-progress"><div class="intro-tts-bar" id="ittsPBar"></div></div>
+      <span class="intro-tts-status" id="ittsStatus">Press Read Aloud to hear this section</span>
+      <select id="ittsSpeed" style="font-size:11px;padding:3px 6px;border:1px solid #e2e8f0;border-radius:5px;background:#fff;color:#475569;cursor:pointer;outline:none;">
+        <option value="0.8">0.8×</option><option value="1" selected>1×</option>
+        <option value="1.25">1.25×</option><option value="1.5">1.5×</option>
+      </select>
+    </div>
+    <div class="intro-nav">
+      <button class="intro-nav-btn active" onclick="ittsSection(0)" id="inav-0">🔬 Overview</button>
+      <button class="intro-nav-btn" onclick="ittsSection(1)" id="inav-1">🔌 Components</button>
+      <button class="intro-nav-btn" onclick="ittsSection(2)" id="inav-2">📈 Waveforms</button>
+      <button class="intro-nav-btn" onclick="ittsSection(3)" id="inav-3">📊 Outputs</button>
+    </div>
+    <div class="intro-body">
+      <div class="intro-section active" id="isec-0">
+        <h3><span class="h-icon">🔬</span>What is this experiment?</h3>
+        <p id="itts-0-0">A <strong>Single-Phase Half Wave Controlled Rectifier with R-L-E Load</strong> converts single-phase AC into a controlled DC output using a single <strong>SCR (Silicon Controlled Rectifier)</strong>. The load consists of a resistor R, inductor L, and a back-EMF source E (representing a DC motor or battery).</p>
+        <p id="itts-0-1">Unlike the purely resistive case, the inductor stores energy and causes the SCR to keep conducting beyond the natural zero-crossing of the supply — up to the <strong>extinction angle β</strong>, where the instantaneous current finally returns to zero.</p>
+        <h3><span class="h-icon">⚡</span>How does it work?</h3>
+        <p id="itts-0-2">The SCR fires when two conditions are met: the supply voltage V<sub>m</sub>sinα must exceed the back-EMF E, and a gate pulse is applied at firing angle α. Current flows through R, L, and E from α to β. The back-EMF E opposes current flow, so there is a <strong>minimum firing angle α<sub>min</sub> = sin⁻¹(E/V<sub>m</sub>)</strong> below which the SCR cannot turn on.</p>
+        <p id="itts-0-3">The inductor causes current to lag, and extends conduction past the supply zero-crossing. The extinction angle β is found numerically by solving i<sub>o</sub>(β) = 0. When SCR is off, it blocks current and the thyristor voltage equals v<sub>s</sub> − E.</p>
+      </div>
+      <div class="intro-section" id="isec-1">
+        <h3><span class="h-icon">🔌</span>Circuit Components</h3>
+        <div class="comp-grid">
+          <div class="comp-card" id="itts-1-0"><div class="comp-card-title">AC Supply (Vs)</div><p>Single-phase sinusoidal source V<sub>m</sub>sinωt. Range: 50–230 V. Pin 3 = positive terminal, Pin 4 = neutral/return.</p></div>
+          <div class="comp-card green" id="itts-1-1"><div class="comp-card-title">SCR (Thyristor)</div><p>Main controlled switch. Pin 5 = Anode, Pin 6 = Cathode, Pin 7 = Gate. Fires at α (0°–150°), turns off at β when i<sub>o</sub> = 0.</p></div>
+          <div class="comp-card purple" id="itts-1-2"><div class="comp-card-title">Gate Pulse Generator</div><p>Generates trigger pulse at firing angle α each cycle. Connected to SCR gate (pin 7) and VGP voltmeter.</p></div>
+          <div class="comp-card orange" id="itts-1-3"><div class="comp-card-title">Load — R, L, E</div><p>Series R-L-E load. R: 5–100 Ω, L: 10–200 mH, E: 0–0.8·V<sub>m</sub>. L stores energy (extends β past π), E is back-EMF opposing current.</p></div>
+          <div class="comp-card" id="itts-1-4"><div class="comp-card-title">Ammeter (IL)</div><p>Measures load current i<sub>o</sub>(t) in series. Pin 14 = +, Pin 15 = −. Connected between SCR cathode and load.</p></div>
+          <div class="comp-card green" id="itts-1-5"><div class="comp-card-title">Voltmeters</div><p>VINP measures supply. VT measures voltage across SCR thyristor. VGP measures gate pulse. VLOAD measures load. VE measures back-EMF.</p></div>
+        </div>
+      </div>
+      <div class="intro-section" id="isec-2">
+        <h3><span class="h-icon">📈</span>Output Waveforms</h3>
+        <div class="wave-list">
+          <div class="wave-item" id="itts-2-0"><div class="wave-dot" style="background:#94b8e0;"></div><div><strong>Input Voltage v<sub>in</sub>(t)</strong><br><span>Full sinusoid V<sub>m</sub>sinωt for 2 complete cycles. α and β markers shown each cycle.</span></div></div>
+          <div class="wave-item" id="itts-2-1"><div class="wave-dot" style="background:#0057b8;"></div><div><strong>Output Voltage v<sub>out</sub>(t)</strong><br><span>Equals supply voltage V<sub>m</sub>sinωt during conduction (α to β). Outside conduction, output equals E (back-EMF level). The yellow dashed line shows V<sub>dc</sub>.</span></div></div>
+          <div class="wave-item" id="itts-2-2"><div class="wave-dot" style="background:#c2440b;"></div><div><strong>Thyristor Voltage v<sub>T</sub>(t)</strong><br><span>During conduction: ≈0 V (small forward drop). Outside conduction: v<sub>T</sub> = v<sub>s</sub> − E = V<sub>m</sub>sinωt − E. Positive when forward biased (before α), negative when reverse biased (after β).</span></div></div>
+          <div class="wave-item" id="itts-2-3"><div class="wave-dot" style="background:#16a34a;"></div><div><strong>Load Current i<sub>o</sub>(t)</strong><br><span>Rises from zero at α, peaks, decays to zero at β. Average I<sub>dc</sub> shown as dashed line.</span></div></div>
+          <div class="wave-item" id="itts-2-4"><div class="wave-dot" style="background:#6d28d9;"></div><div><strong>Gate Pulse v<sub>g</sub>(t)</strong><br><span>Narrow trigger pulses at α — one per cycle, two pulses across the 2-cycle view.</span></div></div>
+        </div>
+      </div>
+      <div class="intro-section" id="isec-3">
+        <h3><span class="h-icon">📊</span>Simulation Output Parameters</h3>
+        <div class="wave-list">
+          <div class="wave-item" id="itts-3-0"><div class="wave-dot" style="background:#2563eb;"></div><div><strong>V<sub>dc</sub></strong><br><span>Average output voltage = (V<sub>m</sub>/2π)(cosα − cosβ). Depends on both α and β.</span></div></div>
+          <div class="wave-item" id="itts-3-1"><div class="wave-dot" style="background:#16a34a;"></div><div><strong>I<sub>dc</sub></strong><br><span>Average load current = (V<sub>dc</sub> − E) / R. Zero if V<sub>dc</sub> ≤ E.</span></div></div>
+          <div class="wave-item" id="itts-3-2"><div class="wave-dot" style="background:#ea580c;"></div><div><strong>β (Extinction Angle)</strong><br><span>Angle where current returns to zero. Found numerically. β > π when L is large.</span></div></div>
+          <div class="wave-item" id="itts-3-3"><div class="wave-dot" style="background:#7c3aed;"></div><div><strong>P<sub>dc</sub> and V<sub>E</sub></strong><br><span>P<sub>dc</sub> = I<sub>dc</sub> × E = power delivered to back-EMF. V<sub>E</sub> reads E directly.</span></div></div>
+        </div>
+        <h3><span class="h-icon">🧮</span>How to use</h3>
+        <p id="itts-3-4"><strong>1.</strong> Wire the circuit (or Auto-Complete). <strong>2.</strong> Click ▶ VERIFY CIRCUIT. <strong>3.</strong> Set V<sub>m</sub> (50–230 V), R (5–100 Ω), L (10–200 mH), E (0–0.8·V<sub>m</sub>) and α (0°–150°). <strong>4.</strong> Click ▶ Run. <strong>5.</strong> Observe 5 waveforms including thyristor voltage.</p>
+      </div>
+    </div>
+    <div class="intro-footer">
+      <span class="intro-footer-hint">Press ESC or click outside to close</span>
+      <button class="intro-start-btn" onclick="closeIntro()">Start Experiment →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Title Banner -->
+<div class="exp-banner">
+  <div class="exp-banner-inner">
+    <div class="exp-tag"><span class="exp-tag-dot"></span>Power Electronics · Virtual Lab</div>
+    <div class="exp-title">Single Phase Half Wave Controlled Rectifier with <span>R-L-E Load</span></div>
+    <div class="exp-subtitle">SCR-based 1-phase controlled rectification · 50 Hz supply · Series R-L-E load · 2-Cycle Display</div>
+    <div class="exp-pills">
+      <span class="exp-pill">⚡ 1 SCR</span>
+      <span class="exp-pill">Vm: 50–230 V</span>
+      <span class="exp-pill">R: 5–100 Ω</span>
+      <span class="exp-pill">L: 10–200 mH</span>
+      <span class="exp-pill">E: 0–0.8·Vm</span>
+      <span class="exp-pill">α: 0°–150°</span>
+      <span class="exp-pill">📊 5-channel waveforms</span>
+    </div>
+  </div>
+</div>
+
+<!-- Info Tabs -->
+<div class="info-panel" id="infoPanel">
+  <div class="tab-bar">
+    <button class="tab-btn" id="tab-proc" onclick="switchTab('proc')">▸ Procedure</button>
+    <button class="tab-btn" id="tab-nom"  onclick="switchTab('nom')">▸ Nomenclature</button>
+    <button class="tab-btn" id="tab-math" onclick="switchTab('math')">▸ Mathematical Expression</button>
+    <button id="wc-autoBtn" onclick="wcAutoComplete()">⚡ Auto-Complete</button>
+    <button id="wc-demoBtn" onclick="toggleDemo()">🎓 Guided Demo</button>
+    <button class="tab-btn" id="tab-intro-btn" onclick="openIntro()" style="margin-left:auto;color:#2563eb;">ℹ Know about Experiment</button>
+  </div>
+
+  <!-- PROCEDURE -->
+  <div class="tab-content" id="content-proc">
+    <div class="tts-bar">
+      <button class="tts-btn play" id="ttsPlayBtn" onclick="ttsPlay()">▶ Read Aloud</button>
+      <button class="tts-btn pause" id="ttsPauseBtn" onclick="ttsPause()" style="display:none;">⏸ Pause</button>
+      <button class="tts-btn stop" id="ttsStopBtn" onclick="ttsStop()" style="display:none;">⏹ Stop</button>
+      <div class="tts-progress-wrap"><div class="tts-progress-bar" id="ttsProgressBar"></div></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);" id="ttsStatus">Loading voices…</span>
+      <select class="tts-speed-select" id="ttsVoice" onchange="ttsUpdateVoice()" style="max-width:160px;"></select>
+      <span style="font-size:11px;color:var(--text3);">Speed:</span>
+      <select class="tts-speed-select" id="ttsSpeed" onchange="ttsUpdateSpeed()">
+        <option value="0.75">0.75×</option><option value="0.9">0.9×</option>
+        <option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option>
+      </select>
+    </div>
+    <div class="procedure-box" id="procedureBox">
+      <div class="proc-step" id="step-1"><div class="proc-num">1</div><div class="proc-text">Complete the circuit by making <strong>all 17 connections</strong> in the wiring diagram. Click <strong>▶ VERIFY CIRCUIT</strong> to unlock simulation.</div></div>
+      <div class="proc-step" id="step-2"><div class="proc-num">2</div><div class="proc-text">Set the <strong>Peak Voltage V<sub>m</sub></strong> in the sidebar. Range: <strong>50–230 V</strong>. Default is 100 V.</div></div>
+      <div class="proc-step" id="step-3"><div class="proc-num">3</div><div class="proc-text">Set <strong>Load Resistance R</strong> (5–100 Ω), <strong>Load Inductance L</strong> (10–200 mH), and <strong>Back-EMF E</strong> (0–0.8·V<sub>m</sub> V).</div></div>
+      <div class="proc-step" id="step-4"><div class="proc-num">4</div><div class="proc-text">Adjust the <strong>Firing Angle α</strong> slider (range: <strong>0°–150°</strong>). The SCR fires only when V<sub>m</sub>sinα ≥ E, so α must be ≥ α<sub>min</sub> = sin⁻¹(E/V<sub>m</sub>).</div></div>
+      <div class="proc-step" id="step-5"><div class="proc-num">5</div><div class="proc-text">Click <strong>▶ Run</strong>. Five waveforms are plotted for <strong>2 complete cycles (0°–720°)</strong>: input voltage, output voltage, thyristor voltage, load current, and gate pulse.</div></div>
+      <div class="proc-step" id="step-6"><div class="proc-num">6</div><div class="proc-text">Observe <strong>V<sub>dc</sub>, I<sub>dc</sub>, β, P<sub>dc</sub></strong> and <strong>α<sub>min</sub></strong> in the sidebar. The thyristor voltage graph shows v<sub>T</sub> = v<sub>s</sub> − E during non-conduction.</div></div>
+      <div class="proc-step" id="step-7"><div class="proc-num">7</div><div class="proc-text">Enable <strong>⦿ Live Mode</strong> for real-time waveform updates. Use <strong>↺ Reset</strong> to restore defaults.</div></div>
+    </div>
+  </div>
+
+  <!-- NOMENCLATURE -->
+  <div class="tab-content" id="content-nom">
+    <div class="nomen-box">
+      <ul class="nomen-list">
+        <li><span class="nomen-sym">V<sub>m</sub></span><span class="nomen-desc">Peak AC input voltage (50–230 V)</span></li>
+        <li><span class="nomen-sym">V<sub>dc</sub></span><span class="nomen-desc">Average (DC) output voltage</span></li>
+        <li><span class="nomen-sym">V<sub>rms</sub></span><span class="nomen-desc">RMS output voltage</span></li>
+        <li><span class="nomen-sym">R</span><span class="nomen-desc">Load resistance (5–100 Ω)</span></li>
+        <li><span class="nomen-sym">L</span><span class="nomen-desc">Load inductance (10–200 mH)</span></li>
+        <li><span class="nomen-sym">Z</span><span class="nomen-desc">Load impedance = √(R²+(ωL)²)</span></li>
+        <li><span class="nomen-sym">φ</span><span class="nomen-desc">Impedance angle = tan⁻¹(ωL/R)</span></li>
+        <li><span class="nomen-sym">α</span><span class="nomen-desc">Firing angle of SCR (0°–150°)</span></li>
+        <li><span class="nomen-sym">β</span><span class="nomen-desc">Extinction angle where i<sub>o</sub> = 0</span></li>
+        <li><span class="nomen-sym">I<sub>dc</sub></span><span class="nomen-desc">Average load current</span></li>
+        <li><span class="nomen-sym">I<sub>rms</sub></span><span class="nomen-desc">RMS load current</span></li>
+        <li><span class="nomen-sym">E</span><span class="nomen-desc">Back-EMF voltage (0–0.8·V<sub>m</sub> V)</span></li>
+        <li><span class="nomen-sym">α<sub>min</sub></span><span class="nomen-desc">Minimum firing angle = sin⁻¹(E/V<sub>m</sub>)</span></li>
+        <li><span class="nomen-sym">P<sub>dc</sub></span><span class="nomen-desc">Power absorbed by back-EMF = I<sub>dc</sub>·E</span></li>
+        <li><span class="nomen-sym">PF</span><span class="nomen-desc">Power factor of supply</span></li>
+        <li><span class="nomen-sym">v<sub>T</sub></span><span class="nomen-desc">Voltage across SCR thyristor</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- MATH -->
+  <div class="tab-content" id="content-math">
+    <div class="math-box">
+      <div class="math-card"><div class="math-card-title">Load Impedance (Z)</div><div class="math-formula">Z = √(R² + (ωL)²)</div><div class="math-note">ω = 2π × 50 = 314.16 rad/s</div></div>
+      <div class="math-card"><div class="math-card-title">Impedance Angle (φ)</div><div class="math-formula">φ = tan⁻¹(ωL / R)</div><div class="math-note">α must be ≥ sin⁻¹(E/V<sub>m</sub>) for SCR to fire</div></div>
+      <div class="math-card"><div class="math-card-title">Instantaneous Current</div><div class="math-formula">i<sub>o</sub> = (V<sub>m</sub>/Z)sin(ωt−φ) − E/R + A·e<sup>−(R/ωL)ωt</sup></div><div class="math-note">Valid α ≤ ωt ≤ β; A from i<sub>o</sub>(α) = 0</div></div>
+      <div class="math-card"><div class="math-card-title">Average Output Voltage</div><div class="math-formula">V<sub>dc</sub> = (V<sub>m</sub>/2π)(cos α − cos β)</div><div class="math-note">β found numerically from i<sub>o</sub>(β) = 0</div></div>
+      <div class="math-card"><div class="math-card-title">Output Voltage (off-state)</div><div class="math-formula">v<sub>out</sub>(t) = E &nbsp;&nbsp;(when SCR off)</div><div class="math-note">No freewheeling diode — load sees back-EMF E when i<sub>o</sub> = 0</div></div>
+      <div class="math-card"><div class="math-card-title">Thyristor Voltage</div><div class="math-formula">v<sub>T</sub> = v<sub>s</sub> − v<sub>out</sub></div><div class="math-note">≈0 V during conduction; = V<sub>m</sub>sinωt − E when SCR off</div></div>
+      <div class="math-card"><div class="math-card-title">Average Load Current</div><div class="math-formula">I<sub>dc</sub> = (V<sub>dc</sub> − E) / R</div><div class="math-note">E opposes current; α<sub>min</sub> = sin⁻¹(E/V<sub>m</sub>)</div></div>
+      <div class="math-card"><div class="math-card-title">Power to Back-EMF</div><div class="math-formula">P<sub>dc</sub> = I<sub>dc</sub> × E</div><div class="math-note">Energy stored in battery or DC motor</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Circuit Diagram -->
+<div class="circuit-banner">
+  <div class="circuit-banner-title">Circuit Diagram — Single Phase Half Wave Controlled Rectifier (R-L-E Load)</div>
+  <div id="wc-wrap">
+    <div id="wc-circuit">
+      <div id="demo-banner">
+        <span style="font-size:16px;">🎓</span>
+        <span id="demo-text" style="flex:1;line-height:1.5;">Starting guided demo…</span>
+      </div>
+      <div id="wc-inner">
+        <svg id="wc-svg" xmlns="http://www.w3.org/2000/svg">
+          <line id="wc-drawLine" x1="0" y1="0" x2="0" y2="0" stroke="#000" stroke-width="2.2" stroke-dasharray="7,4" opacity="0" pointer-events="none"/>
+        </svg>
+        <!-- VINP -->
+        <div class="wc-comp" id="wc-vgp" style="left:40px; top:200px;">
+          <div class="wc-card wc-vm" style="width:68px; padding:8px 8px 0px;border-color:#93c5fd; background:#f0f9ff;">
+            <svg width="52" height="100" viewBox="-26 -46 52 100">
+              <circle cx="0" cy="0" r="22" stroke="#0057b8" stroke-width="2" fill="#fff"/>
+              <text x="0" y="7" font-size="22" fill="#0057b8" text-anchor="middle" font-family="monospace">V</text>
+              <line x1="0" y1="-46" x2="0" y2="-22" stroke="#0057b8" stroke-width="1.8"/>
+              <line x1="0" y1="22"  x2="0" y2="44"  stroke="#0057b8" stroke-width="1.8"/>
+              <text x="14" y="-32" font-size="12" font-weight="700" fill="#0057b8" font-family="monospace">+</text>
+              <text x="14" y="40"  font-size="12" font-weight="700" fill="#0057b8" font-family="monospace">−</text>
+              <text x="-25" y="-32" font-size="14" font-weight="700" fill="#0057b8" font-family="monospace">1</text>
+              <text x="-25" y="40" font-size="14" font-weight="700" fill="#0057b8" font-family="monospace">2</text>
+            </svg>
+          </div>
+          <div class="wc-val" style="color:#1a1a1a;font-size:8px;text-align:center;width:72px;">VINP</div>
+          <div class="wc-pin" id="wc-pin-vinp-p" data-pid="vinp-p" style="top:15px;left:47%;"></div>
+          <div class="wc-pin" id="wc-pin-vinp-n" data-pid="vinp-n" style="bottom:10px;left:47%;"></div>
+        </div>
+        <!-- AC Supply -->
+        <div class="wc-comp" id="wc-vs" style="left:200px;top:200px;background: #f0f9ff">
+          <div class="wc-card">
+            <svg width="58" height="110" viewBox="-29 -55 58 110">
+              <circle cx="0" cy="0" r="26" stroke="#0057b8" stroke-width="2" fill="#ffffff"/>
+              <line x1="0" y1="-55" x2="0" y2="-26" stroke="#0057b8" stroke-width="1.8"/>
+              <line x1="0" y1="26" x2="0" y2="55" stroke="#0057b8" stroke-width="1.8"/>
+              <path d="M-14,0 Q-7,-14 0,0 Q7,14 14,0" stroke="#0057b8" stroke-width="2.2" fill="none"/>
+              <text x="16" y="-44" font-size="16" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">3</text>
+              <text x="16" y="52" font-size="16" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">4</text>
+            </svg>
+            <div class="wc-val">Vs Input</div>
+          </div>
+          <div class="wc-pin" id="wc-pin-vs-p1" data-pid="vs-p1" style="top:9px;left:50%;"></div>
+          <div class="wc-pin" id="wc-pin-vs-p2" data-pid="vs-p2" style="bottom:12px;left:50%;"></div>
+        </div>
+        <!-- VT -->
+        <div class="wc-comp" id="wc-vt" style="left:460px; top:150px;">
+          <div class="wc-card wc-vm" style="width:90px; padding:6px 0px; border-color:#93c5fd; background:#f0f9ff;">
+            <div class="wc-lbl" style="color:#0057b8; font-size:8px;">VT1</div>
+            <svg width="90" height="44" viewBox="-45 -22 90 44">
+              <circle cx="0" cy="0" r="18" stroke="#0057b8" stroke-width="2" fill="#fff"/>
+              <text x="0" y="6" font-size="17" fill="#0057b8" text-anchor="middle" font-family="monospace">V</text>
+              <line x1="-45" y1="0" x2="-18" y2="0" stroke="#0057b8" stroke-width="1.8"/>
+              <line x1="18"  y1="0" x2="45"  y2="0" stroke="#0057b8" stroke-width="1.8"/>
+              <text x="-32" y="-6" font-size="10" font-weight="700" fill="#0057b8" font-family="monospace">+</text>
+              <text x="30"  y="-6" font-size="10" font-weight="700" fill="#0057b8" font-family="monospace">−</text>
+              <text x="30" y="20" font-size="13" font-weight="700" fill="#0057b8" font-family="monospace">8</text>
+              <text x="-35" y="20" font-size="13" font-weight="700" fill="#0057b8" font-family="monospace">9</text>
+            </svg>
+          </div>
+          <div class="wc-pin wc-vm-pin" id="wc-pin-vt-p" data-pid="vt-p" style="top:57%; left:4px;"></div>
+          <div class="wc-pin wc-vm-pin" id="wc-pin-vt-n" data-pid="vt-n" style="top:57%; left:90px;"></div>
+        </div>
+        <!-- SCR -->
+        <div class="wc-comp" id="wc-t1" style="left:450px; top:0px;">
+          <div class="wc-card" style="width:110px; background: rgba(255,255,255,0.5);">
+            <div class="wc-lbl" style="color:#0057b8; font-size:10px;">Thyristor</div>
+            <svg width="110" height="60" viewBox="-55 -30 110 60">
+              <line x1="-55" y1="0" x2="-20" y2="0" stroke="#0057b8" stroke-width="1.5"/>
+              <line x1="20" y1="0"  x2="55"  y2="0" stroke="#0057b8" stroke-width="1.5"/>
+              <line x1="-20" y1="-18" x2="-20" y2="18" stroke="#0057b8" stroke-width="2"/>
+              <polygon points="-20,-16 -20,16 15,0" stroke="#0057b8" stroke-width="1.6" fill="#dbeafe"/>
+              <line x1="15" y1="-18" x2="15" y2="18" stroke="#0057b8" stroke-width="2.2"/>
+              <line x1="15" y1="12" x2="28" y2="26" stroke="#0057b8" stroke-width="1.6"/>
+              <circle cx="28" cy="26" r="2.5" fill="#0057b8"/>
+              <text x="-48" y="-8" font-size="10" font-weight="700" fill="#0057b8" font-family="monospace">5</text>
+              <text x="42"  y="-8" font-size="10" font-weight="700" fill="#0057b8" font-family="monospace">6</text>
+              <text x="34"  y="22" font-size="10" font-weight="700" fill="#0057b8" font-family="monospace">7</text>
+            </svg>
+          </div>
+          <div class="wc-pin" id="wc-pin-t1-a" data-pid="t1-a" style="top:48px; left:6px;"></div>
+          <div class="wc-pin" id="wc-pin-t1-k" data-pid="t1-k" style="top:48px; left:110px;"></div>
+          <div class="wc-pin" id="wc-pin-t1-g" data-pid="t1-g" style="top:78px; left:84px;"></div>
+        </div>
+        <!-- Gate Pulse Generator -->
+        <div class="wc-comp" id="wc-gate" style="left:575px; top:150px;">
+          <div class="wc-card" style="width:120px; padding:8px 10px; border-color:#93c5fd; background:transparent;">
+            <svg width="100" height="64" viewBox="-50 -32 100 64">
+              <rect x="-45" y="-22" width="90" height="44" rx="4" fill="#dbeafe" stroke="#0057b8" stroke-width="1.5"/>
+              <polyline points="-35,15 -35,-15 -18,-15 -18,15 -1,15 -1,-15 16,-15 16,15 33,15 33,-15" fill="none" stroke="#0057b8" stroke-width="2"/>
+              <line x1="0" y1="-32" x2="0" y2="-22" stroke="#0057b8" stroke-width="1.8"/>
+              <circle cx="0" cy="-32" r="2.5" fill="#0057b8"/>
+              <text x="8" y="-24" font-size="11" font-weight="700" fill="#0057b8" font-family="monospace">10</text>
+            </svg>
+            <div class="wc-val" style="color:#0057b8; font-weight:700;">Gate Pulse</div>
+          </div>
+          <div class="wc-pin" id="wc-pin-gt-o" data-pid="gt-o" style="top:10px; left:50%;"></div>
+        </div>
+        <!-- GND -->
+        <div class="wc-comp" id="wc-gnd" style="left:745px;top:300px;">
+          <div class="wc-card" style="width:80px;padding:8px 10px 10px;">
+            <svg width="60" height="58" viewBox="-30 -8 60 58">
+              <line x1="0" y1="-8" x2="0" y2="8" stroke="#1a2035" stroke-width="2"/>
+              <line x1="-18" y1="8" x2="18" y2="8" stroke="#1a2035" stroke-width="2.2"/>
+              <line x1="-12" y1="16" x2="12" y2="16" stroke="#1a2035" stroke-width="2"/>
+              <line x1="-6" y1="24" x2="6" y2="24" stroke="#1a2035" stroke-width="1.8"/>
+              <text x="0" y="42" font-size="8" fill="#1a2035" text-anchor="middle" font-family="monospace" font-weight="700">GND</text>
+              <circle cx="0" cy="-8" r="3" fill="#0057b8"/>
+              <text x="8" y="3" font-size="13" font-weight="700" fill="#0057b8" text-anchor="start" font-family="monospace">13</text>
+            </svg>
+          </div>
+          <div class="wc-pin" id="wc-pin-gnd" data-pid="gnd" style="top:8px;left:50%;"></div>
+        </div>
+        <!-- IL Ammeter -->
+        <div class="wc-comp" id="wc-am1" style="left:800px;top:0px;">
+          <div class="wc-card" style="width:120px;padding:10px 12px;background: #f0f9ff">
+            <svg width="110" height="70" viewBox="-55 -35 110 70">
+              <circle cx="0" cy="0" r="24" stroke="#1a1a1a" stroke-width="2" fill="rgba(255,255,255,0.75)"/>
+              <text x="0" y="8" font-size="30" fill="#1a1a1a" text-anchor="middle" font-family="monospace">A</text>
+              <line x1="-55" y1="0" x2="-24" y2="0" stroke="#1a1a1a" stroke-width="1.8"/>
+              <line x1="24" y1="0" x2="55" y2="0" stroke="#1a1a1a" stroke-width="1.8"/>
+              <text x="-42" y="-10" font-size="16" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">14</text>
+              <text x="42" y="-10" font-size="16" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">15</text>
+            </svg>
+            <div class="wc-val">Ammeter</div>
+          </div>
+          <div class="wc-pin" id="wc-pin-am1-p" data-pid="am1-p" style="left:0px;top:45%;"></div>
+          <div class="wc-pin" id="wc-pin-am1-n" data-pid="am1-n" style="right:-12px;top:45%;"></div>
+        </div>
+        <!-- R Resistor -->
+        <div class="wc-comp" id="wc-rl" style="left:1020px;top:40px;">
+          <div class="wc-card" style="padding:6px 8px 8px;width:90px;">
+            <svg width="70" height="130" viewBox="-35 -65 70 130">
+              <text x="22" y="-50" font-size="16" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">16</text>
+              <line x1="0" y1="-60" x2="0" y2="-30" stroke="#1a1a1a" stroke-width="1.8"/>
+              <polyline points="0,-30 -12,-22 12,-14 -12,-6 12,2 -12,10 12,18 0,26" stroke="#1a1a1a" stroke-width="2.2" fill="none"/>
+              <line x1="0" y1="26" x2="0" y2="50" stroke="#1a1a1a" stroke-width="1.8"/>
+              <text x="22" y="58" font-size="16" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">17</text>
+            </svg>
+            <div class="wc-val">R Load</div>
+          </div>
+          <div class="wc-pin" id="wc-pin-rl-t" data-pid="rl-t" style="top:9px;left:50%;"></div>
+          <div class="wc-pin" id="wc-pin-rl-b" data-pid="rl-b" style="bottom:19px;left:50%;"></div>
+        </div>
+        <!-- L Inductor -->
+        <div class="wc-comp" id="wc-l1" style="left:1020px;top:240px;">
+          <div class="wc-card" style="padding:6px 8px 8px;width:90px;">
+            <svg width="70" height="130" viewBox="-35 -65 70 130">
+              <line x1="0" y1="-65" x2="0" y2="-45" stroke="#1a1a1a" stroke-width="2.2"/>
+              <path d="M 0,-45 C 20,-45 20,-25 0,-25 C 20,-25 20,-5 0,-5 C 20,-5 20,15 0,15 C 20,15 20,35 0,35"
+                stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <line x1="0" y1="35" x2="0" y2="65" stroke="#1a1a1a" stroke-width="2.2"/>
+              <text x="20" y="-52" font-size="14" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">18</text>
+              <text x="20" y="62" font-size="14" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">19</text>
+            </svg>
+            <div class="wc-val">L Load</div>
+          </div>
+          <div class="wc-pin" id="wc-pin-l1-t" data-pid="l1-t" style="top:9px;left:50%;"></div>
+          <div class="wc-pin" id="wc-pin-l1-b" data-pid="l1-b" style="bottom:11px;left:50%;"></div>
+        </div>
+        <!-- E Back-EMF -->
+        <div class="wc-comp" id="wc-emf" style="left:1020px;top:440px;">
+          <div class="wc-card" style="padding:6px 8px 8px;width:90px;">
+            <svg width="70" height="110" viewBox="-35 -55 70 110">
+              <text x="20" y="-42" font-size="14" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">20</text>
+              <line x1="0" y1="-40" x2="0" y2="-26" stroke="#1a1a1a" stroke-width="1.8"/>
+              <line x1="-14" y1="-26" x2="14" y2="-26" stroke="#1a1a1a" stroke-width="3"/>
+              <line x1="-8" y1="-18" x2="8" y2="-18" stroke="#1a1a1a" stroke-width="1.5"/>
+              <line x1="-14" y1="-8" x2="14" y2="-8" stroke="#1a1a1a" stroke-width="3"/>
+              <line x1="-8" y1="0" x2="8" y2="0" stroke="#1a1a1a" stroke-width="1.5"/>
+              <line x1="-14" y1="10" x2="14" y2="10" stroke="#1a1a1a" stroke-width="3"/>
+              <line x1="-8" y1="18" x2="8" y2="18" stroke="#1a1a1a" stroke-width="1.5"/>
+              <line x1="0" y1="18" x2="0" y2="40" stroke="#1a1a1a" stroke-width="1.8"/>
+              <text x="-22" y="-16" font-size="13" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="monospace">+</text>
+              <text x="-22" y="6" font-size="13" font-weight="700" fill="#1a1a1a" text-anchor="middle" font-family="monospace">−</text>
+              <text x="20" y="48" font-size="14" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">21</text>
+            </svg>
+            <div class="wc-val">Back-EMF E</div>
+          </div>
+          <div class="wc-pin" id="wc-pin-emf-p" data-pid="emf-p" style="top:9px;left:50%;"></div>
+          <div class="wc-pin" id="wc-pin-emf-n" data-pid="emf-n" style="bottom:9px;left:50%;"></div>
+        </div>
+        <!-- VGP -->
+        <div class="wc-comp" id="wc-vgp2" style="left:750px; top:150px;">
+          <div class="wc-card wc-vm" style="width:68px; padding:8px 8px 0px;border-color:#93c5fd; background:#f0f9ff;">
+            <svg width="52" height="100" viewBox="-26 -46 52 100">
+              <circle cx="0" cy="0" r="22" stroke="#0057b8" stroke-width="2" fill="#fff"/>
+              <text x="0" y="7" font-size="22" fill="#0057b8" text-anchor="middle" font-family="monospace">V</text>
+              <line x1="0" y1="-46" x2="0" y2="-22" stroke="#0057b8" stroke-width="1.8"/>
+              <line x1="0" y1="22"  x2="0" y2="44"  stroke="#555" stroke-width="1.8"/>
+              <text x="14" y="-32" font-size="12" font-weight="700" fill="#0057b8" font-family="monospace">+</text>
+              <text x="14" y="40"  font-size="12" font-weight="700" fill="#0057b8" font-family="monospace">−</text>
+              <text x="-25" y="-32" font-size="14" font-weight="700" fill="#0057b8" font-family="monospace">11</text>
+              <text x="-25" y="40" font-size="14" font-weight="700" fill="#0057b8" font-family="monospace">12</text>
+            </svg>
+          </div>
+          <div class="wc-pin wc-vm-pin" id="wc-pin-vgp-p" data-pid="vgp-p" style="top:0px;left:50%;"></div>
+          <div class="wc-pin wc-vm-pin" id="wc-pin-vgp-n" data-pid="vgp-n" style="bottom:-12px;left:50%;"></div>
+        </div>
+        <!-- VE -->
+        <div class="wc-comp" id="wc-ve" style="left:880px;top:440px;">
+          <div class="wc-card wc-vm" style="width:78px;padding:0px 0px 0;border-color:#93c5fd;background: #f0f9ff;">
+            <svg width="58" height="110" viewBox="-29 -50 58 110">
+              <circle cx="0" cy="0" r="24" stroke="#0057b8" stroke-width="2" fill="#fff"/>
+              <text x="0" y="8" font-size="24" font-weight="500" fill="#0057b8" text-anchor="middle" font-family="monospace">V</text>
+              <line x1="0" y1="-76" x2="0" y2="-24" stroke="#0057b8" stroke-width="1.8"/>
+              <line x1="0" y1="25" x2="0" y2="70" stroke="#0057b8" stroke-width="1.8"/>
+              <text x="-16" y="-40" font-size="12" font-weight="700" fill="#0057b8" font-family="monospace">+</text>
+              <text x="-16" y="60"  font-size="12" font-weight="700" fill="#0057b8" font-family="monospace">−</text>
+              <text x="16" y="-36" font-size="13" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">22</text>
+              <text x="16" y="46" font-size="13" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">23</text>
+            </svg>
+          </div>
+          <div class="wc-pin wc-vm-pin" id="wc-pin-ve-p" data-pid="ve-p" style="top:0px;left:50%;"></div>
+          <div class="wc-pin wc-vm-pin" id="wc-pin-ve-n" data-pid="ve-n" style="bottom:-16px;left:50%;"></div>
+        </div>
+        <!-- VLOAD -->
+        <div class="wc-comp" id="wc-vload" style="left:1220px;top:240px;">
+          <div class="wc-card wc-vm" style="width:78px;padding:0px 0px 0;background:#f0f9ff;">
+            <svg width="58" height="110" viewBox="-29 -50 58 110">
+              <circle cx="0" cy="0" r="24" stroke="#0057b8" stroke-width="2" fill="#fff"/>
+              <text x="0" y="8" font-size="24" font-weight="500" fill="#0057b8" text-anchor="middle" font-family="monospace">V</text>
+              <line x1="0" y1="-50" x2="0" y2="-24" stroke="#0057b8" stroke-width="1.8"/>
+              <line x1="0" y1="30" x2="0" y2="50" stroke="#0057b8" stroke-width="1.8"/>
+              <text x="-16" y="-40" font-size="12" font-weight="700" fill="#0057b8" font-family="monospace">+</text>
+              <text x="-16" y="60"  font-size="12" font-weight="700" fill="#0057b8" font-family="monospace">−</text>
+              <text x="16" y="-36" font-size="13" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">25</text>
+              <text x="16" y="46" font-size="13" font-weight="700" fill="#0057b8" text-anchor="middle" font-family="monospace">24</text>
+            </svg>
+          </div>
+          <div class="wc-pin wc-vm-pin" id="wc-pin-vload-p" data-pid="vload-p" style="top:0px;left:50%;"></div>
+          <div class="wc-pin wc-vm-pin" id="wc-pin-vload-n" data-pid="vload-n" style="bottom:-12px;left:50%;"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Wiring Sidebar -->
+    <div id="wc-sidebar">
+      <div class="wc-scard">
+        <div class="wc-stitle" id="wc-chk-title">Connections — 0 / 17</div>
+        <div class="wc-divider">POWER CIRCUIT</div>
+        <div class="wc-chk" id="wc-chk-w1"><div class="wc-icon" id="wc-icon-w1"></div><span>AC 3 → SCR 5 (Anode)</span></div>
+        <div class="wc-chk" id="wc-chk-w2"><div class="wc-icon" id="wc-icon-w2"></div><span>SCR 6 (Cathode) → IL 14 (+)</span></div>
+        <div class="wc-chk" id="wc-chk-w3"><div class="wc-icon" id="wc-icon-w3"></div><span>IL 15 (−) → R 16 (top)</span></div>
+        <div class="wc-chk" id="wc-chk-w4"><div class="wc-icon" id="wc-icon-w4"></div><span>R 17 (bot) → L 18 (top)</span></div>
+        <div class="wc-chk" id="wc-chk-w5"><div class="wc-icon" id="wc-icon-w5"></div><span>L 19 (bot) → E 20 (+)</span></div>
+        <div class="wc-chk" id="wc-chk-w6"><div class="wc-icon" id="wc-icon-w6"></div><span>E 21 (−) → AC 4 (Return)</span></div>
+        <div class="wc-chk" id="wc-chk-w7"><div class="wc-icon" id="wc-icon-w7"></div><span>GP 10 → SCR 7 (Gate)</span></div>
+        <div class="wc-divider" style="margin-top:5px;">VOLTMETER VINP</div>
+        <div class="wc-chk wc-vm-chk" id="wc-chk-w8"><div class="wc-icon" id="wc-icon-w8"></div><span>VINP 1 (+) → AC 3 (+)</span></div>
+        <div class="wc-chk wc-vm-chk" id="wc-chk-w9"><div class="wc-icon" id="wc-icon-w9"></div><span>VINP 2 (−) → AC 4 (−)</span></div>
+        <div class="wc-divider" style="margin-top:5px;">VOLTMETER VT (SCR)</div>
+        <div class="wc-chk wc-vm-chk" id="wc-chk-w10"><div class="wc-icon" id="wc-icon-w10"></div><span>VT 8 (+) → SCR 5 (Anode)</span></div>
+        <div class="wc-chk wc-vm-chk" id="wc-chk-w11"><div class="wc-icon" id="wc-icon-w11"></div><span>VT 9 (−) → SCR 6 (Cathode)</span></div>
+        <div class="wc-divider" style="margin-top:5px;">VOLTMETER VGP</div>
+        <div class="wc-chk wc-vm-chk" id="wc-chk-w12"><div class="wc-icon" id="wc-icon-w12"></div><span>VGP 11 (+) → GP 10 (output)</span></div>
+        <div class="wc-chk wc-vm-chk" id="wc-chk-w13"><div class="wc-icon" id="wc-icon-w13"></div><span>VGP 12 (−) → GND 13</span></div>
+        <div class="wc-divider" style="margin-top:5px;">VOLTMETER VLOAD</div>
+        <div class="wc-chk wc-vm-chk" id="wc-chk-w14"><div class="wc-icon" id="wc-icon-w14"></div><span>VLOAD 25 (+) → IL 14 (+)</span></div>
+        <div class="wc-chk wc-vm-chk" id="wc-chk-w15"><div class="wc-icon" id="wc-icon-w15"></div><span>VLOAD 24 (−) → E 21 (−)</span></div>
+        <div class="wc-divider" style="margin-top:5px;">VOLTMETER VE (Back-EMF)</div>
+        <div class="wc-chk wc-vm-chk" id="wc-chk-w16"><div class="wc-icon" id="wc-icon-w16"></div><span>VE 22 (+) → E 20 (+)</span></div>
+        <div class="wc-chk wc-vm-chk" id="wc-chk-w17"><div class="wc-icon" id="wc-icon-w17"></div><span>VE 23 (−) → E 21 (−)</span></div>
+      </div>
+      <div class="wc-scard">
+        <div class="wc-stitle">How To Wire</div>
+        <div class="wc-instr"><b>Click</b> a pin to start<br><b>Click</b> target pin to connect<br><b>Right-click</b> a wire to delete<br><span style="color:#c0392b;">Wrong connections rejected</span></div>
+      </div>
+      <div style="flex:1;"></div>
+      <button id="wc-nextBtn" disabled onclick="wcGoNext()">▶ VERIFY CIRCUIT</button>
+      <button class="wc-ubtn" onclick="wcUndo()">↩ Undo Last Wire</button>
+    </div>
+  </div>
+  <div id="wc-toast"></div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="toolbar-logo"><span class="toolbar-logo-icon">⚡</span>SCR<span>/HWR-RLE</span></div>
+  <button class="tb-btn run" id="runBtn" onclick="simulate()">▶ Run</button>
+  <button class="tb-btn" id="liveBtn" onclick="toggleLive()">⦿ Live Mode</button>
+  <button class="tb-btn" onclick="downloadGraph()">↓ Save Plot</button>
+  <button class="tb-btn reset-btn" onclick="resetValues()">↺ Reset</button>
+  <button class="tb-btn" id="tourLaunchBtn" onclick="if(window.startUITour)startUITour()" style="border-left:1px solid var(--border2);border-right:none;background:linear-gradient(135deg,#eff6ff,#f5f3ff);color:#2563eb;font-weight:700;" title="Feature Tour">🎯 Feature Tour</button>
+</div>
+
+<div class="workspace">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="section-title">Block Parameters</div>
+
+      <div class="field">
+        <div class="field-label">
+          Peak Voltage (Vm) <span class="field-unit">V</span>
+          <span class="field-hint">50 – 230 V</span>
+        </div>
+        <input type="number" id="vm" value="100" min="50" max="230" step="1" oninput="onParamChange()">
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          Load Resistance (R) <span class="field-unit">Ω</span>
+          <span class="field-hint">5 – 100 Ω</span>
+        </div>
+        <input type="number" id="r" value="10" min="5" max="100" step="0.1" oninput="onParamChange()">
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          Load Inductance (L) <span class="field-unit">mH</span>
+          <span class="field-hint">10 – 200 mH</span>
+        </div>
+        <input type="number" id="l" value="50" min="10" max="200" step="0.1" oninput="onParamChange()">
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          Back-EMF (E) <span class="field-unit">V</span>
+          <span class="field-hint" id="eHint">0 – 80 V (0.8·Vm)</span>
+        </div>
+        <input type="number" id="e" value="30" min="0" max="184" step="1" oninput="onEChange()">
+      </div>
+
+      <div class="field">
+        <div class="alpha-row">
+          <span class="field-label" style="margin-bottom:0;">Firing Angle (α) <span class="field-hint" style="font-size:10px;">0° – 150°</span></span>
+          <span class="alpha-badge" id="alphaVal">30°</span>
+        </div>
+        <input type="range" id="alpha" min="0" max="150" value="30" oninput="onAlphaChange()">
+        <div class="slider-ticks"><span>0°</span><span>37°</span><span>75°</span><span>112°</span><span>150°</span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-title">Simulation Output</div>
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="mlabel">V<sub>dc</sub></div><div class="mval" id="vdc">—</div><div class="munit">V</div></div>
+        <div class="metric-card"><div class="mlabel">V<sub>rms</sub></div><div class="mval" id="vrms">—</div><div class="munit">V</div></div>
+        <div class="metric-card"><div class="mlabel">I<sub>dc</sub></div><div class="mval" id="idc">—</div><div class="munit">A</div></div>
+        <div class="metric-card"><div class="mlabel">I<sub>rms</sub></div><div class="mval" id="irms">—</div><div class="munit">A</div></div>
+      </div>
+      <div class="ext-grid">
+        <div class="metric-card"><div class="mlabel">Extinction β</div><div class="mval" id="beta">—</div><div class="munit">degrees</div></div>
+        <div class="metric-card"><div class="mlabel">Power Factor</div><div class="mval" id="pf">—</div><div class="munit">lag</div></div>
+      </div>
+      <div class="ext-grid">
+        <div class="metric-card"><div class="mlabel">P<sub>dc</sub> (load)</div><div class="mval" id="pdc">—</div><div class="munit">W</div></div>
+        <div class="metric-card"><div class="mlabel">α<sub>min</sub></div><div class="mval" id="alphamin">—</div><div class="munit">degrees</div></div>
+      </div>
+      <div class="ext-grid" style="margin-top:8px;">
+        <div class="metric-card" style="grid-column:1/-1;">
+          <div class="mlabel">V<sub>E</sub> (Back-EMF reading)</div>
+          <div class="mval" id="ve_reading">—</div>
+          <div class="munit">V DC</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canvas area -->
+  <div class="canvas-area">
+    <div class="plot-card">
+      <div class="plot-header">
+        <div class="plot-title"><span class="plot-dot" style="background:#94b8e0;"></span>Input Voltage</div>
+        <div class="plot-legend"><div class="leg-item"><div class="leg-line" style="background:#94b8e0;"></div>v(t)</div></div>
+      </div>
+      <canvas id="inputGraph" width="900" height="200" style="background:#fff;"></canvas>
+    </div>
+    <div class="plot-card">
+      <div class="plot-header">
+        <div class="plot-title"><span class="plot-dot" style="background:#0057b8;"></span>Output Voltage</div>
+        <div class="plot-legend">
+          <div class="leg-item"><div class="leg-line" style="background:#0057b8;"></div>Vo(t)</div>
+          <div class="leg-item"><div class="leg-line" style="background:#f59e0b;"></div>Vavg</div>
+          <div class="leg-item"><div class="leg-line" style="background:#b91c1c;border-top:2px dashed #b91c1c;height:0;"></div>Emf</div>
+        </div>
+      </div>
+      <canvas id="voltageGraph" width="900" height="230" style="background:#fff;"></canvas>
+    </div>
+    <div class="plot-card">
+      <div class="plot-header">
+        <div class="plot-title"><span class="plot-dot" style="background:#c2440b;"></span>Thyristor Voltage</div>
+        <div class="plot-legend"></div>
+      </div>
+      <canvas id="thyristorGraph" width="900" height="220" style="background:#fff;"></canvas>
+    </div>
+    <div class="plot-card">
+      <div class="plot-header">
+        <div class="plot-title"><span class="plot-dot" style="background:#16a34a;"></span>Load Current</div>
+        <div class="plot-legend">
+          <div class="leg-item"><div class="leg-line" style="background:#16a34a;"></div>io(t)</div>
+          <div class="leg-item"><div class="leg-line" style="background:#86efac;"></div>Iavg</div>
+        </div>
+      </div>
+      <canvas id="currentGraph" width="900" height="240" style="background:#fff;"></canvas>
+    </div>
+    <div class="plot-card">
+      <div class="plot-header">
+        <div class="plot-title"><span class="plot-dot" style="background:#6d28d9;"></span>Gate Pulse</div>
+      </div>
+      <canvas id="gateGraph" width="900" height="160" style="background:#fff;"></canvas>
+    </div>
+    <div class="status-strip">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Ready — complete circuit wiring to begin</span>
+      <span>·</span>
+      <span id="calcInfo">Not yet simulated</span>
+    </div>
+  </div>
+</div>
+
+<div id="circuitVerifiedBanner" style="display:none;position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:9998;background:#16a34a;color:#fff;border-radius:8px;padding:12px 28px;font-size:14px;font-weight:600;box-shadow:0 4px 20px rgba(22,163,74,0.35);align-items:center;gap:10px;transition:opacity 0.5s;">
+  ✓ Circuit verified — simulation unlocked!
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   PARAMETER RANGES (enforced globally)
+   Vm: 50–230 V
+   R:  5–100 Ω
+   L:  10–200 mH
+   E:  0–0.8×Vm
+   α:  0°–150°
+══════════════════════════════════════════ */
+const PARAM_RANGES = {
+  Vm: { min: 50,  max: 230  },
+  R:  { min: 5,   max: 100  },
+  L:  { min: 10,  max: 200  }, // mH
+  E:  { min: 0,   maxFrac: 0.8 }, // max = 0.8 * Vm
+  alpha: { min: 0, max: 150 }  // degrees
+};
+
+/* ══════════════════════════════════════════
+   WIRING ENGINE
+══════════════════════════════════════════ */
+(function(){
+  const WIRE_COLOR='#000000';
+  const WC_TOTAL=17;
+  const WC_REQUIRED=[
+    {id:'w1',src:'vs-p1',tgt:'t1-a'},{id:'w2',src:'t1-k',tgt:'am1-p'},
+    {id:'w3',src:'am1-n',tgt:'rl-t'},{id:'w4',src:'rl-b',tgt:'l1-t'},
+    {id:'w5',src:'l1-b',tgt:'emf-p'},{id:'w6',src:'emf-n',tgt:'vs-p2'},
+    {id:'w7',src:'gt-o',tgt:'t1-g'},{id:'w8',src:'vinp-p',tgt:'vs-p1'},
+    {id:'w9',src:'vinp-n',tgt:'vs-p2'},{id:'w10',src:'vt-p',tgt:'t1-a'},
+    {id:'w11',src:'vt-n',tgt:'t1-k'},{id:'w12',src:'vgp-p',tgt:'gt-o'},
+    {id:'w13',src:'vgp-n',tgt:'gnd'},{id:'w14',src:'vload-p',tgt:'rl-t'},
+    {id:'w15',src:'vload-n',tgt:'emf-n'},{id:'w16',src:'ve-p',tgt:'emf-p'},
+    {id:'w17',src:'ve-n',tgt:'emf-n'}
+  ];
+  const VALID_PAIRS=new Set();
+  WC_REQUIRED.forEach(r=>{VALID_PAIRS.add(r.src+'|'+r.tgt);VALID_PAIRS.add(r.tgt+'|'+r.src);});
+  let wcDone=new Set(),wcWires=[],wcFrom=null,wcMM=null,toastTimer=null;
+  function showToast(msg){const t=document.getElementById('wc-toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2400);}
+  const wireRouting={'vs-p1|t1-a':'VH','t1-k|am1-p':'HV','am1-n|rl-t':'HV','rl-b|l1-t':'HV','l1-b|emf-p':'HV','emf-n|vs-p2':'HV','gt-o|t1-g':'VH','vinp-p|vs-p1':'HV','vinp-n|vs-p2':'HV','vt-p|t1-a':'HV','vt-n|t1-k':'HV','vgp-p|gt-o':'HV','vgp-n|gnd':'HV','vload-p|rl-t':'VH','vload-n|emf-n':'VH','ve-p|emf-p':'HV','ve-n|emf-n':'HV'};
+  Object.keys(wireRouting).forEach(k=>{const[a,b]=k.split('|');const mode=wireRouting[k];wireRouting[b+'|'+a]=mode==='VH'?'HV':'VH';});
+  function wcPinCenter(pid){const el=document.getElementById('wc-pin-'+pid);if(!el)return null;const cr=document.getElementById('wc-inner').getBoundingClientRect();const pr=el.getBoundingClientRect();return{x:pr.left+pr.width/2-cr.left,y:pr.top+pr.height/2-cr.top};}
+  function wcMakeWire(p1id,p2id){const p1=wcPinCenter(p1id),p2=wcPinCenter(p2id);if(!p1||!p2)return null;const svg=document.getElementById('wc-svg');const path=document.createElementNS('http://www.w3.org/2000/svg','path');const key=p1id+'|'+p2id;const mode=wireRouting[key]||'HV';let d;if(mode==='VH')d=`M${p1.x},${p1.y} L${p1.x},${p2.y} L${p2.x},${p2.y}`;else d=`M${p1.x},${p1.y} L${p2.x},${p1.y} L${p2.x},${p2.y}`;path.setAttribute('d',d);path.setAttribute('stroke',WIRE_COLOR);path.setAttribute('stroke-width','2.8');path.setAttribute('fill','none');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');path.style.pointerEvents='stroke';path.style.cursor='pointer';svg.insertBefore(path,document.getElementById('wc-drawLine'));const len=path.getTotalLength();path.style.strokeDasharray=len;path.style.strokeDashoffset=len;path.style.transition='stroke-dashoffset 0.5s ease';requestAnimationFrame(()=>{path.style.strokeDashoffset='0';});path.addEventListener('contextmenu',e=>{e.preventDefault();const w=wcWires.find(x=>x.el===path);if(w)wcDelete(w);});return path;}
+  function wcFlash(a,b){const p1=wcPinCenter(a),p2=wcPinCenter(b);if(!p1||!p2)return;const svg=document.getElementById('wc-svg');const ln=document.createElementNS('http://www.w3.org/2000/svg','line');ln.setAttribute('x1',p1.x);ln.setAttribute('y1',p1.y);ln.setAttribute('x2',p2.x);ln.setAttribute('y2',p2.y);ln.setAttribute('stroke','#c0392b');ln.setAttribute('stroke-width','2.5');ln.setAttribute('stroke-dasharray','6,4');ln.style.pointerEvents='none';svg.appendChild(ln);setTimeout(()=>ln.remove(),700);}
+  function wcDelete(w){if(w.rid)wcDone.delete(w.rid);w.el.remove();wcWires=wcWires.filter(x=>x!==w);wcRefresh();wcUpdateUI();}
+  function wcConnect(a,b){if(a===b)return;if(!VALID_PAIRS.has(a+'|'+b)&&!VALID_PAIRS.has(b+'|'+a)){wcFlash(a,b);showToast('✕ Wrong connection: '+a+' ↔ '+b);return;}const req=WC_REQUIRED.find(r=>(r.src===a&&r.tgt===b)||(r.src===b&&r.tgt===a));if(req&&wcDone.has(req.id)){showToast('Already connected: '+a+' ↔ '+b);return;}if(req&&!wcDone.has(req.id)){const el=wcMakeWire(a,b);if(el){wcWires.push({rid:req.id,el});wcDone.add(req.id);wcRefresh();wcUpdateUI();if(isDemoActive){demoStepIndex++;updateDemoHighlight();}}}}
+  document.querySelectorAll('.wc-pin').forEach(pin=>{pin.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const pid=pin.dataset.pid;if(wcFrom===null){wcFrom=pid;pin.classList.add('wc-active');document.getElementById('wc-circuit').classList.add('wc-wiring');wcBeginLine(pid);}else if(wcFrom===pid){wcCancel();}else{const f=wcFrom;wcCancel();wcConnect(f,pid);}});});
+  document.getElementById('wc-circuit').addEventListener('pointerdown',e=>{if(!e.target.classList.contains('wc-pin'))wcCancel();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')wcCancel();});
+  function wcBeginLine(pid){const dl=document.getElementById('wc-drawLine');dl.setAttribute('opacity','1');const p=wcPinCenter(pid);if(!p)return;dl.setAttribute('x1',p.x);dl.setAttribute('y1',p.y);dl.setAttribute('x2',p.x);dl.setAttribute('y2',p.y);wcMM=ev=>{const cr=document.getElementById('wc-inner').getBoundingClientRect();const pp=wcPinCenter(pid);if(!pp)return;dl.setAttribute('x1',pp.x);dl.setAttribute('y1',pp.y);dl.setAttribute('x2',ev.clientX-cr.left);dl.setAttribute('y2',ev.clientY-cr.top);};document.addEventListener('mousemove',wcMM);}
+  function wcCancel(){document.getElementById('wc-drawLine').setAttribute('opacity','0');if(wcMM){document.removeEventListener('mousemove',wcMM);wcMM=null;}document.querySelectorAll('.wc-pin.wc-active').forEach(p=>p.classList.remove('wc-active'));document.getElementById('wc-circuit').classList.remove('wc-wiring');wcFrom=null;}
+  function wcRefresh(){document.querySelectorAll('.wc-pin').forEach(pin=>{const pid=pin.dataset.pid;const reqs=WC_REQUIRED.filter(r=>r.src===pid||r.tgt===pid);const done=reqs.length>0&&reqs.every(r=>wcDone.has(r.id));pin.classList.toggle('wc-done',done);});}
+  function wcUpdateUI(){const n=wcDone.size;WC_REQUIRED.forEach(r=>{const d=wcDone.has(r.id);const chk=document.getElementById('wc-chk-'+r.id);const ico=document.getElementById('wc-icon-'+r.id);if(chk)chk.classList.toggle('wc-chk-done',d);if(ico)ico.textContent=d?'✓':'';});document.getElementById('wc-chk-title').textContent='Connections — '+n+' / '+WC_TOTAL;const all=n===WC_TOTAL;document.getElementById('wc-nextBtn').disabled=!all;document.getElementById('wc-nextBtn').classList.toggle('wc-unlocked',all);}
+  window.wcUndo=()=>{if(isDemoActive)toggleDemo();if(wcWires.length)wcDelete(wcWires[wcWires.length-1]);};
+  window.wcAutoComplete=()=>{if(isDemoActive)toggleDemo();WC_REQUIRED.forEach(req=>{if(!wcDone.has(req.id)){const p1=document.getElementById('wc-pin-'+req.src);const p2=document.getElementById('wc-pin-'+req.tgt);if(!p1||!p2){wcDone.add(req.id);return;}const el=wcMakeWire(req.src,req.tgt);if(el){wcWires.push({rid:req.id,el});wcDone.add(req.id);}}});wcRefresh();wcUpdateUI();};
+  let isDemoActive=false,demoStepIndex=0;
+  const DEMO_SPEECH={w1:'Connection 1. Connect the AC supply positive terminal, pin 3, to the SCR Anode, pin 5.',w2:'Connection 2. Connect the SCR Cathode, pin 6, to the Ammeter positive, pin 14.',w3:'Connection 3. Connect the Ammeter negative, pin 15, to the Resistor top, pin 16.',w4:'Connection 4. Connect the Resistor bottom, pin 17, to the Inductor top, pin 18.',w5:'Connection 5. Connect the Inductor bottom, pin 19, to the Back-EMF positive, pin 20.',w6:'Connection 6. Connect the Back-EMF negative, pin 21, to the AC supply return, pin 4.',w7:'Connection 7. Connect the Gate Pulse output, pin 10, to the SCR Gate, pin 7.',w8:'Connection 8. Connect VINP positive, pin 1, to AC supply positive, pin 3.',w9:'Connection 9. Connect VINP negative, pin 2, to AC supply return, pin 4.',w10:'Connection 10. Connect VT positive, pin 8, to SCR Anode, pin 5.',w11:'Connection 11. Connect VT negative, pin 9, to SCR Cathode, pin 6.',w12:'Connection 12. Connect VGP positive, pin 11, to Gate Pulse output, pin 10.',w13:'Connection 13. Connect VGP negative, pin 12, to Ground, pin 13.',w14:'Connection 14. Connect VLOAD positive, pin 25, to Ammeter positive, pin 14.',w15:'Connection 15. Connect VLOAD negative, pin 24, to Back-EMF negative, pin 21.',w16:'Connection 16. Connect VE positive, pin 22, to Back-EMF positive, pin 20.',w17:'Connection 17 — final. Connect VE negative, pin 23, to Back-EMF negative, pin 21. All connections complete!'};
+  function demoSpeak(text){if(!('speechSynthesis' in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=1.0;window.speechSynthesis.speak(u);}
+  function updateDemoHighlight(){document.querySelectorAll('.wc-pin').forEach(p=>p.classList.remove('demo-target'));while(demoStepIndex<WC_REQUIRED.length&&wcDone.has(WC_REQUIRED[demoStepIndex].id))demoStepIndex++;if(demoStepIndex>=WC_REQUIRED.length){document.getElementById('demo-text').textContent='🎉 All connections done! Click ▶ VERIFY CIRCUIT.';demoSpeak('All connections complete. Click Verify Circuit.');return;}const req=WC_REQUIRED[demoStepIndex];const p1=document.getElementById('wc-pin-'+req.src);const p2=document.getElementById('wc-pin-'+req.tgt);if(p1)p1.classList.add('demo-target');if(p2)p2.classList.add('demo-target');const chkEl=document.getElementById('wc-chk-'+req.id);if(chkEl)chkEl.scrollIntoView({behavior:'smooth',block:'center'});if(p1)p1.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});const txt=DEMO_SPEECH[req.id]||('Connect '+req.src+' to '+req.tgt);document.getElementById('demo-text').textContent=txt;demoSpeak(txt);}
+  window.toggleDemo=()=>{isDemoActive=!isDemoActive;const btn=document.getElementById('wc-demoBtn');const banner=document.getElementById('demo-banner');if(isDemoActive){btn.textContent='🛑 Stop Demo';btn.classList.add('active');banner.style.display='flex';if(wcDone.size===WC_TOTAL){wcWires.forEach(w=>w.el.remove());wcWires=[];wcDone.clear();wcRefresh();wcUpdateUI();}demoStepIndex=0;updateDemoHighlight();}else{btn.textContent='🎓 Guided Demo';btn.classList.remove('active');banner.style.display='none';document.querySelectorAll('.wc-pin').forEach(p=>p.classList.remove('demo-target'));if('speechSynthesis' in window)window.speechSynthesis.cancel();}};
+  window.wcGoNext=()=>{window.circuitVerified=true;if(isDemoActive)toggleDemo();const nb=document.getElementById('wc-nextBtn');nb.textContent='✓ Verified';nb.style.background='#16a34a';nb.style.color='#fff';document.getElementById('runBtn').disabled=false;document.getElementById('runBtn').style.opacity='';document.getElementById('runBtn').style.cursor='';document.getElementById('liveBtn').disabled=false;document.getElementById('liveBtn').style.opacity='';document.getElementById('liveBtn').style.cursor='';const vb=document.getElementById('circuitVerifiedBanner');vb.style.display='flex';setTimeout(()=>{vb.style.opacity='0';setTimeout(()=>{vb.style.display='none';vb.style.opacity='1';},500);},3000);simulate();};
+  wcUpdateUI();
+})();
+
+/* ══════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════ */
+let activeTab=null;
+const tabLabels={proc:'Procedure',nom:'Nomenclature',math:'Mathematical Expression'};
+function switchTab(name){
+  ['proc','nom','math'].forEach(t=>{document.getElementById('content-'+t).classList.remove('active');const b=document.getElementById('tab-'+t);b.classList.remove('active-proc','active-nom','active-math');b.textContent='▸ '+tabLabels[t];});
+  if(activeTab===name){if(name==='proc')ttsStop();activeTab=null;}
+  else{if(activeTab==='proc')ttsStop();document.getElementById('content-'+name).classList.add('active');const cls=name==='proc'?'active-proc':name==='nom'?'active-nom':'active-math';const btn=document.getElementById('tab-'+name);btn.classList.add(cls);btn.textContent='▾ '+tabLabels[name];activeTab=name;}
+}
+
+/* ══════════════════════════════════════════
+   TTS — PROCEDURE TAB
+══════════════════════════════════════════ */
+const ttsSteps=[
+  {id:'step-1',text:"Step 1. Complete the circuit by making all 17 connections. Click Verify Circuit to unlock simulation."},
+  {id:'step-2',text:"Step 2. Set the Peak Voltage V m in the sidebar. Range is 50 to 230 Volts. Default is 100 V."},
+  {id:'step-3',text:"Step 3. Set Load Resistance R, 5 to 100 Ohms; Load Inductance L, 10 to 200 millihenries; and Back-EMF E, 0 to 0.8 times V m."},
+  {id:'step-4',text:"Step 4. Adjust the Firing Angle alpha slider from 0 to 150 degrees. The SCR fires only when V m sine alpha is greater than or equal to E."},
+  {id:'step-5',text:"Step 5. Click Run. Five waveforms are plotted for 2 complete cycles from 0 to 720 degrees, including the thyristor voltage waveform."},
+  {id:'step-6',text:"Step 6. Observe V dc, I dc, extinction angle beta, power P dc, and the alpha minimum value. The thyristor voltage equals V s minus E when the SCR is off."},
+  {id:'step-7',text:"Step 7. Enable Live Mode for real-time updates. Use Reset to restore defaults."}
+];
+let ttsCurrentStep=0,ttsRunning=false,ttsPaused=false,ttsVoiceList=[],ttsSelectedVoice=null;
+function ttsPopulateVoices(){const all=window.speechSynthesis.getVoices();if(!all.length)return;ttsVoiceList=all.filter(v=>/^en/i.test(v.lang));if(!ttsVoiceList.length)ttsVoiceList=all;const sel=document.getElementById('ttsVoice');sel.innerHTML='';ttsVoiceList.forEach((v,i)=>{const o=document.createElement('option');o.value=i;o.textContent=v.name+(v.localService?'':' 🌐');sel.appendChild(o);});ttsSelectedVoice=ttsVoiceList[0];sel.value=0;document.getElementById('ttsStatus').textContent='Ready';}
+if(window.speechSynthesis){ttsPopulateVoices();window.speechSynthesis.onvoiceschanged=ttsPopulateVoices;}
+function ttsUpdateVoice(){const i=parseInt(document.getElementById('ttsVoice').value);ttsSelectedVoice=ttsVoiceList[i]||null;if(ttsRunning){window.speechSynthesis.cancel();ttsSpeakStep(ttsCurrentStep);}}
+function ttsHighlight(idx){document.querySelectorAll('.proc-step').forEach(el=>el.classList.remove('tts-highlight'));if(idx>=0&&idx<ttsSteps.length){const el=document.getElementById(ttsSteps[idx].id);if(el){el.classList.add('tts-highlight');el.scrollIntoView({behavior:'smooth',block:'nearest'});}}}
+function ttsSetProgress(pct){const b=document.getElementById('ttsProgressBar');if(b)b.style.width=pct+'%';}
+function ttsSpeakStep(idx){if(idx>=ttsSteps.length){ttsStop();return;}ttsHighlight(idx);document.getElementById('ttsStatus').textContent='Reading step '+(idx+1)+' of '+ttsSteps.length+'…';ttsSetProgress((idx/ttsSteps.length)*100);const u=new SpeechSynthesisUtterance(ttsSteps[idx].text);u.rate=parseFloat(document.getElementById('ttsSpeed').value)||1;if(ttsSelectedVoice)u.voice=ttsSelectedVoice;u.onend=()=>{if(ttsRunning&&!ttsPaused){ttsCurrentStep++;ttsSpeakStep(ttsCurrentStep);}};u.onerror=()=>{if(ttsRunning){ttsCurrentStep++;ttsSpeakStep(ttsCurrentStep);}};window.speechSynthesis.speak(u);}
+function ttsPlay(){if(ttsPaused){ttsPaused=false;ttsRunning=true;window.speechSynthesis.resume();document.getElementById('ttsPlayBtn').style.display='none';document.getElementById('ttsPauseBtn').style.display='';document.getElementById('ttsStopBtn').style.display='';return;}if(ttsRunning)return;ttsRunning=true;ttsPaused=false;ttsCurrentStep=0;document.getElementById('ttsPlayBtn').style.display='none';document.getElementById('ttsPauseBtn').style.display='';document.getElementById('ttsStopBtn').style.display='';ttsSpeakStep(0);}
+function ttsPause(){if(!ttsRunning)return;ttsPaused=true;window.speechSynthesis.pause();document.getElementById('ttsPauseBtn').style.display='none';document.getElementById('ttsPlayBtn').style.display='';document.getElementById('ttsPlayBtn').textContent='▶ Resume';}
+function ttsStop(){ttsRunning=false;ttsPaused=false;window.speechSynthesis.cancel();ttsCurrentStep=0;document.querySelectorAll('.proc-step').forEach(el=>el.classList.remove('tts-highlight'));document.getElementById('ttsPlayBtn').style.display='';document.getElementById('ttsPlayBtn').textContent='▶ Read Aloud';document.getElementById('ttsPauseBtn').style.display='none';document.getElementById('ttsStopBtn').style.display='none';document.getElementById('ttsStatus').textContent='';ttsSetProgress(0);}
+function ttsUpdateSpeed(){if(ttsRunning&&!ttsPaused){window.speechSynthesis.cancel();ttsSpeakStep(ttsCurrentStep);}}
+
+/* ══════════════════════════════════════════
+   SIMULATION ENGINE
+══════════════════════════════════════════ */
+const DPR=window.devicePixelRatio||1;
+const OMEGA=2*Math.PI*50;
+const NUM_CYCLES=2;
+const TOTAL_ANGLE=NUM_CYCLES*2*Math.PI;
+
+let liveMode=false,animFrame=null,animProgress=1;
+let prevVm=100,prevR=10,prevL=0.05,prevE=30,prevAlpha=30*Math.PI/180;
+window.circuitVerified=false;
+
+/* ── Clamp E to valid range based on current Vm ── */
+function getEMax(Vm){ return 0.8 * Vm; }
+
+/* Update E max hint and clamp input when Vm changes */
+function updateEConstraints(Vm){
+  const eMax = getEMax(Vm);
+  const eInput = document.getElementById('e');
+  const eHint  = document.getElementById('eHint');
+  eInput.max = eMax.toFixed(1);
+  if(eHint) eHint.textContent = `0 – ${eMax.toFixed(0)} V (0.8·Vm)`;
+  // clamp current E value if needed
+  const eVal = parseFloat(eInput.value)||0;
+  if(eVal > eMax){ eInput.value = eMax.toFixed(1); }
+}
+
+function getParams(){
+  const Vm = Math.min(230, Math.max(50, parseFloat(document.getElementById('vm').value)||100));
+  const R  = Math.min(100, Math.max(5,  parseFloat(document.getElementById('r').value)||10));
+  const Lmh= Math.min(200, Math.max(10, parseFloat(document.getElementById('l').value)||50));
+  const L  = Lmh / 1000;
+  // E is clamped to [0, 0.8*Vm]
+  const eMax = getEMax(Vm);
+  const E  = Math.min(eMax, Math.max(0, parseFloat(document.getElementById('e').value)||0));
+  // alpha clamped to [0°, 150°]
+  const alphaDeg = Math.min(150, Math.max(0, parseFloat(document.getElementById('alpha').value)||0));
+  const alpha = alphaDeg * Math.PI / 180;
+  return {Vm, R, L, E, alpha};
+}
+
+function onParamChange(){
+  const Vm = Math.min(230, Math.max(50, parseFloat(document.getElementById('vm').value)||100));
+  updateEConstraints(Vm);
+  if(liveMode) simulate();
+}
+
+function onEChange(){
+  if(liveMode) simulate();
+}
+
+function onAlphaChange(){
+  const alphaDeg = Math.min(150, Math.max(0, parseFloat(document.getElementById('alpha').value)||0));
+  document.getElementById('alpha').value = alphaDeg;
+  document.getElementById('alphaVal').textContent = alphaDeg + '°';
+  if(liveMode) simulate();
+}
+
+function findBeta(Vm,R,L,E,alphaRad){
+  const Z=Math.sqrt(R*R+(OMEGA*L)*(OMEGA*L));
+  const phi=Math.atan2(OMEGA*L,R);
+  const alphaMin=(E>0&&E<Vm)?Math.asin(Math.min(E/Vm,1)):0;
+  if(alphaRad<alphaMin-1e-6){return{beta:alphaRad,Z,phi,current:()=>0,alphaMin,noConduction:true};}
+  const A=(L>0)?(E/R-(Vm/Z)*Math.sin(alphaRad-phi))*Math.exp((R/(OMEGA*L))*alphaRad):0;
+  function current(wt){
+    if(wt<alphaRad)return 0;
+    let io;
+    if(L<1e-6){io=(Vm*Math.sin(wt)-E)/R;}
+    else{io=(Vm/Z)*Math.sin(wt-phi)-E/R+A*Math.exp(-(R/(OMEGA*L))*wt);}
+    return Math.max(0,io);
+  }
+  const maxWt=alphaRad+2*Math.PI;
+  let beta=maxWt;
+  const steps=4000;
+  let prevIo=current(alphaRad+1e-4);
+  for(let i=1;i<=steps;i++){
+    const wt=alphaRad+(i/steps)*(maxWt-alphaRad);
+    const io=(L<1e-6)?(Vm*Math.sin(wt)-E)/R:(Vm/Z)*Math.sin(wt-phi)-E/R+A*Math.exp(-(R/(OMEGA*L))*wt);
+    if(i>5&&prevIo>0&&io<=0){beta=wt;break;}
+    prevIo=io;
+  }
+  return{beta,Z,phi,current,alphaMin};
+}
+
+function computeMetrics(Vm,R,L,E,alphaRad){
+  const res=findBeta(Vm,R,L,E,alphaRad);
+  const{beta,current,alphaMin,noConduction}=res;
+  let Vdc=0,Vrms=0,Idc=0,Irms=0;
+  if(!noConduction){
+    Vdc=(Vm/(2*Math.PI))*(Math.cos(alphaRad)-Math.cos(beta));
+    Vdc=Math.max(0,Vdc);
+    const N=2000;
+    let sumV2=0,sumI2=0,sumI=0;
+    for(let i=0;i<=N;i++){
+      const wt=2*Math.PI*(i/N);
+      const conducting=(wt>=alphaRad&&wt<=beta);
+      const vo=conducting?Math.max(0,Vm*Math.sin(wt)):E;
+      const io=Math.max(0,current(wt));
+      sumV2+=vo*vo;sumI2+=io*io;sumI+=io;
+    }
+    Vrms=Math.sqrt(sumV2/(N+1));
+    Irms=Math.sqrt(sumI2/(N+1));
+    Idc=Math.max(0,sumI/(N+1));
+  }
+  const Vsupply=Vm/Math.sqrt(2);
+  const PF=(Irms>0.0001)?(Irms*Irms*R)/(Vsupply*Irms):0;
+  const betaDeg=beta*180/Math.PI;
+  const alphaMinDeg=alphaMin*180/Math.PI;
+  const Pdc=Idc*E;
+  function setM(id,val,d){const el=document.getElementById(id);if(!el)return;const t=typeof val==='number'?val.toFixed(d):val;if(el.textContent!==t){el.textContent=t;el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');}}
+  setM('vdc',Vdc,2);setM('vrms',Vrms,2);setM('idc',Idc,3);setM('irms',Irms,3);
+  setM('beta',betaDeg,1);setM('pf',PF,3);setM('pdc',Pdc,2);setM('alphamin',alphaMinDeg,1);
+  setM('ve_reading',E,2);
+  return res;
+}
+
+/* ── Canvas utilities ── */
+const ML=62,MR=22,MT=28,MB=34;
+function prepCanvas(id){
+  const canvas=document.getElementById(id);
+  const W=canvas.offsetWidth||900;
+  const H=200;
+  canvas.width=W*DPR;canvas.height=H*DPR;
+  const ctx=canvas.getContext('2d');ctx.scale(DPR,DPR);
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
+  return{ctx,W,H};
+}
+
+function drawGrid(ctx,W,H){
+  ctx.save();ctx.strokeStyle='#e8ecf2';ctx.lineWidth=1;
+  const uw=W-ML-MR;
+  for(let i=1;i<8;i++){const x=ML+(uw/8)*i;ctx.beginPath();ctx.moveTo(x,MT);ctx.lineTo(x,H-MB);ctx.stroke();}
+  const uh=H-MT-MB;
+  for(let j=1;j<5;j++){const y=MT+(uh/5)*j;ctx.beginPath();ctx.moveTo(ML,y);ctx.lineTo(W-MR,y);ctx.stroke();}
+  ctx.restore();
+}
+
+function waveX(wt,W){return ML+(wt/TOTAL_ANGLE)*(W-ML-MR);}
+function waveY(val,maxV,H){const mid=MT+(H-MT-MB)/2;return mid-(val/maxV)*(H-MT-MB)*0.42;}
+
+function drawAxes(ctx,W,H,maxV,unit,label,showNeg){
+  const mid=MT+(H-MT-MB)/2;
+  const uw=W-ML-MR;
+  ctx.save();
+  ctx.strokeStyle='#b0bac8';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(ML,mid);ctx.lineTo(W-MR,mid);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ML,MT);ctx.lineTo(ML,H-MB);ctx.stroke();
+  ctx.strokeStyle='#d0d5dd';ctx.strokeRect(ML,MT,uw,H-MT-MB);
+  ctx.fillStyle='#8898aa';ctx.font='10px "JetBrains Mono",monospace';ctx.textAlign='right';
+  ctx.fillText('+'+maxV.toFixed(0)+unit,ML-4,MT+12);
+  ctx.fillText('0',ML-4,mid+4);
+  if(showNeg&&maxV>0.001){ctx.fillText('-'+maxV.toFixed(0)+unit,ML-4,H-MB-4);}
+  // Time axis ticks
+  ctx.textAlign='center';ctx.fillStyle='#aab2bf';ctx.font='9.5px "JetBrains Mono",monospace';
+  const totalTime=2/50;
+  [{frac:0},{frac:0.125},{frac:0.25},{frac:0.375},{frac:0.5},{frac:0.625},{frac:0.75},{frac:0.875},{frac:1}].forEach(t=>{
+    const time=totalTime*t.frac;
+    const x=ML+uw*t.frac;
+    ctx.fillText((time*1000).toFixed(0)+' ms',x,H-MB+14);
+  });
+  ctx.fillStyle='#94a3b8';ctx.font='10px "JetBrains Mono",monospace';
+  ctx.fillText('Time (ms)',W/2,H-4);
+  if(label){ctx.save();ctx.translate(14,MT+(H-MT-MB)/2);ctx.rotate(-Math.PI/2);ctx.fillStyle='#94a3b8';ctx.font='10px "JetBrains Mono",monospace';ctx.textAlign='center';ctx.fillText(label,0,0);ctx.restore();}
+  ctx.restore();
+}
+
+function drawAlphaBetaMarkers(ctx,W,H,alphaRad,betaRad,cycle){
+  const offset=cycle*2*Math.PI;
+  const ax=waveX(offset+alphaRad,W);
+  const labelY=MT-6;
+  ctx.save();
+  ctx.strokeStyle='rgba(109,40,217,0.55)';ctx.setLineDash([5,4]);ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(ax,MT);ctx.lineTo(ax,H-MB);ctx.stroke();
+  ctx.fillStyle='#6d28d9';ctx.font='bold 10px "JetBrains Mono",monospace';ctx.textAlign='center';
+  ctx.fillText('α',ax,labelY);
+  if(betaRad&&betaRad>alphaRad+0.05&&betaRad<=alphaRad+2*Math.PI){
+    const bx=waveX(offset+betaRad,W);
+    ctx.strokeStyle='rgba(194,68,11,0.55)';ctx.setLineDash([5,4]);ctx.lineWidth=1.4;
+    ctx.beginPath();ctx.moveTo(bx,MT);ctx.lineTo(bx,H-MB);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#c2440b';ctx.font='bold 9px "JetBrains Mono",monospace';ctx.textAlign='center';
+    ctx.fillText('β',bx,labelY);
+  }
+  ctx.restore();
+}
+
+/* ── GRAPH 1: Input Voltage ── */
+function drawInput(Vm,R,L,E,alphaRad){
+  const{ctx,W,H}=prepCanvas('inputGraph');
+  drawGrid(ctx,W,H);drawAxes(ctx,W,H,Vm,'V','Vin',true);
+  const N=2000;
+  ctx.save();ctx.strokeStyle='#94b8e0';ctx.lineWidth=2;ctx.beginPath();
+  for(let i=0;i<=N;i++){const wt=TOTAL_ANGLE*(i/N);const x=waveX(wt,W),y=waveY(Vm*Math.sin(wt),Vm,H);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+  ctx.stroke();ctx.restore();
+  const{beta,noConduction}=findBeta(Vm,R,L,E,alphaRad);
+  for(let c=0;c<NUM_CYCLES;c++)drawAlphaBetaMarkers(ctx,W,H,alphaRad,noConduction?null:beta,c);
+}
+
+/* ── GRAPH 2: Output Voltage ── */
+function drawVoltage(Vm,R,L,E,alphaRad){
+  const{ctx,W,H}=prepCanvas('voltageGraph');
+  const{beta,noConduction}=findBeta(Vm,R,L,E,alphaRad);
+  drawGrid(ctx,W,H);drawAxes(ctx,W,H,Vm,'V','Vout',false);
+  const N=3000;
+  const zeroY=waveY(0,Vm,H);
+
+  /* Vdc dashed line */
+  const Vdc=noConduction?0:Math.max(0,(Vm/(2*Math.PI))*(Math.cos(alphaRad)-Math.cos(beta)));
+  const vdcY=waveY(Vdc,Vm,H);
+  ctx.save();ctx.strokeStyle='#f59e0b';ctx.setLineDash([7,4]);ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(ML,vdcY);ctx.lineTo(W-MR,vdcY);ctx.stroke();
+  ctx.setLineDash([]);ctx.fillStyle='#d97706';ctx.font='10px "JetBrains Mono",monospace';
+  ctx.textAlign='right';ctx.fillText('Vdc='+Vdc.toFixed(1)+' V',W-MR,vdcY-5);ctx.restore();
+
+  /* E dashed line */
+  if(E>0){
+    const eY=waveY(E,Vm,H);
+    ctx.save();ctx.strokeStyle='#b91c1c';ctx.setLineDash([5,4]);ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(ML,eY);ctx.lineTo(W-MR,eY);ctx.stroke();
+    ctx.setLineDash([]);ctx.fillStyle='#b91c1c';ctx.font='10px "JetBrains Mono",monospace';
+    ctx.textAlign='left';ctx.fillText('E='+E.toFixed(0)+' V',ML+4,eY-5);ctx.restore();
+  }
+
+  if(!noConduction){
+    for(let c=0;c<NUM_CYCLES;c++)drawAlphaBetaMarkers(ctx,W,H,alphaRad,beta,c);
+
+    /* Build waveform points:
+       Conducting [alpha, beta]: vo = Vm*sin(wt)   — true rectified sine
+       Off-state otherwise:      vo = E             — flat at back-EMF */
+    const pts=[];
+    for(let i=0;i<=N;i++){
+      const wt=TOTAL_ANGLE*(i/N);
+      const localWt=wt%(2*Math.PI);
+      const conducting=(localWt>=alphaRad&&localWt<=beta);
+      pts.push({x:waveX(wt,W),y:waveY(conducting?Vm*Math.sin(localWt):E,Vm,H),conducting});
+    }
+
+    /* Blue fill under sine pulses, down to zero axis */
+    const grad=ctx.createLinearGradient(0,MT,0,zeroY);
+    grad.addColorStop(0,'rgba(0,87,184,0.18)');
+    grad.addColorStop(1,'rgba(0,87,184,0.03)');
+    ctx.save();ctx.fillStyle=grad;
+    let inPulse=false;
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i];
+      if(p.conducting&&!inPulse){ctx.beginPath();ctx.moveTo(p.x,zeroY);ctx.lineTo(p.x,p.y);inPulse=true;}
+      else if(p.conducting&&inPulse){ctx.lineTo(p.x,p.y);}
+      else if(!p.conducting&&inPulse){ctx.lineTo(pts[i-1].x,zeroY);ctx.closePath();ctx.fill();inPulse=false;}
+    }
+    if(inPulse){ctx.lineTo(pts[pts.length-1].x,zeroY);ctx.closePath();ctx.fill();}
+    ctx.restore();
+
+    /* Waveform line */
+    ctx.save();ctx.strokeStyle='#0057b8';ctx.lineWidth=2.2;ctx.beginPath();
+    pts.forEach((p,i)=>{if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);});
+    ctx.stroke();ctx.restore();
+
+  } else {
+    const eY=waveY(E,Vm,H);
+    ctx.save();ctx.strokeStyle='#0057b8';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(ML,eY);ctx.lineTo(W-MR,eY);ctx.stroke();
+    ctx.fillStyle='#b91c1c';ctx.font='12px "Times New Roman",Times,serif';ctx.textAlign='center';
+    ctx.fillText('SCR not conducting — α < αmin (increase α or decrease E)',W/2,MT+16);ctx.restore();
+  }
+}
+
+/* ── GRAPH 3: Thyristor Voltage ── */
+function drawThyristorVoltage(Vm,R,L,E,alphaRad){
+  const{ctx,W,H}=prepCanvas('thyristorGraph');
+  const{beta,noConduction}=findBeta(Vm,R,L,E,alphaRad);
+  const maxV=Math.max(Math.abs(Vm),Math.abs(Vm-E),Math.abs(-Vm-E))*1.1;
+  drawGrid(ctx,W,H);drawAxes(ctx,W,H,maxV,'V','vT',true);
+  const N=3000;
+  const mid=MT+(H-MT-MB)/2;
+  ctx.save();ctx.fillStyle='#6b7280';ctx.font='10px "JetBrains Mono",monospace';
+  ctx.textAlign='left';ctx.fillText('0V',ML+3,mid-5);ctx.restore();
+  if(!noConduction){for(let c=0;c<NUM_CYCLES;c++)drawAlphaBetaMarkers(ctx,W,H,alphaRad,beta,c);}
+  ctx.save();ctx.strokeStyle='#111';ctx.lineWidth=2;ctx.beginPath();
+  for(let i=0;i<=N;i++){
+    const wt=TOTAL_ANGLE*(i/N);
+    const localWt=wt%(2*Math.PI);
+    let vT;
+    if(!noConduction&&localWt>=alphaRad&&localWt<=beta){vT=0;}
+    else{vT=Vm*Math.sin(localWt)-E;}
+    const x=waveX(wt,W),y=waveY(vT,maxV,H);
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.stroke();ctx.restore();
+}
+
+/* ── GRAPH 4: Load Current ── */
+function drawCurrent(Vm,R,L,E,alphaRad){
+  const{ctx,W,H}=prepCanvas('currentGraph');
+  const{beta,current,Z,noConduction}=findBeta(Vm,R,L,E,alphaRad);
+  const maxI=(Z>0)?Vm/Z:Vm/Math.max(R,0.1);
+  drawGrid(ctx,W,H);drawAxes(ctx,W,H,maxI,'A','Io',false);
+  const N=2000;
+  const midY=MT+(H-MT-MB)/2;
+  if(!noConduction){
+    for(let c=0;c<NUM_CYCLES;c++)drawAlphaBetaMarkers(ctx,W,H,alphaRad,beta,c);
+    let sumI=0;
+    for(let i=0;i<=N;i++){const wt=2*Math.PI*(i/N);sumI+=Math.max(0,current(wt));}
+    const Idc=sumI/(N+1);
+    const idcY=waveY(Idc,maxI,H);
+    ctx.save();ctx.strokeStyle='#4ade80';ctx.setLineDash([7,4]);ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(ML,idcY);ctx.lineTo(W-MR,idcY);ctx.stroke();
+    ctx.setLineDash([]);ctx.fillStyle='#15803d';ctx.font='10px "JetBrains Mono",monospace';
+    ctx.textAlign='right';ctx.fillText('Idc='+Idc.toFixed(3)+'A',W-MR-3,idcY-5);ctx.restore();
+    const grad=ctx.createLinearGradient(0,MT,0,midY);
+    grad.addColorStop(0,'rgba(22,163,74,0.18)');grad.addColorStop(1,'rgba(22,163,74,0.0)');
+    ctx.save();ctx.fillStyle=grad;ctx.beginPath();
+    for(let i=0;i<=N;i++){
+      const wt=TOTAL_ANGLE*(i/N);const localWt=wt%(2*Math.PI);
+      const io=(localWt>=alphaRad&&localWt<=beta)?Math.max(0,current(localWt)):0;
+      const x=waveX(wt,W),y=waveY(io,maxI,H);
+      if(i===0){ctx.moveTo(x,midY);ctx.lineTo(x,y);}else ctx.lineTo(x,y);
+    }
+    ctx.lineTo(W-MR,midY);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#16a34a';ctx.lineWidth=2;ctx.beginPath();
+    for(let i=0;i<=N;i++){
+      const wt=TOTAL_ANGLE*(i/N);const localWt=wt%(2*Math.PI);
+      const io=(localWt>=alphaRad&&localWt<=beta)?Math.max(0,current(localWt)):0;
+      const x=waveX(wt,W),y=waveY(io,maxI,H);
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    ctx.stroke();ctx.restore();
+  } else {
+    ctx.save();ctx.strokeStyle='#16a34a';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(ML,midY);ctx.lineTo(W-MR,midY);ctx.stroke();
+    ctx.fillStyle='#b91c1c';ctx.font='12px "Times New Roman",Times,serif';ctx.textAlign='center';
+    ctx.fillText('No conduction — i_o = 0',W/2,midY-18);ctx.restore();
+  }
+}
+
+/* ── GRAPH 5: Gate Pulse ── */
+function drawGatePulse(Vm,R,L,E,alphaRad){
+  const{ctx,W,H}=prepCanvas('gateGraph');
+  const uw=W-ML-MR;
+  const plotTop=MT,plotBottom=H-MB,plotH=plotBottom-plotTop;
+  ctx.save();ctx.strokeStyle='#e8ecf2';ctx.lineWidth=1;
+  for(let i=1;i<8;i++){const x=ML+(i/8)*uw;ctx.beginPath();ctx.moveTo(x,plotTop);ctx.lineTo(x,plotBottom);ctx.stroke();}
+  ctx.restore();
+  ctx.save();ctx.strokeStyle='#d0d5dd';ctx.strokeRect(ML,plotTop,uw,plotH);ctx.restore();
+  const lowY=plotBottom,highY=plotTop+plotH*0.25;
+  ctx.save();ctx.fillStyle='#6b7280';ctx.font='10px monospace';ctx.textAlign='right';ctx.textBaseline='middle';
+  ctx.fillText('Gate',ML-6,highY);ctx.fillText('0',ML-6,lowY);
+  ctx.textAlign='center';ctx.textBaseline='top';ctx.fillStyle='#9ca3af';
+  [{deg:0,frac:0},{deg:90,frac:0.125},{deg:180,frac:0.25},{deg:270,frac:0.375},{deg:360,frac:0.5},{deg:450,frac:0.625},{deg:540,frac:0.75},{deg:630,frac:0.875},{deg:720,frac:1}].forEach(t=>{
+    ctx.fillText(t.deg+'°',ML+uw*t.frac,plotBottom+14);
+  });
+  ctx.restore();
+  ctx.save();ctx.strokeStyle='#9ca3af';ctx.beginPath();ctx.moveTo(ML,lowY);ctx.lineTo(W-MR,lowY);ctx.stroke();ctx.restore();
+  const pulseW=uw*0.02;const totalTime=2/50;
+  ctx.save();ctx.strokeStyle='#111';ctx.fillStyle='#111';ctx.lineWidth=2;
+  for(let k=0;k<TOTAL_ANGLE;k+=2*Math.PI){
+    const theta=alphaRad+k;
+    const time=theta/(2*Math.PI*50);const frac=time/totalTime;
+    const px=ML+uw*frac;
+    ctx.beginPath();ctx.moveTo(px,lowY);ctx.lineTo(px,highY);ctx.lineTo(px+pulseW,highY);ctx.lineTo(px+pulseW,lowY);ctx.closePath();ctx.fill();ctx.stroke();
+  }
+  ctx.restore();
+  const px=waveX(alphaRad,W);
+  ctx.save();ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(px,plotTop);ctx.lineTo(px,plotBottom);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#111';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.textBaseline='bottom';
+  ctx.fillText('α = '+(alphaRad*180/Math.PI).toFixed(0)+'°',px,plotBottom+12);ctx.restore();
+  ctx.save();ctx.fillStyle='#374151';ctx.font='10px serif';ctx.textAlign='left';ctx.textBaseline='bottom';
+  ctx.fillText('Gate pulse (trigger at α)',ML+6,plotTop-6);ctx.restore();
+}
+
+/* ── Locked placeholder ── */
+function drawLockedPlaceholder(canvasId,label){
+  const canvas=document.getElementById(canvasId);if(!canvas)return;
+  const W=canvas.offsetWidth||900;const H=100;
+  canvas.width=W*DPR;canvas.height=H*DPR;
+  const ctx=canvas.getContext('2d');ctx.scale(DPR,DPR);
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#e8ecf2';ctx.lineWidth=1;
+  for(let i=1;i<8;i++){const x=W/8*i;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let j=1;j<4;j++){const y=H/4*j;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.strokeStyle='#d0d5dd';ctx.lineWidth=1.5;ctx.strokeRect(1,1,W-2,H-2);
+  const cx=W/2;
+  ctx.fillStyle='#c8d0dc';ctx.beginPath();ctx.arc(cx,H/2-22,14,Math.PI,2*Math.PI);ctx.fill();ctx.fillRect(cx-18,H/2-22,36,28);
+  ctx.beginPath();ctx.arc(cx,H/2-22,10,Math.PI,2*Math.PI);ctx.fillStyle='#ffffff';ctx.fill();
+  ctx.fillStyle='#c8d0dc';ctx.beginPath();ctx.arc(cx,H/2-6,6,0,2*Math.PI);ctx.fill();ctx.fillRect(cx-3,H/2-6,6,10);
+  ctx.fillStyle='#8898aa';ctx.font='600 13px "Times New Roman",Times,serif';ctx.textAlign='center';
+  ctx.fillText('Complete circuit wiring to unlock',cx,H/2+30);
+  ctx.fillStyle='#aab2bf';ctx.font='11px "Times New Roman",Times,serif';ctx.fillText(label,cx,H/2+46);
+}
+
+function drawAllLocked(){
+  drawLockedPlaceholder('inputGraph','Input Voltage Waveform');
+  drawLockedPlaceholder('voltageGraph','Output Voltage Waveform');
+  drawLockedPlaceholder('thyristorGraph','Thyristor Voltage Waveform');
+  drawLockedPlaceholder('currentGraph','Load Current Waveform');
+  drawLockedPlaceholder('gateGraph','Gate Pulse Waveform');
+}
+
+/* ── Main simulate ── */
+function simulate(){
+  if(!window.circuitVerified)return;
+  const p=getParams();
+  setStatus('busy','Simulating…','');
+  if(animFrame)cancelAnimationFrame(animFrame);
+  animProgress=0;
+  const{Vm:tVm,R:tR,L:tL,E:tE,alpha:tA}=p;
+  const{Vm:fVm,R:fR,L:fL,E:fE}={Vm:prevVm,R:prevR,L:prevL,E:prevE};
+  const fA=prevAlpha;
+  function tick(){
+    animProgress=Math.min(animProgress+0.06,1);
+    const e=1-Math.pow(1-animProgress,3);
+    const Vm=fVm+(tVm-fVm)*e,R=fR+(tR-fR)*e,L=fL+(tL-fL)*e,E=fE+(tE-fE)*e,alpha=fA+(tA-fA)*e;
+    drawInput(Vm,R,L,E,alpha);
+    drawVoltage(Vm,R,L,E,alpha);
+    drawThyristorVoltage(Vm,R,L,E,alpha);
+    drawCurrent(Vm,R,L,E,alpha);
+    drawGatePulse(Vm,R,L,E,alpha);
+    computeMetrics(Vm,R,L,E,alpha);
+    if(animProgress<1){animFrame=requestAnimationFrame(tick);}
+    else{
+      prevVm=tVm;prevR=tR;prevL=tL;prevE=tE;prevAlpha=tA;
+      setStatus('ready','Simulation complete — 5 waveforms, 2 cycles (0°–720°)',
+        'α='+Math.round(tA*180/Math.PI)+'°  ·  Vm='+tVm+'V  ·  R='+tR+'Ω  ·  L='+(tL*1000).toFixed(1)+'mH  ·  E='+tE+'V');
+    }
+  }
+  animFrame=requestAnimationFrame(tick);
+}
+
+function setStatus(state,msg,info){
+  document.getElementById('statusDot').className='status-dot'+(state==='busy'?' busy':'');
+  document.getElementById('statusText').textContent=msg;
+  if(info!==undefined)document.getElementById('calcInfo').textContent=info;
+}
+
+function toggleLive(){
+  liveMode=!liveMode;
+  const btn=document.getElementById('liveBtn');
+  btn.textContent=liveMode?'⦿ Live: ON':'⦿ Live Mode';
+  btn.classList.toggle('live-active',liveMode);
+}
+
+function resetValues(){
+  document.getElementById('vm').value=100;
+  document.getElementById('r').value=10;
+  document.getElementById('l').value=50;
+  document.getElementById('e').value=30;
+  document.getElementById('alpha').value=30;
+  document.getElementById('alphaVal').textContent='30°';
+  updateEConstraints(100);
+  prevVm=100;prevR=10;prevL=0.05;prevE=30;prevAlpha=30*Math.PI/180;
+  if(window.circuitVerified)simulate();
+}
+
+function downloadGraph(){
+  const canvas=document.getElementById('voltageGraph');
+  const link=document.createElement('a');
+  link.download='scr_rle_output_voltage_2cycle.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+
+window.addEventListener('resize',()=>{
+  if(animProgress>=1&&window.circuitVerified){
+    const p=getParams();
+    drawInput(p.Vm,p.R,p.L,p.E,p.alpha);
+    drawVoltage(p.Vm,p.R,p.L,p.E,p.alpha);
+    drawThyristorVoltage(p.Vm,p.R,p.L,p.E,p.alpha);
+    drawCurrent(p.Vm,p.R,p.L,p.E,p.alpha);
+    drawGatePulse(p.Vm,p.R,p.L,p.E,p.alpha);
+  }
+});
+
+document.getElementById('runBtn').disabled=true;
+document.getElementById('runBtn').style.opacity='0.4';
+document.getElementById('runBtn').style.cursor='not-allowed';
+document.getElementById('liveBtn').disabled=true;
+document.getElementById('liveBtn').style.opacity='0.4';
+document.getElementById('liveBtn').style.cursor='not-allowed';
+
+// Initialize E constraint hint on load
+window.addEventListener('load',()=>{
+  updateEConstraints(100);
+  setTimeout(drawAllLocked,80);
+});
+
+/* ══════════════════════════════════════════
+   INTRO MODAL TTS
+══════════════════════════════════════════ */
+(function(){
+  const ITTS_SECTIONS=[
+    ["A Single-Phase Half Wave Controlled Rectifier with R-L-E Load converts single-phase AC into a controlled DC output using a single SCR — Silicon Controlled Rectifier. The load has a resistor R, inductor L, and back-EMF source E representing a DC motor or battery.",
+     "Unlike the purely resistive case, the inductor stores energy and causes the SCR to keep conducting beyond the natural zero-crossing — up to the extinction angle β, where current finally returns to zero.",
+     "The SCR fires when supply voltage V m sine alpha exceeds back-EMF E and a gate pulse arrives at firing angle alpha. The valid ranges are: V m 50 to 230 Volts, R 5 to 100 Ohms, L 10 to 200 millihenries, E 0 to 0.8 times V m, and alpha 0 to 150 degrees.",
+     "The inductor causes current to lag and extends conduction past the zero-crossing. Extinction angle β is found numerically from the current equation. When SCR is off, thyristor voltage equals v s minus E."],
+    ["AC Supply: single-phase sinusoidal source V m sine omega t, range 50 to 230 Volts. Pin 3 is the positive terminal, pin 4 is the neutral return.",
+     "SCR Thyristor: the main controlled switch. Pin 5 is the anode, pin 6 is the cathode, pin 7 is the gate. It fires at alpha (0 to 150 degrees) and turns off at beta when current reaches zero.",
+     "Gate Pulse Generator: produces a narrow trigger pulse at firing angle alpha each cycle. Connected to the SCR gate and the VGP voltmeter.",
+     "R-L-E Load in series: resistor R 5 to 100 Ohms, inductor L 10 to 200 millihenries, back-EMF E 0 to 0.8 times V m.",
+     "Ammeter IL: measures load current i-o in series between the SCR cathode and load. Pin 14 is positive, pin 15 is negative.",
+     "Voltmeters: VINP measures the supply, VT measures SCR voltage, VGP measures gate pulse, VLOAD measures the load, and VE measures the back-EMF."],
+    ["Input Voltage v-in of t: the full sinusoidal supply V m sine omega t plotted for 2 complete cycles, with alpha and beta markers shown each cycle.",
+     "Output Voltage v-out of t: equals V m sine omega t during conduction from alpha to beta. Outside conduction the output equals E, the back-EMF level. The yellow dashed line shows V dc average.",
+     "Thyristor Voltage v-T of t: approximately zero during conduction. When the SCR is off it equals V s minus E. Positive when forward biased before alpha, negative when reverse biased after beta.",
+     "Load Current i-o of t: rises from zero at alpha, peaks, then decays back to zero at beta. The dashed line shows the average I dc value.",
+     "Gate Pulse v-g of t: narrow trigger pulses sent to the SCR gate at angle alpha — one pulse per cycle, so two pulses appear across the two-cycle view."],
+    ["V dc — average output voltage equals V m over 2 pi times cosine alpha minus cosine beta. It depends on both the firing angle alpha and the extinction angle beta.",
+     "I dc — average load current equals V dc minus E, divided by R. It is zero when V dc is less than or equal to E, since back-EMF blocks current.",
+     "Beta (extinction angle): the angle where current returns to zero, found numerically. Beta exceeds 180 degrees when inductance L is large.",
+     "P dc and V E: P dc equals I dc times E, giving the power delivered to the back-EMF source such as a motor or battery. V E reads the back-EMF E directly.",
+     "How to use: wire the circuit or use Auto-Complete. Then click Verify Circuit, set V m (50–230 V), R (5–100 Ω), L (10–200 mH), E (0–0.8·Vm), and alpha (0–150°), then click Run to see all five waveforms."]
+  ];
+  const ITTS_HL_IDS=[
+    ['itts-0-0','itts-0-1','itts-0-2','itts-0-3'],
+    ['itts-1-0','itts-1-1','itts-1-2','itts-1-3','itts-1-4','itts-1-5'],
+    ['itts-2-0','itts-2-1','itts-2-2','itts-2-3','itts-2-4'],
+    ['itts-3-0','itts-3-1','itts-3-2','itts-3-3','itts-3-4']
+  ];
+  (function injectHL(){
+    const s=document.createElement('style');
+    s.textContent=`.itts-speaking-p{background:linear-gradient(135deg,#fef9c3,#fef08a) !important;border-radius:7px;box-shadow:0 0 0 2.5px #fbbf24, 0 3px 14px rgba(251,191,36,0.25);padding:4px 8px !important;transition:background 0.25s,box-shadow 0.25s;position:relative;}.itts-speaking-p::before{content:'🔊';position:absolute;left:-24px;top:50%;transform:translateY(-50%);font-size:13px;animation:itts-pulse-icon 0.9s ease-in-out infinite;}@keyframes itts-pulse-icon{0%,100%{opacity:1;transform:translateY(-50%) scale(1);}50%{opacity:0.5;transform:translateY(-50%) scale(1.25);}}.itts-speaking-card{border-left-color:#f59e0b !important;background:linear-gradient(135deg,#fffbeb,#fef9c3) !important;box-shadow:0 0 0 2.5px #fbbf24, 0 4px 18px rgba(251,191,36,0.22) !important;transition:all 0.25s;}.itts-speaking-wave{background:linear-gradient(135deg,#fffbeb,#fef9c3) !important;border-color:#fbbf24 !important;box-shadow:0 0 0 2.5px #fbbf24 !important;transition:all 0.25s;}`;
+    document.head.appendChild(s);
+  })();
+  let ittsActive=false,ittsPaused=false,ittsIdx=0,ittsCurSec=0,_lastHlEl=null;
+  function ittsClearHL(){if(_lastHlEl){_lastHlEl.classList.remove('itts-speaking-p','itts-speaking-card','itts-speaking-wave');_lastHlEl=null;}document.querySelectorAll('.itts-speaking-p,.itts-speaking-card,.itts-speaking-wave').forEach(el=>{el.classList.remove('itts-speaking-p','itts-speaking-card','itts-speaking-wave');});}
+  function ittsHighlightLine(sec,lineIdx){ittsClearHL();const ids=ITTS_HL_IDS[sec];if(!ids||lineIdx>=ids.length)return;const id=ids[lineIdx];if(!id)return;const el=document.getElementById(id);if(!el)return;if(el.classList.contains('comp-card'))el.classList.add('itts-speaking-card');else if(el.classList.contains('wave-item'))el.classList.add('itts-speaking-wave');else el.classList.add('itts-speaking-p');_lastHlEl=el;el.scrollIntoView({behavior:'smooth',block:'center'});}
+  function ittsBestVoice(){const all=window.speechSynthesis.getVoices();const pref=['Google UK English Female','Google US English','Samantha','Karen'];for(const name of pref){const v=all.find(x=>x.name===name);if(v)return v;}return all.find(v=>/^en/i.test(v.lang))||null;}
+  function ittsSpeakLine(idx){const lines=ITTS_SECTIONS[ittsCurSec];if(idx>=lines.length){ittsStop();return;}document.getElementById('ittsPBar').style.width=((idx/lines.length)*100)+'%';document.getElementById('ittsStatus').textContent='Reading '+(idx+1)+' of '+lines.length+'…';ittsHighlightLine(ittsCurSec,idx);const u=new SpeechSynthesisUtterance(lines[idx]);u.rate=parseFloat(document.getElementById('ittsSpeed').value)||1;const v=ittsBestVoice();if(v)u.voice=v;u.onend=u.onerror=()=>{if(ittsActive&&!ittsPaused)ittsSpeakLine(idx+1);};ittsIdx=idx;window.speechSynthesis.speak(u);}
+  window.ittsPlay=()=>{if(ittsPaused){ittsPaused=false;ittsActive=true;window.speechSynthesis.resume();document.getElementById('ittsPause').style.display='';document.getElementById('ittsPlay').style.display='none';return;}if(ittsActive)return;ittsActive=true;ittsPaused=false;window.speechSynthesis.cancel();document.getElementById('ittsPlay').style.display='none';document.getElementById('ittsPause').style.display='';document.getElementById('ittsStop').style.display='';ittsSpeakLine(0);};
+  window.ittsPause=()=>{if(!ittsActive)return;ittsPaused=true;window.speechSynthesis.pause();document.getElementById('ittsPause').style.display='none';document.getElementById('ittsPlay').style.display='';document.getElementById('ittsPlay').textContent='▶ Resume';};
+  window.ittsStop=()=>{ittsActive=false;ittsPaused=false;window.speechSynthesis.cancel();ittsClearHL();document.getElementById('ittsPlay').style.display='';document.getElementById('ittsPlay').textContent='▶ Read Aloud';document.getElementById('ittsPause').style.display='none';document.getElementById('ittsStop').style.display='none';document.getElementById('ittsPBar').style.width='0%';document.getElementById('ittsStatus').textContent='Press Read Aloud to hear this section';};
+  window.ittsSection=(idx)=>{ittsCurSec=idx;document.querySelectorAll('.intro-nav-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));document.querySelectorAll('.intro-section').forEach((s,i)=>s.classList.toggle('active',i===idx));if(ittsActive){ittsStop();setTimeout(()=>window.ittsPlay(),200);}else{document.getElementById('ittsStatus').textContent='Press Read Aloud to hear this section';}};
+  window.closeIntro=()=>{ittsStop();const o=document.getElementById('introOverlay');o.style.opacity='0';o.style.transition='opacity 0.3s';setTimeout(()=>o.style.display='none',300);};
+  window.openIntro=()=>{const o=document.getElementById('introOverlay');o.style.display='flex';o.style.opacity='0';o.style.transition='opacity 0.3s';document.querySelectorAll('.intro-nav-btn').forEach((b,i)=>b.classList.toggle('active',i===0));document.querySelectorAll('.intro-section').forEach((s,i)=>s.classList.toggle('active',i===0));ittsStop();requestAnimationFrame(()=>o.style.opacity='1');};
+  document.getElementById('introOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('introOverlay'))closeIntro();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeIntro();});
+})();
+
+/* ══════════════════════════════════════════
+   GUIDED TOUR  (ported from RL-load GT system)
+══════════════════════════════════════════ */
+</script>
+
+<style>
+  /* ══ GUIDED TOUR ══ */
+  #gtBackdrop{position:fixed;inset:0;z-index:10001;background:rgba(5,10,25,0.82);opacity:0;pointer-events:none;transition:opacity 0.35s;}
+  #gtBackdrop.vis{opacity:1;pointer-events:all;}
+  #gtHighlight{position:fixed;z-index:10002;border:3px solid #facc15;border-radius:10px;box-shadow:0 0 0 4px rgba(250,204,21,0.3),0 0 40px rgba(250,204,21,0.35);transition:all 0.45s cubic-bezier(.4,0,.2,1);pointer-events:none;background:transparent;display:none;}
+  #gtHighlight.vis{display:block;}
+  @keyframes gtPulse{0%,100%{box-shadow:0 0 0 4px rgba(250,204,21,0.3),0 0 35px rgba(250,204,21,0.35);}50%{box-shadow:0 0 0 9px rgba(250,204,21,0.1),0 0 55px rgba(250,204,21,0.55);}}
+  #gtHighlight.pulse{animation:gtPulse 1.6s ease-in-out infinite;}
+  #gtCard{position:fixed;z-index:10003;background:#0f172a;border:1.5px solid rgba(250,204,21,0.4);border-radius:14px;padding:20px 24px;max-width:440px;min-width:290px;box-shadow:0 20px 60px rgba(0,0,0,0.65);pointer-events:all;color:#f1f5f9;display:none;}
+  #gtCard.vis{display:block;}
+  #gtCard .gt-badge{font-family:monospace;font-size:10px;font-weight:700;letter-spacing:1.4px;color:#facc15;text-transform:uppercase;margin-bottom:8px;}
+  #gtCard h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.3;}
+  #gtCard p{font-size:13.5px;color:#94a3b8;line-height:1.65;}
+  #gtCard p strong{color:#e2e8f0;}
+  #gtCard code{font-family:monospace;font-size:12px;background:rgba(255,255,255,0.07);padding:2px 7px;border-radius:4px;}
+  .gt-wait-note{background:rgba(250,204,21,0.1);border:1px solid rgba(250,204,21,0.3);border-radius:8px;padding:8px 12px;font-size:12px;color:#facc15;margin-top:10px;display:none;}
+  .gt-controls{display:flex;align-items:center;gap:10px;margin-top:18px;border-top:1px solid rgba(255,255,255,0.08);padding-top:14px;}
+  .gt-btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.15s;}
+  .gt-btn.next{background:#facc15;color:#0f172a;}
+  .gt-btn.next:hover{background:#fde047;}
+  .gt-btn.done{background:#16a34a;color:#fff;}
+  .gt-btn.done:hover{background:#15803d;}
+  .gt-btn.skip{background:rgba(255,255,255,0.07);color:#94a3b8;border:1px solid rgba(255,255,255,0.12);}
+  .gt-btn.skip:hover{background:rgba(255,255,255,0.12);color:#cbd5e1;}
+  .gt-btn.mute{background:rgba(255,255,255,0.07);color:#94a3b8;border:1px solid rgba(255,255,255,0.12);font-size:16px;padding:7px 13px;}
+  .gt-btn.mute.on{background:rgba(250,204,21,0.15);color:#facc15;border-color:rgba(250,204,21,0.3);}
+  .gt-prog-row{display:flex;align-items:center;gap:8px;margin-top:12px;}
+  .gt-prog-wrap{flex:1;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;}
+  .gt-prog-bar{height:100%;background:linear-gradient(90deg,#facc15,#f97316);border-radius:2px;transition:width 0.4s;}
+  .gt-prog-lbl{font-family:monospace;font-size:10px;color:#475569;white-space:nowrap;}
+</style>
+
+<!-- ══ GUIDED TOUR HTML ══ -->
+<div id="gtBackdrop"></div>
+<div id="gtHighlight"></div>
+<div id="gtCard">
+  <div class="gt-badge" id="gtBadge">Step 1 of 22</div>
+  <h3 id="gtTitle"></h3>
+  <p id="gtDesc"></p>
+  <div class="gt-wait-note" id="gtWaitNote">✏️ Set your value, then click <strong>Done ✓</strong></div>
+  <div class="gt-prog-row">
+    <div class="gt-prog-wrap"><div class="gt-prog-bar" id="gtBar" style="width:0%"></div></div>
+    <span class="gt-prog-lbl" id="gtProgLbl">1 / 22</span>
+  </div>
+  <div class="gt-controls">
+    <button class="gt-btn next" id="gtNextBtn" onclick="gtNext()">Next →</button>
+    <button class="gt-btn done" id="gtDoneBtn" onclick="gtDone()" style="display:none;">✓ Done, Next →</button>
+    <button class="gt-btn mute on" id="gtMuteBtn" onclick="gtToggleMute()" title="Toggle speech">🔊</button>
+    <button class="gt-btn skip" onclick="gtEnd()">✕ End Tour</button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+const GT_STEPS = [
+
+  /* ══ BLOCK 1: Parameters — user sets each value ══ */
+  {
+    sel: '#vm',
+    title: '⚡ Peak Voltage (Vm)',
+    desc: 'Enter the <strong>Peak AC supply voltage</strong> in Volts. Valid range: <strong>50 – 230 V</strong>. This is the amplitude of the sinusoidal source applied to the SCR anode. For a 230 V RMS mains supply, Vm = 230 × √2 ≈ 325 V.',
+    speech: 'Enter the Peak Voltage V m in volts. Valid range is 50 to 230 volts. For a 230 volt R M S mains supply, V m equals approximately 325 volts. Set your value, then click Done.',
+    pos: 'right', wait: true
+  },
+  {
+    sel: '#r',
+    title: '🔋 Load Resistance (R)',
+    desc: 'Set the <strong>Load Resistance R</strong> in Ohms. Valid range: <strong>5 – 100 Ω</strong>. R dissipates power and — together with L — determines the impedance Z = √(R² + (ωL)²), the impedance angle φ, and the time constant τ = L/R governing current decay to zero.',
+    speech: 'Set the Load Resistance R. Valid range is 5 to 100 ohms. Resistance sets impedance and controls how fast the current decays after the supply zero-crossing. Set your value, then click Done.',
+    pos: 'right', wait: true
+  },
+  {
+    sel: '#l',
+    title: '🌀 Load Inductance (L)',
+    desc: 'Set the <strong>Load Inductance L</strong> in milli-Henries. Valid range: <strong>10 – 200 mH</strong>. The inductor stores magnetic energy during conduction and releases it after the supply crosses zero — forcing the SCR to keep conducting past 180°, pushing the extinction angle β beyond π.',
+    speech: 'Set the Load Inductance L in milli-Henries. Valid range is 10 to 200 milli-Henries. A larger inductor stores more energy and pushes the extinction angle beta further past 180 degrees. Set your value, then click Done.',
+    pos: 'right', wait: true
+  },
+  {
+    sel: '#e',
+    title: '🔌 Back-EMF (E)',
+    desc: 'Set the <strong>Back-EMF E</strong> in Volts. Valid range: <strong>0 – 0.8 × Vm</strong>. E represents a DC motor counter-voltage or battery EMF in the load. It opposes current flow and sets a <strong>minimum firing angle α<sub>min</sub> = sin⁻¹(E/Vm)</strong> — below which the SCR cannot turn on. Higher E reduces both conduction time and average current.',
+    speech: 'Set the Back E M F E in Volts. Valid range is 0 to 0.8 times V m. E is the counter-voltage of a motor or battery. It opposes current and sets a minimum firing angle. Higher E reduces conduction and output current. Set your value, then click Done.',
+    pos: 'right', wait: true
+  },
+  {
+    sel: '#alpha',
+    title: '🎚️ Firing Angle (α)',
+    desc: 'Drag this slider to set the <strong>Firing Angle α</strong> (0° – 150°). α is the delay from the supply zero-crossing at which the gate pulse fires the SCR. The SCR can only turn on when Vm·sinα ≥ E — below α<sub>min</sub> the SCR remains blocked. Once ON, conduction extends to extinction angle β where instantaneous current reaches zero.',
+    speech: 'Drag the Firing Angle alpha slider from 0 to 150 degrees. The S C R fires only when V m sine alpha is greater than or equal to the back E M F E. Conduction extends to beta. Set your value, then click Done.',
+    pos: 'right', wait: true
+  },
+
+  /* ══ BLOCK 2: Toolbar buttons ══ */
+  {
+    sel: 'button.tb-btn.run',
+    title: '▶ Run Button',
+    desc: 'The <strong>Run</strong> button starts the simulation. It numerically solves for the <strong>extinction angle β</strong> from i(β) = 0, then computes V<sub>dc</sub>, I<sub>dc</sub>, P<sub>dc</sub>, α<sub>min</sub>, power factor, and plots all five waveforms: input voltage, output voltage, thyristor voltage, load current, and gate pulse.',
+    speech: 'The Run button starts the simulation. It finds beta numerically and plots all five waveforms and output metrics.',
+    pos: 'bottom'
+  },
+  {
+    sel: '#liveBtn',
+    title: '⦿ Live Mode',
+    desc: '<strong>Live Mode</strong> enables real-time updates. Every change to Vm, R, L, E, or α instantly re-solves β and refreshes all waveforms and metrics. Especially useful for watching how increasing E raises α<sub>min</sub>, or how increasing L pushes β further beyond π.',
+    speech: 'Live Mode enables real-time updates. Changing any parameter instantly re-solves beta and refreshes all waveforms. Great for observing how E affects alpha-min and how L pushes beta past pi.',
+    pos: 'bottom'
+  },
+  {
+    sel: 'button[onclick="downloadGraph()"]',
+    title: '↓ Save Plot',
+    desc: 'The <strong>Save Plot</strong> button downloads the <strong>Output Voltage waveform</strong> as a PNG image file. Use it to capture your simulation results for lab reports or documentation.',
+    speech: 'The Save Plot button downloads the output voltage waveform as a P N G image for your records.',
+    pos: 'bottom'
+  },
+
+  /* ══ BLOCK 3: Waveform graphs ══ */
+  {
+    sel: '.canvas-area .plot-card:nth-child(1)',
+    title: '📈 Graph 1 — AC Input Voltage vin(t)',
+    desc: 'Shows the full <strong>sinusoidal AC supply</strong> Vm·sin(ωt) for 2 complete cycles (0°–720°). The <span style="color:#6d28d9;font-weight:600;">purple dashed line</span> marks firing angle α. The <span style="color:#c2440b;font-weight:600;">orange dashed line</span> marks extinction angle β each cycle.',
+    speech: 'Graph 1 shows the A C input voltage sinusoid for two complete cycles. Purple dashed lines mark alpha, orange dashed lines mark beta.',
+    pos: 'left'
+  },
+  {
+    sel: '.canvas-area .plot-card:nth-child(2)',
+    title: '📈 Graph 2 — Output Voltage vout(t)',
+    desc: 'During conduction (α → β): <strong>v<sub>out</sub> = V<sub>m</sub>·sin(ωt)</strong>. Outside conduction: <strong>v<sub>out</sub> = E</strong> (the load holds at back-EMF level — no freewheeling diode). The <span style="color:#f59e0b;font-weight:600;">yellow dashed line</span> = V<sub>dc</sub> average. The <span style="color:#b91c1c;font-weight:600;">red dashed line</span> = E level.',
+    speech: 'Graph 2 shows the output voltage. During conduction it follows V m sine omega t. Outside conduction the output stays at the back E M F level E. Yellow dashed line is V D C average. Red dashed line is E.',
+    pos: 'left'
+  },
+  {
+    sel: '.canvas-area .plot-card:nth-child(3)',
+    title: '📈 Graph 3 — Thyristor Voltage vT(t)',
+    desc: 'Shows <strong>voltage across the SCR</strong>. During conduction (α → β): <strong>v<sub>T</sub> ≈ 0 V</strong>. When SCR is OFF: <strong>v<sub>T</sub> = v<sub>s</sub> − E = V<sub>m</sub>·sin(ωt) − E</strong>. Positive when forward-biased (before α), negative when reverse-biased (after β). This graph reveals the <strong>voltage stress on the thyristor device</strong>.',
+    speech: 'Graph 3 shows the thyristor voltage. During conduction it is approximately zero. When off, it equals V s minus E. Positive means the S C R is forward-biased, negative means reverse-biased. This shows the device voltage stress.',
+    pos: 'left'
+  },
+  {
+    sel: '.canvas-area .plot-card:nth-child(4)',
+    title: '📈 Graph 4 — Load Current io(t)',
+    desc: 'The <strong>load current</strong> waveform. It rises from zero at α, follows the impedance-shifted sinusoid (V<sub>m</sub>/Z)·sin(ωt−φ) − E/R + exponential decay term, then falls to zero at β. The <span style="color:#4ade80;font-weight:600;">green dashed line</span> = I<sub>dc</sub> average. Unlike a pure R load, with E present the current onset is delayed and the peak is reduced.',
+    speech: 'Graph 4 shows the load current. It rises from zero at alpha, peaks, then decays back to zero at beta. The green dashed line marks average I D C. Back E M F reduces peak current and delays onset.',
+    pos: 'left'
+  },
+  {
+    sel: '.canvas-area .plot-card:nth-child(5)',
+    title: '📈 Graph 5 — Gate Pulse vg(t)',
+    desc: 'Shows the narrow <strong>gate trigger pulses</strong> sent to the SCR at angle α each cycle. Two pulses appear across the 2-cycle (720°) view — one per cycle. Without this pulse the SCR remains blocked regardless of the supply voltage or the back-EMF level.',
+    speech: 'Graph 5 shows the gate pulse signal. Narrow trigger pulses fire the thyristor gate at alpha each cycle. Without this pulse the S C R stays blocked.',
+    pos: 'left'
+  },
+
+  /* ══ BLOCK 4: Simulation output metrics ══ */
+  {
+    sel: '#vdc',
+    title: '📊 V_dc — Average Output Voltage',
+    desc: '<strong>V<sub>dc</sub></strong> = (V<sub>m</sub> / 2π) · (cos α − cos β)<br>The average voltage delivered to the R-L-E load. Because β > α and may exceed π, the negative region of the waveform can reduce V<sub>dc</sub>. If V<sub>dc</sub> ≤ E, no current can flow.',
+    speech: 'V D C is the average output voltage. Formula: V m over 2 pi times cosine alpha minus cosine beta. If V D C is less than or equal to E, no current flows.',
+    pos: 'right'
+  },
+  {
+    sel: '#vrms',
+    title: '📊 V_rms — RMS Output Voltage',
+    desc: '<strong>V<sub>rms</sub></strong> is computed by numerical integration over the full 360° cycle including both the conduction segment and the flat-at-E off segment. Always ≥ V<sub>dc</sub>. Determines resistor power ratings.',
+    speech: 'V R M S is the root mean square output voltage integrated over the full cycle. It is always at least as large as V D C.',
+    pos: 'right'
+  },
+  {
+    sel: '#idc',
+    title: '📊 I_dc — Average Load Current',
+    desc: '<strong>I<sub>dc</sub> = (V<sub>dc</sub> − E) / R</strong><br>The average current through the resistive component. Because E opposes current, only the excess voltage (V<sub>dc</sub> − E) drives current. I<sub>dc</sub> = 0 when V<sub>dc</sub> ≤ E.',
+    speech: 'I D C is the average load current, equal to V D C minus E, all divided by R. Only the excess voltage above E drives current through the load.',
+    pos: 'right'
+  },
+  {
+    sel: '#irms',
+    title: '📊 I_rms — RMS Load Current',
+    desc: '<strong>I<sub>rms</sub></strong> is computed by numerical integration. It determines thermal heating in R. Output power dissipated in R: <strong>P<sub>R</sub> = I<sub>rms</sub>² × R</strong>. Always ≥ I<sub>dc</sub>.',
+    speech: 'I R M S is the root mean square load current. It determines thermal heating of the resistor. Resistor power equals I R M S squared times R.',
+    pos: 'right'
+  },
+  {
+    sel: '#beta',
+    title: '📐 Extinction Angle (β)',
+    desc: '<strong>β</strong> is where the instantaneous load current returns to zero and the SCR turns off by natural commutation. Found numerically by solving i<sub>o</sub>(β) = 0. For an R-L-E load, β depends on all three — R, L, E — and α. Larger L or smaller E can push β well beyond 180°.',
+    speech: 'Beta is the extinction angle where load current returns to zero and the S C R turns off. It is found numerically. It depends on R, L, E, and alpha.',
+    pos: 'right'
+  },
+  {
+    sel: '#alphamin',
+    title: '📐 α_min — Minimum Firing Angle',
+    desc: '<strong>α<sub>min</sub> = sin⁻¹(E / V<sub>m</sub>)</strong><br>The smallest firing angle at which the SCR can conduct. Below α<sub>min</sub>, V<sub>m</sub>·sinα < E so the supply cannot overcome the back-EMF and the SCR never turns on. Increase α above α<sub>min</sub> or reduce E to restore conduction.',
+    speech: 'Alpha minimum equals the inverse sine of E divided by V m. Below this angle the supply cannot overcome back E M F and the S C R remains blocked. You must fire above alpha minimum.',
+    pos: 'right'
+  },
+  {
+    sel: '#pdc',
+    title: '⚡ P_dc — Power to Back-EMF',
+    desc: '<strong>P<sub>dc</sub> = I<sub>dc</sub> × E</strong><br>The useful DC power delivered to the back-EMF source — the mechanical power in a DC motor, or the charging power into a battery. This is the primary purpose of the rectifier in motor drive applications.',
+    speech: 'P D C is the DC power delivered to the back E M F source, equal to I D C times E. In a motor drive this represents the mechanical output power. In a battery charger it is the charging power.',
+    pos: 'right'
+  },
+  {
+    sel: '#pf',
+    title: '📉 Power Factor',
+    desc: '<strong>PF = P<sub>out</sub> / (V<sub>rms,supply</sub> × I<sub>rms</sub>)</strong><br>The power factor is reduced by both the inductive lag and the back-EMF (which limits conduction time). Lower than an equivalent R-only load at the same α. A low PF means more reactive current drawn from the supply for the same useful output power.',
+    speech: 'The Power Factor equals output power divided by apparent power. It is reduced by inductance and by back E M F, which limits conduction time. A low power factor means more reactive current from the supply.',
+    pos: 'right', pinTop: 130
+  },
+  {
+    sel: '#ve_reading',
+    title: '🔋 V_E — Back-EMF Voltmeter Reading',
+    desc: '<strong>V<sub>E</sub></strong> is the direct reading of the back-EMF source E in Volts DC — this is what the VE voltmeter in the circuit measures across the E terminal. It confirms the back-EMF value used in the simulation and equals the E input parameter.',
+    speech: 'V E is the back E M F voltmeter reading in volts D C. It confirms the value of E used in the simulation and corresponds to what the V E voltmeter reads across the back E M F source.',
+    pos: 'right'
+  }
+
+];
+
+const TOTAL = GT_STEPS.length;
+let step = 0, muted = false, active = false;
+
+const backdrop  = document.getElementById('gtBackdrop');
+const highlight = document.getElementById('gtHighlight');
+const card      = document.getElementById('gtCard');
+const titleEl   = document.getElementById('gtTitle');
+const descEl    = document.getElementById('gtDesc');
+const badgeEl   = document.getElementById('gtBadge');
+const barEl     = document.getElementById('gtBar');
+const progLbl   = document.getElementById('gtProgLbl');
+const nextBtn   = document.getElementById('gtNextBtn');
+const doneBtn   = document.getElementById('gtDoneBtn');
+const waitNote  = document.getElementById('gtWaitNote');
+const muteBtn   = document.getElementById('gtMuteBtn');
+
+function speak(text) {
+  if (muted || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1.0;
+  const voices = window.speechSynthesis.getVoices();
+  const pref = ['Google UK English Female','Google US English','Samantha','Karen','Daniel'];
+  let best = null;
+  for (const n of pref) { const v = voices.find(x => x.name === n); if (v) { best = v; break; } }
+  if (!best) best = voices.find(v => /^en/i.test(v.lang)) || null;
+  if (best) u.voice = best;
+  window.speechSynthesis.speak(u);
+}
+
+function positionCard(rect, pos, pinTop) {
+  const M = 20, cw = Math.min(440, window.innerWidth - 40), ch = 300;
+  card.style.maxWidth = cw + 'px';
+  card.style.top = card.style.left = '';
+
+  function cL(l) { return Math.max(10, Math.min(l, window.innerWidth - cw - 10)); }
+  function cT(t) { return Math.max(10, Math.min(t, window.innerHeight - ch - 10)); }
+
+  if (pos === 'left') {
+    card.style.left = '16px';
+    card.style.top = cT(pinTop != null ? pinTop : window.innerHeight/2 - ch/2) + 'px';
+  } else if (pos === 'right') {
+    let l = rect.right + M;
+    if (l + cw > window.innerWidth - 10) l = rect.left - cw - M;
+    card.style.left = cL(l) + 'px';
+    card.style.top  = cT(pinTop != null ? pinTop : rect.top) + 'px';
+  } else if (pos === 'bottom') {
+    let t = rect.bottom + M;
+    if (t + ch > window.innerHeight - 10) t = rect.top - ch - M;
+    card.style.top  = cT(t) + 'px';
+    card.style.left = cL(rect.left) + 'px';
+  } else { // top
+    let t = rect.top - ch - M;
+    if (t < 10) t = rect.bottom + M;
+    card.style.top  = cT(t) + 'px';
+    card.style.left = cL(rect.left) + 'px';
+  }
+}
+
+function showStep(idx) {
+  if (idx >= TOTAL) { gtEnd(); return; }
+  step = idx;
+  const s = GT_STEPS[idx];
+  const el = document.querySelector(s.sel);
+  if (!el) { showStep(idx + 1); return; }
+
+  el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+
+  setTimeout(() => {
+    const rect = el.getBoundingClientRect();
+    const pad = 8;
+    highlight.style.cssText = `left:${rect.left-pad}px;top:${rect.top-pad}px;width:${rect.width+pad*2}px;height:${rect.height+pad*2}px;`;
+    highlight.classList.add('vis','pulse');
+
+    backdrop.style.clipPath = `polygon(0% 0%,100% 0%,100% 100%,0% 100%,0% 0%,${rect.left-pad}px ${rect.top-pad}px,${rect.left-pad}px ${rect.bottom+pad}px,${rect.right+pad}px ${rect.bottom+pad}px,${rect.right+pad}px ${rect.top-pad}px,${rect.left-pad}px ${rect.top-pad}px)`;
+
+    badgeEl.textContent = `Step ${idx+1} of ${TOTAL}`;
+    titleEl.innerHTML  = s.title;
+    descEl.innerHTML   = s.desc;
+    barEl.style.width  = (((idx+1)/TOTAL)*100) + '%';
+    progLbl.textContent = `${idx+1} / ${TOTAL}`;
+
+    const isWait = !!s.wait;
+    nextBtn.style.display = isWait ? 'none' : '';
+    doneBtn.style.display = isWait ? 'inline-flex' : 'none';
+    waitNote.style.display = isWait ? '' : 'none';
+
+    if (!isWait) {
+      nextBtn.textContent = idx === TOTAL - 1 ? '🎉 Finish' : 'Next →';
+    }
+
+    positionCard(rect, s.pos, s.pinTop);
+    card.classList.add('vis');
+    speak(s.speech);
+  }, 380);
+}
+
+window.gtNext = function() {
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  showStep(step + 1);
+};
+
+window.gtDone = function() {
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  showStep(step + 1);
+};
+
+window.gtEnd = function() {
+  active = false;
+  window.speechSynthesis && window.speechSynthesis.cancel();
+  backdrop.classList.remove('vis');
+  backdrop.style.clipPath = '';
+  highlight.classList.remove('vis','pulse');
+  card.classList.remove('vis');
+};
+
+window.gtToggleMute = function() {
+  muted = !muted;
+  muteBtn.textContent = muted ? '🔇' : '🔊';
+  muteBtn.classList.toggle('on', !muted);
+  if (muted) window.speechSynthesis && window.speechSynthesis.cancel();
+};
+
+window.gtStart = function() {
+  if (active) return;
+  active = true; step = 0;
+  backdrop.style.clipPath = '';
+  backdrop.classList.add('vis');
+  highlight.classList.remove('vis','pulse');
+  card.classList.remove('vis');
+  if (!muted && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance('Circuit verified! Starting the guided tour. I will highlight and explain each parameter, button, waveform, and output value step by step.');
+    u.rate = 1.0;
+    const voices = window.speechSynthesis.getVoices();
+    const pref = ['Google UK English Female','Google US English','Samantha','Karen','Daniel'];
+    let best = null;
+    for (const n of pref) { const v = voices.find(x => x.name === n); if (v) { best = v; break; } }
+    if (!best) best = voices.find(v => /^en/i.test(v.lang)) || null;
+    if (best) u.voice = best;
+    u.onend = () => showStep(0);
+    window.speechSynthesis.speak(u);
+  } else {
+    showStep(0);
+  }
+};
+
+/* clicking the dark backdrop advances to next step */
+backdrop.addEventListener('click', () => gtNext());
+
+/* expose as startUITour for the toolbar Feature Tour button */
+window.startUITour = window.gtStart;
+
+/* auto-launch after circuit verification */
+const _origWcGoNext = window.wcGoNext;
+window.wcGoNext = function() {
+  _origWcGoNext();
+  setTimeout(window.gtStart, 900);
+};
+
+})();
+</script>
+</body>
+</html>

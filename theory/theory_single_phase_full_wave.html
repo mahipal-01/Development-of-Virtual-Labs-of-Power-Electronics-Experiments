@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Single Phase Full Wave Controlled Rectifier – Theory</title>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath:  [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']],
+        processEscapes: true,
+        tags: 'none'
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+      startup: { typeset: true }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --surface: #ffffff;
+      --surface2: #f7f8fa;
+      --border: #d0d5dd;
+      --border2: #e4e7ec;
+      --text: #1a1f2e;
+      --text2: #4a5568;
+      --text3: #8898aa;
+      --accent: #0057b8;
+      --accent-lt: #dbeafe;
+      --green: #16a34a;
+      --green-lt: #dcfce7;
+      --orange: #c2440b;
+      --orange-lt: #fff0e6;
+      --purple: #6d28d9;
+      --teal: #0891b2;
+      --teal-lt: #cffafe;
+      --emf: #b91c1c;
+      --emf-lt: #fee2e2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Times New Roman', Times, serif;
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1.5px solid var(--border);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      height: 44px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .toolbar-logo {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1f2e;
+      letter-spacing: -0.3px;
+      padding-right: 20px;
+      border-right: 1px solid var(--border2);
+      margin-right: 16px;
+      white-space: nowrap;
+    }
+    .toolbar-logo span { font-weight: 400; }
+    .tb-nav {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 44px;
+    }
+    .tb-nav a {
+      height: 44px;
+      padding: 0 18px;
+      background: none;
+      border: none;
+      border-right: 1px solid var(--border2);
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .tb-nav a:hover { background: var(--accent-lt); color: var(--accent); }
+    .tb-nav a.active {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ── Banner ── */
+    .exp-banner {
+      background: var(--surface);
+      border-bottom: 2px solid var(--border);
+      padding: 18px 28px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .exp-tag {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .exp-title {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .exp-title span { color: var(--accent); }
+    .exp-subtitle {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 11.5px;
+      color: var(--text3);
+      margin-top: 5px;
+      letter-spacing: 0.2px;
+    }
+
+    /* ── Main layout ── */
+    .page-body {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 28px 28px 0;
+    }
+
+    /* ── Section headings ── */
+    .section-heading {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin: 36px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-heading .sh-num {
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-heading:first-child { margin-top: 0; }
+
+    /* ── Text ── */
+    .content-block {
+      font-size: 15px;
+      line-height: 1.85;
+      color: var(--text2);
+      margin-bottom: 14px;
+      text-align: justify;
+    }
+
+    /* ── Note box ── */
+    .note-box {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 14px;
+      color: #92400e;
+      line-height: 1.75;
+    }
+    .note-box b { color: #78350f; }
+
+    /* ── Formula box ── */
+    .fbox {
+      background: var(--surface2);
+      border: 1.5px solid var(--border2);
+      border-radius: 6px;
+      padding: 13px 18px;
+      margin: 12px 0;
+      text-align: center;
+      overflow-x: auto;
+    }
+    .fbox:hover {
+      border-color: var(--accent);
+      background: #f0f6ff;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    /* ── Formula label ── */
+    .fbox-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      text-align: left;
+    }
+
+    /* ── Formula grid (two-col for short equations) ── */
+    .fgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .fgrid .fbox { margin: 0; }
+
+    /* ── Figure cards ── */
+    .fig-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 20px 0 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .fig-header {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border2);
+      padding: 7px 14px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      color: var(--text3);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .fig-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+    .fig-body { padding: 0; }
+    .fig-body img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 420px;
+      object-fit: contain;
+      background: #f7f8fa;
+      padding: 12px;
+    }
+    .fig-caption {
+      font-size: 12px;
+      color: var(--text3);
+      text-align: center;
+      padding: 8px 14px 12px;
+      font-style: italic;
+      border-top: 1px solid var(--border2);
+      background: var(--surface2);
+    }
+
+    /* ── Advantage / Disadvantage / Application cards ── */
+    .list-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border2);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+    }
+    .list-card ol, .list-card ul {
+      padding-left: 22px;
+      font-size: 14.5px;
+      color: var(--text2);
+      line-height: 1.85;
+    }
+    .list-card li { margin-bottom: 5px; }
+    .list-card-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .list-card-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+
+    /* ── Two-col grid for adv/dis ── */
+    .adv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background: var(--surface);
+      border-top: 1.5px solid var(--border);
+      padding: 18px 28px;
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text3);
+      margin-top: 40px;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── Fade in ── */
+    .fade-in { animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 700px) {
+      .fgrid { grid-template-columns: 1fr; }
+      .adv-grid { grid-template-columns: 1fr; }
+      .page-body { padding: 16px; }
+      .exp-title { font-size: 17px; }
+      .tb-nav a { padding: 0 10px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="toolbar-logo">SCR<span>/FWR-RLE</span> Virtual Lab</div>
+  <nav class="tb-nav">
+    <a href="theory_RLE.html" class="active">📖 Theory</a>
+    <a href="simulation.html">⚙ Simulation</a>
+  </nav>
+</div>
+
+<!-- Banner -->
+<div class="exp-banner">
+  <div class="exp-tag">Theory · Power Electronics · Rectifiers</div>
+  <div class="exp-title">Single Phase Full Wave Controlled Rectifier &mdash; <span>R Load</span>, <span>R-L Load</span> &amp; <span>R-L-E Load</span></div>
+  <div class="exp-subtitle">SCR-based controlled rectification · Firing angle α · Thyristor bridge · 50 Hz system · Virtual Labs › Power Electronics</div>
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="page-body fade-in">
+
+  <!-- Introduction -->
+  <div class="section-heading">
+    <span class="sh-num">i</span>
+    Introduction
+  </div>
+
+  <p class="content-block">
+    A controlled rectifier is an electronic circuit that converts alternating current (AC) into direct current (DC).
+    It consists of power electronic devices, typically thyristors or silicon-controlled rectifiers (SCRs), which are
+    controlled to switch the flow of current in a desired manner. The main function of a controlled rectifier is to
+    control the magnitude and polarity of the output DC voltage. It is commonly used in various applications where
+    precise control over the rectification process is required such as power supplies, motor drives, battery chargers,
+    and voltage regulators.
+  </p>
+  <p class="content-block">
+    The controlled rectifier operates by using a triggering mechanism to turn on the thyristors at specific points in
+    the AC waveform. Once the thyristors are triggered, they conduct current until the AC voltage crosses zero or until
+    the thyristor is turned off. By controlling the timing of thyristor firing, the rectifier can vary the average DC
+    voltage output.
+  </p>
+
+  <!-- Bridge Rectifier -->
+  <div class="section-heading">
+    <span class="sh-num" style="font-size:9px;">BR</span>
+    Single Phase Full Wave Controlled Bridge Rectifier
+  </div>
+
+  <p class="content-block">
+    A single-phase controlled bridge rectifier converts alternating current (AC) input into a direct current (DC) output
+    using a bridge configuration of thyristors (SCRs). It provides full-wave rectification and allows for control over
+    the output voltage. Here's how a single-phase controlled bridge rectifier works:
+  </p>
+
+  <p class="content-block">
+    <strong>1. Bridge Configuration:</strong> The bridge rectifier consists of four thyristors connected in a bridge
+    configuration, along with a load resistor and a DC output terminal. The AC input voltage is connected across the two
+    opposite corners of the bridge, while the load resistor and the DC output terminal are connected across the other two
+    corners.
+  </p>
+  <p class="content-block">
+    <strong>2. Triggering Control:</strong> The thyristors are triggered in a controlled manner using gate pulses to
+    determine their conduction timing. The thyristors are triggered in pairs, with one thyristor from each pair
+    conducting in alternate half-cycles of the input voltage.
+  </p>
+  <p class="content-block">
+    <strong>3. Operation:</strong> During the positive half-cycle of the input voltage, the thyristors on the positive
+    side of the bridge (top two thyristors) are triggered to conduct. This allows the positive half of the input voltage
+    to appear across the load resistor and the DC output terminal.
+  </p>
+  <p class="content-block">
+    <strong>4. Voltage Polarity Reversal:</strong> During the negative half-cycle, the thyristors on the negative side
+    of the bridge (bottom two thyristors) are triggered to conduct, effectively reversing the polarity of the output
+    voltage. By controlling the timing of thyristor triggering, the average DC output voltage can be varied.
+  </p>
+
+  <!-- ══ SECTION 1 — R LOAD ══ -->
+  <div class="section-heading">
+    <span class="sh-num">1</span>
+    Single Phase Full Wave Controlled Rectifier — R Load
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-header"><span class="fig-dot"></span>Fig. 1 — R Load Circuit Diagram</div>
+    <div class="fig-body">
+      <img src="SFW_R_load_circuit.jpeg" alt="Single Phase Full Wave SCR with R Load">
+    </div>
+    <div class="fig-caption">Fig. 1: Single Phase Full Wave SCR with R Load</div>
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-header"><span class="fig-dot"></span>Fig. 2 — R Load Waveforms</div>
+    <div class="fig-body">
+      <img src="SFW_R_load_waveform.png" alt="Waveforms of Single Phase Full Wave SCR with R Load">
+    </div>
+    <div class="fig-caption">Fig. 2: Waveforms of Single Phase Full Wave SCR with R Load</div>
+  </div>
+
+  <p class="content-block">
+    A fully controlled full-wave bridge rectifier is shown in Fig. 1. All four devices are thyristors T1–T4 for control
+    of output power. Diagonally opposite pairs of thyristors are made to conduct and are commutated simultaneously.
+    During the first positive half cycle, thyristors T1 and T2 are forward biased; when triggered, current flows through
+    the load via T1–load–T2–source. During the negative half cycle, T3 and T4 conduct similarly. Thyristors T1, T3 and
+    T2, T4 are triggered at the same firing angle α in each respective half cycle. When supply voltage falls to zero,
+    current also becomes zero and thyristors turn off by natural commutation.
+  </p>
+
+  <p class="content-block">The average of the waveform is determined by:</p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 1 — Average output voltage (R Load)</div>
+    \[V_{o} = \frac{1}{\pi}\int_{\alpha}^{\pi} V_{m}\sin\omega t\;d(\omega t) = \frac{V_{m}}{\pi}(1+\cos\alpha)\]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 2 — Average output current</div>
+    \[I_{o} = \frac{V_{o}}{R} = \frac{V_{m}}{\pi R}(1+\cos\alpha)\]
+  </div>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Eq. 3 — Power in resistance</div>
+      \[P = I_{rms}^2 \times R\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Eq. 4 — RMS load current</div>
+      \[I_{rms} = \frac{V_{m}}{R}\sqrt{\frac{1}{2} - \frac{\alpha}{2\pi} + \sin\!\left(\frac{2\alpha}{4\pi}\right)}\]
+    </div>
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 5 — RMS output voltage</div>
+    \[V_{rms} = V_{m}\sqrt{\frac{1}{2} - \frac{\alpha}{2\pi} + \sin\!\left(\frac{2\alpha}{4\pi}\right)}\]
+  </div>
+
+  <!-- ══ SECTION 2 — RL LOAD ══ -->
+  <div class="section-heading">
+    <span class="sh-num">2</span>
+    Single Phase Full Wave Controlled Rectifier — R-L Load
+  </div>
+
+  <p class="content-block">
+    The current with R-L load does not increase or decrease suddenly. So the waveform between the output current and
+    the output voltage is different, and the output current will tend to increase after each cycle. If the inductance
+    of the load is large enough, the output current is continuous. When the SCR changes from the conductive state to
+    the off state, the load generates energy to maintain that SCR in conduction. Therefore, after the polarity of the
+    voltage reverses and there is no control pulse, the output voltage V<sub>o</sub> &lt; 0.
+  </p>
+
+  <div class="fig-card">
+    <div class="fig-header"><span class="fig-dot"></span>Fig. 3 — R-L Load Circuit Diagram</div>
+    <div class="fig-body">
+      <img src="SFW_RL_load_circuit.jpeg" alt="Single Phase Full Wave SCR with RL Load">
+    </div>
+    <div class="fig-caption">Fig. 3: Single Phase Full Wave SCR with R-L Load</div>
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-header"><span class="fig-dot"></span>Fig. 4 — R-L Load Waveforms</div>
+    <div class="fig-body">
+      <img src="SFW_RL_loadd_waveform.png" alt="Waveforms of Single Phase Full Wave SCR with RL Load">
+    </div>
+    <div class="fig-caption">Fig. 4: Waveforms of Single Phase Full Wave SCR with R-L Load</div>
+  </div>
+
+  <p class="content-block">
+    At firing angle α = 60°, thyristors TH1 and TH3 are triggered. Supply voltage from this instant appears across
+    the output terminals and forces current through the load. The load current I<sub>dc</sub> is assumed constant.
+    At instant π, the supply voltage reverses but because of very large inductance L, the current keeps flowing in the
+    same direction at constant magnitude I<sub>dc</sub>. Thus TH1 and TH3 remain conducting and negative supply voltage
+    appears across the output terminals. At angle π + α, thyristors TH2 and TH4 are triggered, commutating TH1 and TH3
+    by natural commutation.
+  </p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 6 — Instantaneous current (R-L Load)</div>
+    \[i_{o(\omega t)} = \frac{V_m}{Z}\!\left[\sin(\omega t-\theta) - \sin(\alpha-\theta)\,e^{\frac{-(\omega t-\alpha)}{\omega\tau}}\right]\]
+  </div>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Eq. 7 — Impedance angle</div>
+      \[\theta = \tan^{-1}\!\left(\frac{\omega L}{R}\right)\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Condition for conduction</div>
+      \[\alpha \leq \tan^{-1}\!\left(\frac{\omega L}{R}\right)\]
+    </div>
+  </div>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Eq. 9 — Average output voltage</div>
+      \[V_{o} = \frac{2V_{m}}{\pi}\cos\alpha\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Eq. 10 — Average load current</div>
+      \[I_{o} = \frac{2V_{m}}{\pi R}\cos\alpha\]
+    </div>
+  </div>
+
+  <p class="content-block">The amplitude of AC harmonic terms are calculated from:</p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 11 — Harmonic voltage amplitude</div>
+    \[V_{n} = \sqrt{a_{n}^2 + b_{n}^2}\]
+  </div>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Eq. 12 — Coefficient a<sub>n</sub></div>
+      \[a_{n} = \frac{2V_{m}}{\pi}\!\left[\frac{\cos(n+1)\alpha}{n+1} - \frac{\cos(n-1)\alpha}{n-1}\right]\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Eq. 13 — Coefficient b<sub>n</sub></div>
+      \[b_{n} = \frac{2V_{m}}{\pi}\!\left[\frac{\sin(n+1)\alpha}{n+1} - \frac{\sin(n-1)\alpha}{n-1}\right]\]
+    </div>
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 14 — RMS current</div>
+    \[I_{rms} = \sqrt{I_o^2 + \sum_{n=2,4,6\ldots}^{\infty}\!\left(\frac{I_{n}}{\sqrt{2}}\right)^2}\]
+  </div>
+
+  <!-- ══ SECTION 3 — RLE LOAD ══ -->
+  <div class="section-heading">
+    <span class="sh-num">3</span>
+    Single Phase Full Wave Controlled Rectifier — R-L-E Load
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-header"><span class="fig-dot"></span>Fig. 5 — R-L-E Load Circuit Diagram</div>
+    <div class="fig-body">
+      <img src="SFW_RLE_load_circuit.jpeg" alt="Single Phase Full Wave SCR with RLE Load">
+    </div>
+    <div class="fig-caption">Fig. 5: Single Phase Full Wave SCR with R-L-E Load</div>
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-header"><span class="fig-dot"></span>Fig. 6 — R-L-E Load Waveforms</div>
+    <div class="fig-body">
+      <img src="SFW_RLE_load_waveform.png" alt="Waveforms of Single Phase Full Wave SCR with RLE Load">
+    </div>
+    <div class="fig-caption">Fig. 6: Waveforms of Single Phase Full Wave SCR with R-L-E Load</div>
+  </div>
+
+  <p class="content-block">
+    The circuit arrangement of a Single Phase Full Wave Controlled Rectifier with R-L-E load is shown in Fig. 5.
+    During the positive half cycle, thyristors TH1 and TH3 are forward biased and start conducting at ωt = α. The load
+    current flows through TH1, motor, and TH3. At ωt = π, the supply voltage reverses. Because of inductance L,
+    thyristors TH1 and TH3 continue to conduct beyond ωt = π. When TH2 and TH4 are triggered at ωt = π + α, thyristors
+    TH1 and TH3 are subjected to reverse bias and turned off by natural commutation. Load current is transferred from
+    TH1 and TH3 to TH2 and TH4. Load current tends to remain almost constant due to high L/R ratio.
+  </p>
+
+  <p class="content-block">
+    When we use a load with components R, L, E, the output waveform is as shown in Fig. 6. If the SCR is conducting,
+    the output waveform is the same as that of the R-L load rectifier circuit.
+    When no SCR is conducting (I<sub>o</sub> = 0), the output voltage equals E (V<sub>o</sub> = V<sub>dc</sub>).
+  </p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 15 — Condition for conduction</div>
+    \[\alpha \geq \sin^{-1}\!\left(\frac{V_{dc}}{V_{m}}\right)\]
+  </div>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Eq. 16 — Average bridge output voltage</div>
+      \[V_{o} = \frac{2V_m}{\pi}\cos\alpha\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Eq. 17 — Average load current</div>
+      \[I_{o} = \frac{2V_{m}\cos\alpha}{\pi R} - \frac{V_{dc}}{R}\]
+    </div>
+  </div>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Eq. 18 — RMS output voltage</div>
+      \[V_{rms} = V_{max}\sqrt{\frac{\pi-\alpha}{2\pi} + \frac{\sin 2\alpha}{4\pi}}\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Eq. 19 — RMS load current</div>
+      \[I_{rms} = \frac{V_{max}}{R}\sqrt{\frac{\pi-\alpha}{2\pi} + \frac{\sin 2\alpha}{4\pi}}\]
+    </div>
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 20 — Power absorbed by DC voltage</div>
+    \[P_{dc} = I_{o} \times V_{dc}\]
+  </div>
+
+  <!-- ══ SECTION 4 — ADV / DIS / APP ══ -->
+  <div class="section-heading">
+    <span class="sh-num">4</span>
+    Advantages, Disadvantages &amp; Applications
+  </div>
+
+  <div class="adv-grid">
+    <div class="list-card">
+      <div class="list-card-title"><span class="list-card-dot"></span>Advantages</div>
+      <ol>
+        <li>Relatively high efficiency — utilizes both halves of the AC waveform.</li>
+        <li>Smoother output waveform with reduced ripple compared to half-wave rectifiers.</li>
+        <li>Higher average DC output voltage due to full-wave utilization.</li>
+        <li>Adjustable output voltage and power control via firing angle of thyristors.</li>
+      </ol>
+    </div>
+    <div class="list-card">
+      <div class="list-card-title"><span class="list-card-dot"></span>Disadvantages</div>
+      <ol>
+        <li>More complex circuit — requires thyristors, triggering circuits, and gate control circuits.</li>
+        <li>Harmonic distortion in the output waveform can interfere with other equipment.</li>
+        <li>Higher cost due to thyristors and associated control circuits vs. simple diodes.</li>
+        <li>Additional components introduce potential points of failure, reducing reliability.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="list-card">
+    <div class="list-card-title"><span class="list-card-dot"></span>Applications</div>
+    <ol>
+      <li>Power supplies for electronic devices — converts AC mains to regulated DC voltage.</li>
+      <li>Motor drive systems — controls speed and torque of DC motors via firing angle.</li>
+      <li>Battery charging systems — regulates charging current and voltage to prevent overcharging.</li>
+      <li>Electroplating — provides controlled DC voltage and current for electroplating processes.</li>
+      <li>Welding machines — supplies stable and controlled DC current for welding operations.</li>
+      <li>Uninterruptible Power Supplies (UPS) — rectifies AC and charges backup batteries.</li>
+      <li>Variable speed drives — in conjunction with inverters, drives AC motors at different speeds.</li>
+    </ol>
+  </div>
+
+</div><!-- /.page-body -->
+
+<!-- Footer -->
+<div class="footer">
+  <p>© 2026 Virtual Labs &nbsp;|&nbsp; Power Electronics Laboratory</p>
+  <p>Developed for educational purposes at <a href="#">Indian Institute of Technology</a> &nbsp;|&nbsp; <a href="#">Report Issues</a> &nbsp;|&nbsp; <a href="#">Feedback</a></p>
+  <p style="margin-top:6px;font-size:10.5px;color:#aab2bf;">Last Updated: March 2026</p>
+</div>
+
+<script>
+  window.addEventListener('load', function() {
+    if (window.MathJax) MathJax.typeset();
+  });
+</script>
+</body>
+</html>

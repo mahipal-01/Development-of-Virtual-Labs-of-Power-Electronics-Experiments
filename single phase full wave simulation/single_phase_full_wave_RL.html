@@ -1,0 +1,2528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controlled Full Wave Rectifier - RL Load</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:        #f0f4f8;
+      --surface:   #ffffff;
+      --surface2:  #f8fafc;
+      --surface3:  #f1f5f9;
+      --border:    #e2e8f0;
+      --border2:   #edf2f7;
+      --text:      #0f172a;
+      --text2:     #475569;
+      --text3:     #94a3b8;
+      --accent:    #2563eb;
+      --accent-lt: #eff6ff;
+      --accent-dk: #1d4ed8;
+      --green:     #16a34a;
+      --green-hover:#15803d;
+      --green-lt:  #f0fdf4;
+      --orange:    #ea580c;
+      --orange-lt: #fff7ed;
+      --purple:    #7c3aed;
+      --red:       #dc2626;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow:    0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+      --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04);
+      --radius:    8px;
+      --radius-lg: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); font-family: 'Inter', 'Times New Roman', sans-serif; color: var(--text); min-height: 100vh; }
+
+    /* ── Banner ── */
+    .exp-banner {
+      background: linear-gradient(135deg, #1e3a5f 0%, #1a1f6e 50%, #2d1b69 100%);
+      padding: 10px 20px 10px;
+      position: relative; overflow: hidden;
+    }
+    .exp-banner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .exp-banner-inner { position: relative; z-index: 1; }
+    .exp-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.55); text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .exp-tag-dot { width: 6px; height: 6px; border-radius: 50%; background: #60a5fa; }
+    .exp-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 26px; font-weight: 700;
+      color: #ffffff; letter-spacing: -0.5px; line-height: 1.2;
+      margin-bottom: 10px;
+    }
+    .exp-title span { color: #60a5fa; }
+    .exp-subtitle { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+    /* ── Info tabs ── */
+    .info-panel { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0; }
+    .info-panel.collapsed .tab-bar { border-bottom: none; }
+    .tab-bar { display: flex; align-items: center; gap: 6px; padding: 12px 28px; background: var(--surface2); border-bottom: 1px solid var(--border2); }
+    
+    .tab-btn, #wc-autoBtn, #wc-demoBtn, #tab-intro-btn {
+      padding: 6px 12px; font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600;
+      border-radius: 6px; cursor: pointer; transition: all 0.18s; white-space: nowrap; letter-spacing: 0.1px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    
+    .tab-btn { border: 1.5px solid transparent; background: transparent; }
+    #tab-proc { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+    #tab-proc:hover { background: #dcfce7; border-color: #4ade80; }
+    #tab-proc.active-proc { background: #16a34a; color: #fff; border-color: #15803d; box-shadow: 0 2px 8px rgba(22,163,74,0.35); }
+    #tab-nom { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
+    #tab-nom:hover { background: #dbeafe; border-color: #60a5fa; }
+    #tab-nom.active-nom { background: #2563eb; color: #fff; border-color: #1d4ed8; box-shadow: 0 2px 8px rgba(37,99,235,0.35); }
+    #tab-math { background: #faf5ff; color: #7c3aed; border-color: #c4b5fd; }
+    #tab-math:hover { background: #ede9fe; border-color: #a78bfa; }
+    #tab-math.active-math { background: #7c3aed; color: #fff; border-color: #6d28d9; box-shadow: 0 2px 8px rgba(124,58,237,0.35); }
+    
+    #wc-autoBtn { border: 1.5px solid var(--green); color: var(--green); background: transparent; }
+    #wc-autoBtn:hover { background: var(--green-lt); }
+    #wc-demoBtn { border: 1.5px solid var(--orange); color: var(--orange); background: transparent; }
+    #wc-demoBtn:hover { background: var(--orange-lt); }
+    #wc-demoBtn.active { background: var(--orange); color: #fff; box-shadow: var(--shadow-sm); }
+    #tab-intro-btn { border: 1.5px solid var(--accent); color: var(--accent); margin-left: auto; background: transparent; }
+    #tab-intro-btn:hover { background: var(--accent-lt); }
+
+    .tab-content { display: none; padding: 28px 32px 32px; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* TTS Controls */
+    .tts-bar { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; margin-bottom: 24px; max-width: 820px; box-shadow: var(--shadow-sm); }
+    .tts-btn { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 7px; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; transition: background 0.15s, color 0.15s; }
+    .tts-btn.play  { background: var(--green); color: #fff; }
+    .tts-btn.play:hover  { background: var(--green-hover); }
+    .tts-btn.pause { background: var(--orange); color: #fff; }
+    .tts-btn.pause:hover { background: #c2440b; }
+    .tts-btn.stop  { background: var(--surface); color: var(--text2); border: 1px solid var(--border); }
+    .tts-btn.stop:hover  { background: var(--bg); }
+    .tts-status { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tts-progress-wrap { flex: 1; height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+    .tts-progress-bar { height: 100%; width: 0%; background: var(--green); border-radius: 2px; transition: width 0.3s linear; }
+    .tts-speed-label { font-family: 'Inter', sans-serif; font-size: 11px; color: var(--text3); white-space: nowrap; }
+    .tts-speed-select { font-family: 'Inter', sans-serif; font-size: 12px; padding: 3px 7px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text2); cursor: pointer; outline: none; }
+    
+    /* Content Boxes */
+    .nomen-box { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); padding: 28px 36px; max-width: 820px; box-shadow: var(--shadow); border-top: 3px solid var(--accent); }
+    .nomen-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 48px; }
+    .nomen-list li { display: flex; align-items: baseline; gap: 0; font-family: 'Times New Roman', Times, serif; font-size: 14.5px; line-height: 1.4; }
+    .nomen-list li::before { content: '·'; font-size: 20px; margin-right: 10px; flex-shrink: 0; color: var(--accent); line-height: 1; }
+    .nomen-sym { font-style: italic; font-weight: 700; margin-right: 6px; white-space: nowrap; color: var(--text); }
+    .nomen-sym sup, .nomen-sym sub { font-size: 10px; }
+    .nomen-desc { font-weight: 400; color: var(--text2); }
+    
+    .procedure-box { max-width: 820px; }
+    .proc-step { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); transition: border-color 0.15s, box-shadow 0.15s; }
+    .proc-step:hover { border-color: var(--border); box-shadow: var(--shadow-sm); }
+    .proc-num { min-width: 30px; height: 30px; border-radius: 50%; background: var(--green); color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .proc-text { font-size: 14px; color: var(--text2); line-height: 1.65; font-family: 'Times New Roman', Times, serif; }
+    .proc-text strong { color: var(--text); }
+    .proc-step.tts-highlight { border-color: var(--accent); background: var(--accent-lt); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+    .proc-step.tts-highlight .proc-num { background: var(--accent); }
+    .proc-step.tts-highlight .proc-text { color: var(--text); }
+    
+    .math-box { max-width: 820px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .math-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow-sm); border-top: 2px solid var(--accent); }
+    .math-card-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+    .math-formula { font-family: 'Times New Roman', Times, serif; font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.6; }
+    .math-formula sub, .math-formula sup { font-size: 10px; }
+    .math-note { font-size: 11.5px; color: var(--text3); margin-top: 7px; font-style: italic; font-family: 'Times New Roman', Times, serif; }
+
+    /* ── Circuit Banner & Container ── */
+    .circuit-banner { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 28px 20px; }
+    .circuit-banner-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+      color: var(--text3); text-transform: uppercase; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .circuit-banner-title::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 20px; display: flex; align-items: center; gap: 0; height: 52px;
+      box-shadow: var(--shadow-sm); position: sticky; top: 0; z-index: 200;
+    }
+    .toolbar-logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600;
+      color: var(--text); letter-spacing: -0.5px; padding-right: 20px;
+      border-right: 1px solid var(--border2); margin-right: 16px; white-space: nowrap;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toolbar-logo-icon {
+      width: 28px; height: 28px; border-radius: 7px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: #fff;
+    }
+    .toolbar-logo span { color: var(--text3); font-weight: 400; }
+    
+    .tb-btn {
+      height: 52px; padding: 0 16px; background: none; border: none; border-right: 1px solid var(--border2);
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+      color: var(--text2); cursor: pointer; display: flex; align-items: center; gap: 7px;
+      transition: background 0.15s, color 0.15s; white-space: nowrap;
+    }
+    .tb-btn:hover { background: var(--accent-lt); color: var(--accent); }
+    .tb-btn.run { background: var(--accent); color: #fff; font-weight: 600; border-right-color: var(--accent-dk); box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
+    .tb-btn.run:hover { background: var(--accent-dk); }
+    .tb-btn.live-active { background: var(--green-lt); color: var(--green); }
+    .tb-btn.reset-btn { margin-left: auto; border-right: none; border-left: 1px solid var(--border2); }
+    .tb-sep { width: 1px; background: var(--border2); height: 28px; margin: 0 4px; }
+    .tb-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(37,99,235,0.1); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; padding: 2px 7px; border-radius: 20px; }
+    .tb-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+
+    /* ── Workspace & Sidebar ── */
+    .workspace { display: grid; grid-template-columns: 320px 1fr; gap: 0; min-height: calc(100vh - 52px); }
+    .sidebar {
+      background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow-y: auto;
+      max-height: calc(100vh - 52px); position: sticky; top: 52px; z-index: 10;
+    }
+    .sidebar-info-hint { padding: 12px 16px; background: linear-gradient(135deg, var(--accent-lt), rgba(124,58,237,0.05)); border-bottom: 1px solid var(--border2); font-size: 11.5px; color: var(--text2); line-height: 1.5; }
+    .sidebar-info-hint strong { color: var(--accent); }
+    
+    .sidebar-section { padding: 16px; border-bottom: 1px solid var(--border2); }
+    .section-title { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 600; letter-spacing: 1.4px; color: var(--text3); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+    
+    .field { margin-bottom: 13px; }
+    .field:last-child { margin-bottom: 0; }
+    .field-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+    .field-unit { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); background: var(--accent-lt); border: 1px solid rgba(37,99,235,0.15); padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+    
+    input[type="number"], input[type="text"] { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500; padding: 8px 12px; outline: none; transition: border-color 0.15s, box-shadow 0.15s, background 0.15s; }
+    input[type="number"]:focus, input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); background: #fff; }
+    input[type="text"][readonly] { background: #e9ecef; color: #64748b; cursor: not-allowed; border-color: var(--border2); }
+
+    /* Metrics Grid */
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .metric-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; transition: border-color 0.15s, box-shadow 0.15s; position: relative; overflow: hidden; }
+    .metric-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--purple)); opacity: 0; transition: opacity 0.15s; }
+    .metric-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+    .metric-card:hover::before { opacity: 1; }
+    .metric-card .mlabel { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.4px; margin-bottom: 3px; font-family: 'JetBrains Mono', monospace; }
+    .metric-card .mval { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--text); transition: color 0.25s; line-height: 1.2; }
+    .metric-card .munit { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+    .mval.blue { color: var(--accent); }
+    .mval.green { color: var(--green); }
+
+    /* ── Canvas Area ── */
+    .canvas-area { background: var(--bg); padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+    .plot-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .plot-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--border2); background: var(--surface2); }
+    .plot-title { font-size: 12px; font-weight: 600; color: var(--text2); display: flex; align-items: center; gap: 8px; }
+    .plot-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .plot-legend { display: flex; gap: 14px; flex-wrap: wrap; }
+    .leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
+    .leg-line { width: 16px; height: 3px; border-radius: 2px; }
+    canvas { display: block; width: 100%; background: #fff; }
+    
+    .status-strip { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 16px; font-size: 11px; font-weight: 500; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-top: 4px; box-shadow: var(--shadow-sm); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--green-lt); transition: background 0.2s; }
+    .status-dot.busy { background: var(--orange); box-shadow: 0 0 0 3px var(--orange-lt); }
+
+    /* Modal Tweaks */
+    .param-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+    .param-group input { margin-bottom: 16px; }
+
+    /* Tooltip Styles */
+    #wave-tooltip { position: absolute; display: none; background: rgba(15, 23, 42, 0.95); color: white; padding: 8px 12px; border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; pointer-events: none; z-index: 10000; box-shadow: var(--shadow-md); white-space: nowrap; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); }
+    .tt-val { font-weight: 700; color: #60a5fa; font-size: 13px; }
+    .tt-deg { color: #94a3b8; }
+
+    /* ── TOUR UI STYLES ── */
+    .tour-overlay {
+      position: fixed; inset: 0; background: transparent; z-index: 9990;
+      display: none; pointer-events: auto; /* Traps manual clicks/scrolls */
+    }
+    .tour-spotlight {
+      position: fixed; z-index: 9991; 
+      /* Massive shadow darkens everything EXCEPT the target inside */
+      box-shadow: 0 0 0 4px var(--accent), 0 0 0 9999px rgba(15,23,42,0.75);
+      border-radius: var(--radius);
+      background: transparent; pointer-events: none;
+      transition: top 0.4s ease, left 0.4s ease, width 0.4s ease, height 0.4s ease, opacity 0.3s;
+      display: none; opacity: 0;
+    }
+    .tour-popover {
+      position: fixed; z-index: 9999;
+      background: var(--surface); border: 1px solid var(--accent);
+      border-radius: var(--radius-lg); padding: 20px; width: 340px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+      display: none; opacity: 0; transition: opacity 0.3s;
+    }
+    .tour-popover-title { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;}
+    .tour-popover-title::before { content: '✦'; font-size: 18px; color: var(--orange); }
+    .tour-popover-text { font-size: 13.5px; color: var(--text2); line-height: 1.6; margin-bottom: 20px; font-family: 'Inter', sans-serif; }
+    .tour-popover-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border2); padding-top: 14px; }
+    .tour-step-counter { font-size: 11.5px; color: var(--text3); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+    .tour-btn-group { display: flex; gap: 8px; }
+    .tour-btn { padding: 7px 14px; font-size: 12.5px; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; transition: all 0.2s; }
+    .tour-btn-skip { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+    .tour-btn-skip:hover { background: var(--border2); color: var(--text); }
+    .tour-btn-next { background: var(--accent); color: #fff; box-shadow: 0 2px 6px rgba(37,99,235,0.3); }
+    .tour-btn-next:hover { background: var(--accent-dk); box-shadow: 0 4px 10px rgba(37,99,235,0.4); transform: translateY(-1px); }
+
+    /* Button Pulse Animation for Verify Circuit */
+    @keyframes pulseBtn {
+      0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.8); }
+      70% { box-shadow: 0 0 0 15px rgba(22, 163, 74, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+    }
+    .btn-attention {
+      animation: pulseBtn 1.5s infinite !important;
+      transform: scale(1.02);
+      border-color: #fff !important;
+    }
+
+    /* BLOCK Highlight for TTS spoken line */
+    .tts-read { transition: background-color 0.2s, box-shadow 0.2s, padding 0.2s; border-radius: 4px; }
+    .tts-read.hl-block {
+        background-color: rgba(234, 179, 8, 0.2); /* Light yellow block highlight */
+        box-shadow: -4px 0 0 var(--accent); /* Blue left border */
+        padding-left: 6px;
+    }
+
+    /* ── CIRCUIT WIRING UI ── */
+    #wc-wrap { display:flex; width:100%; height:700px; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow-sm); font-family: var(--font-sans); }
+    #wc-circuit { flex:1; position:relative; overflow:auto; background:var(--surface2); cursor:default; min-width:0; border-right: 1px solid var(--border); }
+    
+    /* ADDED GRID BACKGROUND */
+    #wc-inner { 
+      position:relative; width:1150px; height:680px; 
+      background-image:linear-gradient(rgba(37,99,235,0.07) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(37,99,235,0.07) 1px, transparent 1px),
+                       linear-gradient(rgba(37,99,235,0.03) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(37,99,235,0.03) 1px, transparent 1px);
+      background-size:100px 100px, 100px 100px, 20px 20px, 20px 20px;
+      background-position:-1px -1px, -1px -1px, -1px -1px, -1px -1px;
+    }
+    
+    #wc-svg { position:absolute; top:0; left:0; width:1150px; height:680px; pointer-events:none; z-index:5; overflow:visible; }
+    .wc-comp { position:absolute; user-select:none; z-index:10; }
+    
+    /* ADDED SIMPLE LIGHT BLACK BOUNDARY */
+    .wc-card { background:#fff; border-radius:var(--radius-md); border:1px solid #888888 !important; padding:8px 12px; display:flex; flex-direction:column; align-items:center; box-shadow:var(--shadow-sm); transition: box-shadow 0.2s; }
+    .wc-card:hover { box-shadow: var(--shadow); }
+    .wc-card.wc-vm { border-color:#888888 !important; background:#fdfcff; }
+    
+    .wc-lbl { font-family:var(--font-sans); font-weight:700; font-size:11px; letter-spacing:0.5px; color:var(--text2); margin-bottom:4px; }
+    .wc-val { font-size:11px; font-weight: 600; color:var(--text3); margin-top:4px; font-family:'JetBrains Mono', monospace; white-space: nowrap; }
+    
+    .wc-pin { position:absolute; width:16px; height:16px; border-radius:50%; background:var(--accent); border:2px solid #fff; transform:translate(-50%,-50%); z-index:30; cursor:crosshair; transition:all 0.2s; box-shadow:var(--shadow-sm); pointer-events:all; }
+    .wc-pin:hover { transform:translate(-50%,-50%) scale(1.4); box-shadow: 0 0 0 4px var(--accent-lt); }
+    .wc-pin.wc-done { background:var(--green); }
+    .wc-pin.wc-active { background:var(--accent); box-shadow: 0 0 0 4px var(--accent-lt); transform:translate(-50%,-50%) scale(1.6); }
+    .wc-pin.wc-vm-pin { background:var(--purple); }
+    .wc-pin.wc-vm-pin:hover { box-shadow: 0 0 0 4px var(--purple-lt); }
+    .wc-pin.wc-vm-pin.wc-done { background:var(--green); }
+    #wc-circuit.wc-wiring { cursor:crosshair; }
+    
+    /* Guided Demo Pin Highlight Animation */
+    @keyframes pulseDemo {
+      0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+    }
+    .wc-pin.demo-target { background: #eab308 !important; border-color: #fff !important; animation: pulseDemo 1.5s infinite; transform: translate(-50%,-50%) scale(1.4); z-index: 40; }
+
+    #wc-sidebar { width:320px; background:#fff; border-left:1px solid var(--border); display:flex; flex-direction:column; overflow-y:auto; flex-shrink:0; position: relative; }
+    
+    /* Demo Banner */
+    #demo-banner { display: none; background: var(--accent); color: white; padding: 14px 16px; text-align: center; font-size: 14px; font-weight: 600; line-height: 1.4; border-bottom: 1px solid var(--accent-dk); position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow-sm); }
+
+    .wc-scard { padding:16px; border-bottom:1px solid var(--border); }
+    .wc-stitle { font-weight:700; font-size:13px; letter-spacing:1px; color:var(--text); text-transform:uppercase; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border2); }
+    .wc-chk { display:flex; align-items:flex-start; gap:8px; font-size:13px; font-weight: 500; color:var(--text3); padding:8px 6px; border-radius:4px; border:1px solid transparent; margin-bottom:6px; transition:all 0.2s; font-family:'JetBrains Mono', monospace; }
+    .wc-chk:hover { background: var(--surface2); }
+    .wc-chk.wc-chk-done { color:var(--green); border-color:var(--green-lt); background:var(--green-lt); }
+    .wc-chk.wc-vm-chk.wc-chk-done { color:var(--purple); border-color:var(--purple-lt); background:var(--purple-lt); }
+    .wc-icon { width:20px; height:20px; border-radius:50%; border:1px solid var(--border2); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; margin-top:0px; transition:all 0.2s; background: #fff;}
+    .wc-chk.wc-chk-done .wc-icon { border-color:var(--green); background:var(--green); color:#fff; }
+    .wc-chk.wc-vm-chk.wc-chk-done .wc-icon { border-color:var(--purple); background:var(--purple); color:#fff; }
+    .wc-divider { font-size:12px; font-family:var(--font-sans); color:var(--text3); letter-spacing:1px; font-weight:700; padding:16px 4px 6px; text-transform: uppercase; }
+    
+    #wc-nextBtn { margin:16px 16px 8px; padding:14px; background:transparent; border:2px solid var(--border2); color:var(--text3); font-weight:700; font-size:14px; letter-spacing:1px; border-radius:var(--radius); cursor:not-allowed; transition:all 0.3s; text-transform:uppercase; }
+    #wc-nextBtn.wc-unlocked { border-color:var(--green); color:#fff; background:var(--green); cursor:pointer; box-shadow: var(--shadow-sm); }
+    #wc-nextBtn.wc-unlocked:hover { background:var(--green-hover); border-color:var(--green-hover); color:#fff; transform: translateY(-1px); box-shadow: var(--shadow); }
+    
+    .wc-btn-group { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 16px; }
+    .wc-ubtn { flex: 1; padding:10px; background:transparent; font-size:13px; font-weight: 600; border-radius:6px; cursor:pointer; transition:all 0.2s; text-align:center; border:1px solid var(--border); color:var(--text2); }
+    .wc-ubtn:hover { border-color:var(--red); color:var(--red); background:#fef2f2; }
+
+    /* ── Intro Modal ── */
+    #introOverlay {
+      position: fixed; inset: 0; z-index: 9000;
+      background: rgba(10,15,30,0.75);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #introModal {
+      background: #fff; border-radius: 16px; width: 100%; max-width: 1500px;
+      max-height: 90vh; display: flex; flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.3); overflow: hidden;
+    }
+    .intro-header {
+      background: linear-gradient(135deg,#1e3a5f,#1a1f6e,#2d1b69);
+      padding: 22px 28px 18px; position: relative; flex-shrink: 0;
+    }
+    .intro-header-tag {
+      font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:600;
+      letter-spacing:1.8px; color:rgba(255,255,255,0.5); text-transform:uppercase; margin-bottom:7px;
+    }
+    .intro-header h1 {
+      font-family:'Inter',sans-serif; font-size:24px; font-weight:700;
+      color:#fff; line-height:1.25; margin-bottom:6px;
+    }
+    .intro-header h1 span { color:#60a5fa; }
+    .intro-header p { font-size:13px; color:rgba(255,255,255,0.5); }
+    .intro-close {
+      position:absolute; top:14px; right:16px;
+      background:rgba(255,255,255,0.12); border:none; color:#fff;
+      width:30px; height:30px; border-radius:50%; font-size:15px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:background 0.15s;
+    }
+    .intro-close:hover { background:rgba(255,255,255,0.22); }
+    .intro-tts {
+      display:flex; align-items:center; gap:8px; padding:10px 28px; background:#f8fafc;
+      border-bottom:1px solid #e2e8f0; flex-shrink:0;
+    }
+    .intro-tts-btn {
+      display:flex; align-items:center; gap:5px; padding:6px 14px; border-radius:7px; border:none;
+      cursor:pointer; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; transition:all 0.15s;
+    }
+    .intro-tts-btn.play  { background:#16a34a; color:#fff; }
+    .intro-tts-btn.play:hover  { background:#15803d; }
+    .intro-tts-btn.pause { background:#ea580c; color:#fff; }
+    .intro-tts-btn.pause:hover { background:#c2440b; }
+    .intro-tts-btn.stop  { background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
+    .intro-tts-btn.stop:hover  { background:#e2e8f0; }
+    .intro-tts-progress { flex:1; height:4px; background:#e2e8f0; border-radius:2px; overflow:hidden; }
+    .intro-tts-bar      { height:100%; width:0%; background:#16a34a; transition:width 0.3s; }
+    .intro-tts-status   { font-family:'JetBrains Mono',monospace; font-size:10.5px; color:#94a3b8; white-space:nowrap; }
+    .intro-nav {
+      display:flex; gap:0; padding:0 28px; background:#f8fafc; border-bottom:1px solid #e2e8f0; flex-shrink:0; overflow-x:auto;
+    }
+    .intro-nav-btn {
+      padding:11px 18px; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-1px;
+      font-family:'Inter',sans-serif; font-size:14px; font-weight:500; color:#94a3b8; cursor:pointer; white-space:nowrap; transition:color 0.15s, border-color 0.15s;
+    }
+    .intro-nav-btn:hover { color:#2563eb; }
+    .intro-nav-btn.active { color:#2563eb; border-bottom-color:#2563eb; font-weight:600; }
+    .intro-body { overflow-y:auto; flex:1; padding:0; }
+    .intro-section { display:none; padding:24px 28px 28px; }
+    .intro-section.active { display:block; }
+    .intro-section h3 {
+      font-family:'Inter',sans-serif; font-size:19px; font-weight:700; color:#0f172a; margin-bottom:10px; margin-top:20px; display:flex; align-items:center; gap:8px;
+    }
+    .intro-section h3:first-child { margin-top:0; }
+    .intro-section h3 .h-icon {
+      width:28px; height:28px; border-radius:7px; background:linear-gradient(135deg,#2563eb,#7c3aed); color:#fff; font-size:19px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+    .intro-section p {
+      font-family:'Inter',sans-serif; font-size:18px; line-height:1.7; color:#334155; margin-bottom:14px;
+    }
+    .intro-section p strong { color:#0f172a; }
+    .comp-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:10px 0 16px; }
+    .comp-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px 18px; border-left:4px solid #2563eb; transition:box-shadow 0.15s; }
+    .comp-card:hover { box-shadow:0 2px 8px rgba(37,99,235,0.1); }
+    .comp-card.green { border-left-color:#16a34a; }
+    .comp-card.purple { border-left-color:#7c3aed; }
+    .comp-card.orange { border-left-color:#ea580c; }
+    .comp-card.red    { border-left-color:#dc2626; }
+    .comp-card-title { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+    .comp-card p { font-family:'Inter',sans-serif; font-size:14.5px; line-height:1.6; margin:0; color:#475569; }
+    .wave-list { display:flex; flex-direction:column; gap:10px; margin:10px 0; }
+    .wave-item { display:flex; align-items:flex-start; gap:14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px 16px; }
+    .wave-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+    .wave-item strong { font-family:'JetBrains Mono',monospace; font-size:15px; color:#0f172a; }
+    .wave-item span   { font-family:'Inter',sans-serif; font-size:14px; color:#475569; display:block; margin-top:4px; }
+    .intro-footer { padding:16px 28px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#f8fafc; flex-shrink:0; }
+    .intro-footer-hint { font-size:13px; color:#94a3b8; font-family:'JetBrains Mono',monospace; }
+    .intro-start-btn { padding:12px 32px; background:#2563eb; color:#fff; border:none; border-radius:8px; font-family:'Inter',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:background 0.15s; box-shadow:0 2px 8px rgba(37,99,235,0.3); }
+    .intro-start-btn:hover { background:#1d4ed8; }
+
+    @media print {
+      @page { size: landscape; margin: 10mm; }
+      body { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .toolbar, #circuitVerifiedBanner, #wave-tooltip, #wc-sidebar button, .wc-btn-group, .tts-bar, .info-panel, #demo-banner, #introOverlay, #tourOverlay, #tourSpotlight, #tourPopover { display: none !important; }
+      .workspace { margin-top: 0; min-height: auto; grid-template-columns: 240px 1fr; gap: 10px; }
+      .plot-card { box-shadow: none !important; border-color: #aaa !important; page-break-inside: avoid; margin-bottom: 10px; }
+      .exp-banner { box-shadow: none !important; padding: 5px 20px 10px; border-bottom: 1.5px solid #000; margin-bottom: 10px; }
+      .circuit-banner { padding: 10px 20px; border-bottom: 1.5px solid #000; margin-bottom: 10px; }
+      .sidebar { border-right: 1.5px solid #000; }
+      canvas { max-width: 100%; height: auto !important; }
+    }
+  </style>
+</head>
+
+<body>
+  
+  <div id="introOverlay">
+    <div id="introModal">
+      <div class="intro-header">
+        <div class="intro-header-tag">⚡ Power Electronics · Virtual Lab</div>
+        <h1>Single Phase Full Wave Controlled Rectifier with <span>R-L Load</span></h1>
+        <p>Read the quick overview before starting the experiment.</p>
+        <button class="intro-close" onclick="closeIntro()" title="Close">✕</button>
+      </div>
+
+      <div class="intro-tts">
+        <button class="intro-tts-btn play"  id="ittsPlay"  onclick="window.ittsPlay()">▶ Read Aloud</button>
+        <button class="intro-tts-btn pause" id="ittsPause" onclick="window.ittsPause()" style="display:none;">⏸ Pause</button>
+        <button class="intro-tts-btn stop"  id="ittsStop"  onclick="window.ittsStop()"  style="display:none;">⏹ Stop</button>
+        <div class="intro-tts-progress"><div class="intro-tts-bar" id="ittsPBar"></div></div>
+        <span class="intro-tts-status" id="ittsStatus">Press Read Aloud to hear this section</span>
+        <select id="ittsSpeed" style="font-size:11px;padding:3px 6px;border:1px solid var(--border);border-radius:5px;background:#fff;color:var(--text2);cursor:pointer;outline:none;">
+          <option value="0.8">0.8×</option>
+          <option value="1" selected>1×</option>
+          <option value="1.25">1.25×</option>
+          <option value="1.5">1.5×</option>
+        </select>
+      </div>
+
+      <div class="intro-nav">
+        <button class="intro-nav-btn active" onclick="window.ittsSection(0)" id="inav-0">🔬 Overview</button>
+        <button class="intro-nav-btn"        onclick="window.ittsSection(1)" id="inav-1">🔌 Components</button>
+        <button class="intro-nav-btn"        onclick="window.ittsSection(2)" id="inav-2">📈 Waveforms & Outputs</button>
+      </div>
+
+      <div class="intro-body">
+        <div class="intro-section active" id="isec-0">
+          <h3><span class="h-icon">🔬</span><span class="tts-read" data-speak="Welcome to single phase controlled full wave rectifier with R L load. What is this experiment?">What is this experiment?</span></h3>
+          <p class="tts-read">A <strong>Single Phase Full Wave Controlled Rectifier</strong> with an <strong>R-L Load</strong> converts AC to DC. The addition of an inductor changes the dynamics significantly compared to a purely resistive load.</p>
+          <p class="tts-read">The inductor stores energy, which forces the current to continue flowing even when the input voltage drops to zero or becomes negative. This causes the output voltage to have negative portions.</p>
+
+          <h3><span class="h-icon">⚡</span><span class="tts-read">Conduction Modes</span></h3>
+          <p class="tts-read">If the stored energy is depleted before the next half-cycle starts, the current falls to zero. This is <strong>Discontinuous Conduction Mode (DCM)</strong>.</p>
+          <p class="tts-read">If the inductance is high enough, current flows continuously and the next thyristor pair is forced to turn on while current is still flowing. This is <strong>Continuous Conduction Mode (CCM)</strong>.</p>
+        </div>
+
+        <div class="intro-section" id="isec-1">
+          <h3><span class="h-icon">🔌</span><span class="tts-read">Circuit Components</span></h3>
+          <div class="comp-grid">
+            <div class="comp-card">
+              <div class="comp-card-title tts-read">⚡ AC Voltage Source</div>
+              <p class="tts-read">Provides the single-phase AC input supply.</p>
+            </div>
+            <div class="comp-card green">
+              <div class="comp-card-title tts-read">🔴 Thyristor Bridge</div>
+              <p class="tts-read">Four SCRs. T1 & T4 conduct the positive half, T3 & T2 conduct the negative half.</p>
+            </div>
+            <div class="comp-card purple">
+              <div class="comp-card-title tts-read">📡 Gate Pulse Generators</div>
+              <p class="tts-read">Provide triggers. You can set the firing angle (α) for the upper pair, and the lower pair will automatically fire at π + α.</p>
+            </div>
+            <div class="comp-card orange">
+              <div class="comp-card-title tts-read">🔋 Series R-L Load</div>
+              <p class="tts-read">The Resistor consumes power, while the Inductor stores magnetic energy.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="intro-section" id="isec-2">
+          <h3><span class="h-icon">📈</span><span class="tts-read">Waveforms & Outputs</span></h3>
+          <div class="wave-list">
+            <div class="wave-item">
+              <div class="wave-dot" style="background:var(--accent);"></div>
+              <div><strong class="tts-read">Output Voltage & Current</strong>
+              <span class="tts-read">Current lags voltage. Voltage can go negative before the current extinguishes at angle β.</span></div>
+            </div>
+            <div class="wave-item">
+              <div class="wave-dot" style="background:var(--red);"></div>
+              <div><strong class="tts-read">Thyristor Voltages</strong>
+              <span class="tts-read">Displays the blocking voltage across the SCRs when they are not conducting.</span></div>
+            </div>
+            <div class="wave-item">
+              <div class="wave-dot" style="background:var(--green);"></div>
+              <div><strong class="tts-read">ODE Engine</strong>
+              <span class="tts-read">An internal solver calculates the exact transient current equations frame-by-frame.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="intro-footer">
+        <span class="intro-footer-hint">Press ESC or click anywhere outside to close</span>
+        <button class="intro-start-btn" onclick="window.closeIntro()">Start Experiment →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="exp-banner">
+    <div class="exp-banner-inner">
+      <div class="exp-tag"><span class="exp-tag-dot"></span>Power Electronics · Virtual Lab</div>
+      <div class="exp-title">Single Phase Full Wave Controlled Rectifier with <span>R-L Load</span></div>
+      
+    </div>
+  </div>
+
+  <div class="info-panel collapsed" id="infoPanel">
+    <div class="tab-bar">
+      <button class="tab-btn" id="tab-proc" onclick="switchTab('proc')">📋 Procedure</button>
+      <button class="tab-btn" id="tab-nom"  onclick="switchTab('nom')">📖 Nomenclature</button>
+      <button class="tab-btn" id="tab-math" onclick="switchTab('math')">📐 Mathematical Expression</button>
+      
+      <button id="wc-autoBtn" onclick="window.wcAutoConnect()">⚡ Auto Connect</button>
+      <button id="wc-demoBtn" onclick="window.toggleDemo()">🎓 Guided Demo</button>
+      <button id="tab-intro-btn" onclick="window.openIntro()">ℹ Know about Experiment</button>
+    </div>
+
+    <div class="tab-content" id="content-proc">
+      <div class="tts-bar">
+        <button class="tts-btn play" id="ttsPlayBtn" onclick="window.ttsPlay()">▶ Read Aloud</button>
+        <button class="tts-btn pause" id="ttsPauseBtn" onclick="window.ttsPause()" style="display:none;">⏸ Pause</button>
+        <button class="tts-btn stop"  id="ttsStopBtn"  onclick="window.ttsStop()"  style="display:none;">⏹ Stop</button>
+        <div class="tts-progress-wrap"><div class="tts-progress-bar" id="ttsProgressBar"></div></div>
+        <span class="tts-status" id="ttsStatus">Loading voices…</span>
+        <select class="tts-speed-select" id="ttsVoice" onchange="window.ttsUpdateVoice()" title="Select Voice" style="max-width:160px;"></select>
+        <span class="tts-speed-label">Speed:</span>
+        <select class="tts-speed-select" id="ttsSpeed" onchange="window.ttsUpdateSpeed()">
+          <option value="0.75">0.75×</option>
+          <option value="0.9">0.9×</option>
+          <option value="1" selected>1×</option>
+          <option value="1.1">1.1×</option>
+          <option value="1.25">1.25×</option>
+          <option value="1.5">1.5×</option>
+        </select>
+      </div>
+
+      <div class="procedure-box" id="procedureBox">
+        <div class="proc-step" id="step-1" data-text="Step 1. Complete the circuit by making all connections correctly in the circuit diagram below. Connect each component pin as listed in the checklist. Once all connections are made, click Verify Circuit to unlock the simulation.">
+          <div class="proc-num">1</div>
+          <div class="proc-text">Complete the circuit by making <strong>all connections correctly</strong> in the circuit diagram below. Connect each component pin as listed in the checklist. Once all connections are made, click <strong>▶ VERIFY CIRCUIT</strong> to unlock the simulation.</div>
+        </div>
+        <div class="proc-step" id="step-2" data-text="Step 2. Wire the Circuit. Follow the connection list on the right to complete the physical wiring, ensuring the Resistor and Inductor are correctly placed in series.">
+          <div class="proc-num">2</div>
+          <div class="proc-text"><strong>Wire the Circuit:</strong> Follow the connection list on the right to complete the physical wiring, ensuring the Resistor and Inductor are correctly placed in series.</div>
+        </div>
+        <div class="proc-step" id="step-3" data-text="Step 3. Set Source Parameters. Use the sidebar to set the Peak Voltage and frequency. The default is 100 volts and 50 Hertz.">
+          <div class="proc-num">3</div>
+          <div class="proc-text"><strong>Set Source Parameters:</strong> Use the sidebar to set the Peak Voltage (V<sub>m</sub>) and AC Frequency. The default is 100V and 50Hz.</div>
+        </div>
+        <div class="proc-step" id="step-4" data-text="Step 4. Configure the Load. Set the Load Resistance and Load Inductance. Increasing the inductance stores more energy, prolonging current flow beyond the half cycle.">
+          <div class="proc-num">4</div>
+          <div class="proc-text"><strong>Configure the Load:</strong> Set the Load Resistance (R) and Load Inductance (L). Increasing the inductance stores more energy, prolonging current flow beyond the half-cycle.</div>
+        </div>
+        <div class="proc-step" id="step-5" data-text="Step 5. Set Delay Angles. Assign the firing angle alpha. The upper thyristor pair will trigger at alpha, and the lower pair will automatically trigger at pi plus alpha.">
+          <div class="proc-num">5</div>
+          <div class="proc-text"><strong>Set Delay Angles:</strong> Assign the firing angle α. The upper thyristor pair (T1 & T4) will trigger at α, and the lower pair (T3 & T2) will automatically trigger at π + α.</div>
+        </div>
+        <div class="proc-step" id="step-6" data-text="Step 6. Observe Extinction Angle Beta. Run the simulation. The inductor causes current to flow past 180 degrees. If the current drops to zero naturally, it is Discontinuous Conduction Mode. If the opposing pair fires while current is still flowing, it force commutates into Continuous Conduction Mode.">
+          <div class="proc-num">6</div>
+          <div class="proc-text"><strong>Observe Extinction Angle (β):</strong> Run the simulation. The inductor causes current to flow past 180°. If the current drops to zero naturally, it is Discontinuous Conduction Mode (DCM). If the opposing pair fires while current is still flowing, it force-commutates into Continuous Conduction Mode (CCM).</div>
+        </div>
+        <div class="proc-step" id="step-7" data-text="Step 7. Enable Live Mode to see waveforms update in real time as you change parameters. Use the Reset button to restore all default values.">
+          <div class="proc-num">7</div>
+          <div class="proc-text">Enable <strong>⦿ Live Mode</strong> to see waveforms update in real time as you change parameters. Use <strong>↺ Reset</strong> to restore defaults.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="content-nom">
+      <div class="nomen-box">
+        <ul class="nomen-list">
+          <li><span class="nomen-sym">V<sub>m</sub> :</span><span class="nomen-desc">&nbsp;Peak value of AC input voltage</span></li>
+          <li><span class="nomen-sym">R, L :</span><span class="nomen-desc">&nbsp;Load Resistance (Ω) and Inductance (mH)</span></li>
+          <li><span class="nomen-sym">α :</span><span class="nomen-desc">&nbsp;Delay (Firing) Angle for the circuit</span></li>
+          <li><span class="nomen-sym">β :</span><span class="nomen-desc">&nbsp;Extinction Angle (where current hits zero)</span></li>
+          <li><span class="nomen-sym">CCM :</span><span class="nomen-desc">&nbsp;Continuous Conduction Mode (current never falls to 0)</span></li>
+          <li><span class="nomen-sym">DCM :</span><span class="nomen-desc">&nbsp;Discontinuous Conduction Mode (current falls to 0)</span></li>
+          <li><span class="nomen-sym">V<sub>DC</sub> :</span><span class="nomen-desc">&nbsp;Average load voltage</span></li>
+          <li><span class="nomen-sym">I<sub>DC</sub> :</span><span class="nomen-desc">&nbsp;Average load current</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tab-content" id="content-math">
+      <div class="math-box">
+        <div class="math-card">
+          <div class="math-card-title">Transient Current Equation (ODE)</div>
+          <div class="math-formula">L(di/dt) + R·i(t) = v<sub>load</sub>(t)</div>
+          <div class="math-note">Solved numerically to determine exact non-sinusoidal current.</div>
+        </div>
+        <div class="math-card">
+          <div class="math-card-title">Avg Output Voltage (DCM)</div>
+          <div class="math-formula">V<sub>dc</sub> = (V<sub>m</sub>/π) [cos(α) - cos(β)]</div>
+          <div class="math-note">Valid when current falls to zero before the next pulse.</div>
+        </div>
+        <div class="math-card">
+          <div class="math-card-title">Avg Output Voltage (CCM)</div>
+          <div class="math-formula">V<sub>dc</sub> = (2V<sub>m</sub>/π) [cos(α)]</div>
+          <div class="math-note">Valid in Continuous Conduction Mode.</div>
+        </div>
+        <div class="math-card">
+          <div class="math-card-title">Extinction Angle (β)</div>
+          <div class="math-formula">i(β) = 0</div>
+          <div class="math-note">Significance: The exact angle where inductive energy is depleted.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="circuit-banner">
+    <div class="circuit-banner-title">Circuit Diagram</div>
+    
+    <div id="wc-wrap">
+      <div id="wc-circuit">
+        <div id="wc-inner">
+          <svg id="wc-svg" xmlns="http://www.w3.org/2000/svg">
+            <path id="wc-drawLine" d="M0,0" stroke="#0f172a" stroke-width="2.5" stroke-dasharray="6,4" fill="none" opacity="0" pointer-events="none"/>
+          </svg>
+          
+          <div class="wc-comp" id="wc-vinp" style="left:40px; top:315px;">
+            <div class="wc-card wc-vm" style="width:52px; padding:5px; background:#fff;">
+              <svg width="38" height="90" viewBox="-19 -45 38 90">
+                <circle cx="0" cy="0" r="16" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <text x="0" y="5" font-size="14" font-weight="600" fill="#1e293b" text-anchor="middle" font-family="monospace">V</text>
+                <line x1="0" y1="-45" x2="0" y2="-16" stroke="#1e293b" stroke-width="2"/>
+                <line x1="0" y1="16"  x2="0" y2="45"  stroke="#1e293b" stroke-width="2"/>
+                <text x="12" y="-30" font-size="12" font-weight="700" fill="#2563eb">1</text>
+                <text x="12" y="40"  font-size="12" font-weight="700" fill="#2563eb">2</text>
+              </svg>
+              <div class="wc-val">VINP</div>
+            </div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-1" data-pid="1" style="top:5px; left:50%;"></div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-2" data-pid="2" style="bottom:5px; left:50%;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-vs" style="left:140px; top:300px; cursor: pointer;">
+            <div class="wc-card" title="Right Click to edit Vm and Frequency">
+              <div class="wc-lbl" style="color:#1e293b;">AC</div>
+              <svg width="56" height="115" viewBox="-28 -57 56 115">
+                <circle cx="0" cy="0" r="24" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <line x1="0" y1="-57" x2="0" y2="-24" stroke="#1e293b" stroke-width="2"/>
+                <line x1="0" y1="24"  x2="0" y2="57"  stroke="#1e293b" stroke-width="2"/>
+                <path d="M-12,0 Q-6,-12 0,0 Q6,12 12,0" stroke="#1e293b" stroke-width="2.2" fill="none"/>
+                <text x="18" y="-43" font-size="13" font-weight="700" fill="#2563eb" font-family="monospace">3</text>
+                <text x="18" y="52"  font-size="13" font-weight="700" fill="#2563eb" font-family="monospace">4</text>
+              </svg>
+              <div class="wc-val" id="disp-ac">100V 50Hz</div>
+            </div>
+            <div class="wc-pin" id="wc-pin-3" data-pid="3" style="top:9px; left:50%;"></div>
+            <div class="wc-pin" id="wc-pin-4" data-pid="4" style="bottom:6px; left:50%;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-vt1" style="left:270px; top:135px;">
+            <div class="wc-card wc-vm" style="width:48px; padding:5px; background:#fff;">
+              <svg width="34" height="110" viewBox="-17 -55 34 110">
+                <circle cx="0" cy="0" r="14" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <text x="0" y="5" font-size="13" font-weight="600" text-anchor="middle">V</text>
+                <line x1="0" y1="-55" x2="0" y2="-14" stroke="#1e293b" stroke-width="2"/>
+                <line x1="0" y1="14" x2="0" y2="55" stroke="#1e293b" stroke-width="2"/>
+                <text x="8" y="-42" font-size="11" font-weight="700" fill="#2563eb">5</text>
+                <text x="8" y="52" font-size="11" font-weight="700" fill="#2563eb">6</text>
+              </svg>
+              <div class="wc-val">VT1</div>
+            </div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-5" data-pid="5" style="top:5px; left:50%;"></div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-6" data-pid="6" style="bottom:5px; left:50%;"></div>
+          </div>
+          
+          <div class="wc-comp" id="wc-t1" style="left:350px; top:110px;">
+            <div class="wc-card" style="width:82px; padding:6px 0px; position:relative;">
+              <div class="wc-lbl" style="color:#1e293b; font-size:12px; position:absolute; left:8px; top:50%; transform:translateY(-50%); margin:0;">T1</div>
+              <svg width="100%" height="150" viewBox="-55 -100 110 200">
+                <line x1="0" y1="-100" x2="0" y2="-28" stroke="#1e293b" stroke-width="2"/>
+                <line x1="-22" y1="-28" x2="22" y2="-28" stroke="#1e293b" stroke-width="3"/>
+                <polygon points="-20,36 20,36 0,-28" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <line x1="-22" y1="36" x2="22" y2="36" stroke="#1e293b" stroke-width="2.5"/>
+                <line x1="0" y1="36" x2="0" y2="100" stroke="#1e293b" stroke-width="2"/>
+                <line x1="17" y1="-28" x2="34" y2="-46" stroke="#1e293b" stroke-width="2"/>
+                <circle cx="34" cy="-46" r="3.5" fill="#1e293b"/>
+                <text x="-16" y="-75" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">7</text>
+                <text x="-16" y="88" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">8</text>
+                <text x="44" y="-60" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">9</text>
+              </svg>
+            </div>
+            <div class="wc-pin" id="wc-pin-7" data-pid="7" style="top:-6px; left:50%; transform:translateX(-50%);"></div>
+            <div class="wc-pin" id="wc-pin-8" data-pid="8" style="bottom:-6px; left:50%; transform:translateX(-50%);"></div>
+            <div class="wc-pin" id="wc-pin-9" data-pid="9" style="top:27%; right:-4px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-gp1" style="left:460px; top:120px; cursor: pointer;">
+            <div class="wc-card" style="width:85px; padding:6px;" title="Right Click to edit Firing Angle">
+              <div class="wc-lbl" style="color:#8b5cf6;">GP1 (T1)</div>
+              <svg width="70" height="40" viewBox="-20 -20 35 40">
+                <rect x="-30" y="-15" width="55" height="30" rx="4" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+                <polyline points="-20,5 -20,-5 -8,-5 -8,5 4,5 4,-5 16,-5" stroke="#8b5cf6" stroke-width="1.5" fill="none"/>
+                <line x1="-30" y1="0" x2="-35" y2="0" stroke="#1e293b" stroke-width="2"/> 
+                <text x="-32" y="-6" font-size="11" font-weight="700" fill="#2563eb">10</text>
+              </svg>
+              <div class="wc-val gp-val-14">α:60°</div>
+            </div>
+            <div class="wc-pin" id="wc-pin-10" data-pid="10" style="top:50%; left:-4px;"></div>
+          </div>
+          
+          <div class="wc-comp" id="wc-vgp1" style="left:457px; top:225px;">
+            <div class="wc-card wc-vm" style="width:84px; padding:5px; background:#fff;">
+              <svg width="70" height="30" viewBox="-35 -17 70 34">
+                <circle cx="0" cy="0" r="14" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <text x="0" y="4" font-size="13" font-weight="600" text-anchor="middle">V</text>
+                <line x1="-35" y1="0" x2="-14" y2="0" stroke="#1e293b" stroke-width="2"/>
+                <line x1="14" y1="0" x2="35" y2="0" stroke="#1e293b" stroke-width="2"/>
+                <text x="-25" y="-6" font-size="11" font-weight="700" fill="#2563eb">19</text>
+                <text x="25" y="-6" font-size="11" font-weight="700" fill="#2563eb">20</text>
+              </svg>
+              <div class="wc-val">VGP1</div>
+            </div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-19" data-pid="19" style="top:50%; left:0%;"></div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-20" data-pid="20" style="top:50%; left:100%;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-gnd1" style="left:545px; top:255px;">
+            <svg width="30" height="40" viewBox="-15 -10 30 40">
+              <line x1="0" y1="-10" x2="0" y2="10" stroke="#1e293b" stroke-width="2"/>
+              <line x1="-12" y1="10" x2="12" y2="10" stroke="#1e293b" stroke-width="2.5"/>
+              <line x1="-8" y1="16" x2="8" y2="16" stroke="#1e293b" stroke-width="2.5"/>
+              <line x1="-4" y1="22" x2="4" y2="22" stroke="#1e293b" stroke-width="2.5"/>
+              <text x="8" y="0" font-size="12" font-weight="700" fill="#2563eb">21</text>
+            </svg>
+            <div class="wc-pin" id="wc-pin-21" data-pid="21" style="top:0px; left:50%;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-vt3" style="left:620px; top:135px;">
+            <div class="wc-card wc-vm" style="width:48px; padding:5px; background:#fff;">
+              <svg width="34" height="110" viewBox="-17 -55 34 110">
+                <circle cx="0" cy="0" r="14" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <text x="0" y="5" font-size="13" font-weight="600" text-anchor="middle">V</text>
+                <line x1="0" y1="-55" x2="0" y2="-14" stroke="#1e293b" stroke-width="2"/>
+                <line x1="0" y1="14" x2="0" y2="55" stroke="#1e293b" stroke-width="2"/>
+                <text x="-16" y="-42" font-size="11" font-weight="700" fill="#2563eb">11</text>
+                <text x="-16" y="48" font-size="11" font-weight="700" fill="#2563eb">12</text>
+              </svg>
+              <div class="wc-val">VT3</div>
+            </div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-11" data-pid="11" style="top:5px; left:50%;"></div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-12" data-pid="12" style="bottom:5px; left:50%;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-t3" style="left:700px; top:110px;">
+            <div class="wc-card" style="width:90px; padding:6px 0px; position:relative;">
+              <div class="wc-lbl" style="color:#1e293b; font-size:12px; position:absolute; left:8px; top:50%; transform:translateY(-50%); margin:0;">T3</div>
+              <svg width="100%" height="150" viewBox="-55 -100 110 200">
+                <line x1="0" y1="-100" x2="0" y2="-28" stroke="#1e293b" stroke-width="2"/>
+                <line x1="-22" y1="-28" x2="22" y2="-28" stroke="#1e293b" stroke-width="3"/>
+                <polygon points="-20,36 20,36 0,-28" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <line x1="-22" y1="36" x2="22" y2="36" stroke="#1e293b" stroke-width="2.5"/>
+                <line x1="0" y1="36" x2="0" y2="100" stroke="#1e293b" stroke-width="2"/>
+                <line x1="17" y1="-28" x2="34" y2="-46" stroke="#1e293b" stroke-width="2"/>
+                <circle cx="34" cy="-46" r="3.5" fill="#1e293b"/>
+                <text x="-18" y="-85" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">13</text>
+                <text x="-18" y="88" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">14</text>
+                <text x="44" y="-60" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">15</text>
+              </svg>
+            </div>
+            <div class="wc-pin" id="wc-pin-13" data-pid="13" style="top:-6px; left:50%; transform:translateX(-50%);"></div>
+            <div class="wc-pin" id="wc-pin-14" data-pid="14" style="bottom:-6px; left:50%; transform:translateX(-50%);"></div>
+            <div class="wc-pin" id="wc-pin-15" data-pid="15" style="top:27%; right:-4px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-gp3" style="left:816px; top:121px; cursor: pointer;">
+            <div class="wc-card" style="width:85px; padding:6px;" title="Right Click to edit Firing Angle">
+              <div class="wc-lbl" style="color:#8b5cf6;">GP3 (T3)</div>
+              <svg width="70" height="40" viewBox="-20 -20 35 40">
+                <rect x="-30" y="-15" width="55" height="30" rx="4" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+                <polyline points="-20,5 -20,-5 -8,-5 -8,5 4,5 4,-5 16,-5" stroke="#8b5cf6" stroke-width="1.5" fill="none"/>
+                <line x1="-30" y1="0" x2="-35" y2="0" stroke="#1e293b" stroke-width="2"/>
+                <text x="-32" y="-6" font-size="11" font-weight="700" fill="#2563eb">16</text>
+              </svg>
+              <div class="wc-val gp-val-32">α:60°</div>
+            </div>
+            <div class="wc-pin" id="wc-pin-16" data-pid="16" style="top:50%; left:-4px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-am1" style="left:924px; top:68px;">
+            <div class="wc-card" style="width:88px; padding:10px; background:#fff;">
+              <svg width="68" height="68" viewBox="-34 -34 68 68">
+                <circle cx="0" cy="0" r="22" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <text x="0" y="6" font-size="18" font-weight="600" fill="#1e293b" text-anchor="middle" font-family="monospace">A</text>
+                <text x="0" y="-28" font-size="10" font-weight="700" fill="#2563eb" text-anchor="middle">IL→</text>
+                <line x1="-34" y1="0" x2="-22" y2="0" stroke="#1e293b" stroke-width="2"/>
+                <line x1="22"  y1="0" x2="34"  y2="0" stroke="#1e293b" stroke-width="2"/>
+                <text x="-26" y="-12" font-size="11" font-weight="700" fill="#2563eb">17</text>
+                <text x="20"  y="-12" font-size="11" font-weight="700" fill="#2563eb">18</text>
+              </svg>
+            </div>
+            <div class="wc-pin" id="wc-pin-17" data-pid="17" style="top:50%; left:2px;"></div>
+            <div class="wc-pin" id="wc-pin-18" data-pid="18" style="top:50%; left:86px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-vt2" style="left:270px; top:495px;">
+            <div class="wc-card wc-vm" style="width:48px; padding:5px; background:#fff;">
+              <svg width="34" height="110" viewBox="-17 -55 34 110">
+                <circle cx="0" cy="0" r="14" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <text x="0" y="5" font-size="13" font-weight="600" text-anchor="middle">V</text>
+                <line x1="0" y1="-55" x2="0" y2="-14" stroke="#1e293b" stroke-width="2"/>
+                <line x1="0" y1="14" x2="0" y2="55" stroke="#1e293b" stroke-width="2"/>
+                <text x="-18" y="-42" font-size="11" font-weight="700" fill="#2563eb">22</text>
+                <text x="-18" y="52" font-size="11" font-weight="700" fill="#2563eb">23</text>
+              </svg>
+              <div class="wc-val">VT2</div>
+            </div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-22" data-pid="22" style="top:5px; left:50%;"></div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-23" data-pid="23" style="bottom:5px; left:50%;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-t2" style="left:350px; top:470px;">
+            <div class="wc-card" style="width:90px; padding:6px 0px; position:relative;">
+              <div class="wc-lbl" style="color:#1e293b; font-size:12px; position:absolute; left:8px; top:50%; transform:translateY(-50%); margin:0;">T2</div>
+              <svg width="100%" height="150" viewBox="-55 -100 110 200">
+                <line x1="0" y1="-100" x2="0" y2="-28" stroke="#1e293b" stroke-width="2"/>
+                <line x1="-22" y1="-28" x2="22" y2="-28" stroke="#1e293b" stroke-width="3"/>
+                <polygon points="-20,36 20,36 0,-28" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <line x1="-22" y1="36" x2="22" y2="36" stroke="#1e293b" stroke-width="2.5"/>
+                <line x1="0" y1="36" x2="0" y2="100" stroke="#1e293b" stroke-width="2"/>
+                <line x1="17" y1="-28" x2="34" y2="-46" stroke="#1e293b" stroke-width="2"/>
+                <circle cx="34" cy="-46" r="3.5" fill="#1e293b"/>
+                <text x="-20" y="-85" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">24</text>
+                <text x="-20" y="88" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">25</text>
+                <text x="38" y="-60" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">26</text>
+              </svg>
+            </div>
+            <div class="wc-pin" id="wc-pin-24" data-pid="24" style="top:-6px; left:50%; transform:translateX(-50%);"></div>
+            <div class="wc-pin" id="wc-pin-25" data-pid="25" style="bottom:-6px; left:50%; transform:translateX(-50%);"></div>
+            <div class="wc-pin" id="wc-pin-26" data-pid="26" style="top:27%; right:-4px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-gp2" style="left:460px; top:482px; cursor: pointer;">
+            <div class="wc-card" style="width:85px; padding:6px;" title="Right Click to edit Firing Angle">
+              <div class="wc-lbl" style="color:#8b5cf6;">GP2 (T2)</div>
+              <svg width="70" height="40" viewBox="-20 -20 35 40">
+                <rect x="-30" y="-15" width="55" height="30" rx="4" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+                <polyline points="-20,5 -20,-5 -8,-5 -8,5 4,5 4,-5 16,-5" stroke="#8b5cf6" stroke-width="1.5" fill="none"/>
+                <line x1="-30" y1="0" x2="-35" y2="0" stroke="#1e293b" stroke-width="2"/>
+                <text x="-38" y="-9" font-size="11" font-weight="700" fill="#2563eb">27</text>
+              </svg>
+              <div class="wc-val gp-val-32">α:60°</div>
+            </div>
+            <div class="wc-pin" id="wc-pin-27" data-pid="27" style="top:50%; left:-4px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-vgp2" style="left:457px; top:574px;">
+            <div class="wc-card wc-vm" style="width:80px; padding:5px; background:#fff;">
+              <svg width="70" height="25" viewBox="-35 -17 70 34">
+                <circle cx="0" cy="0" r="14" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <text x="0" y="4" font-size="13" font-weight="600" text-anchor="middle">V</text>
+                <line x1="-35" y1="0" x2="-14" y2="0" stroke="#1e293b" stroke-width="2"/>
+                <line x1="14" y1="0" x2="35" y2="0" stroke="#1e293b" stroke-width="2"/>
+                <text x="-40" y="-6" font-size="14" font-weight="700" fill="#2563eb">34</text>
+                <text x="25" y="-6" font-size="14" font-weight="700" fill="#2563eb">35</text>
+              </svg>
+              <div class="wc-val">VGP2</div>
+            </div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-34" data-pid="34" style="top:50%; left:0%;"></div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-35" data-pid="35" style="top:50%; left:100%;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-gnd2" style="left:560px; top:592px;">
+            <svg width="30" height="40" viewBox="-15 -10 30 40">
+              <line x1="-15" y1="10" x2="0" y2="10" stroke="#1e293b" stroke-width="2"/>
+              <line x1="-12" y1="10" x2="12" y2="10" stroke="#1e293b" stroke-width="2.5"/>
+              <line x1="-8" y1="16" x2="8" y2="16" stroke="#1e293b" stroke-width="2.5"/>
+              <line x1="-4" y1="22" x2="4" y2="22" stroke="#1e293b" stroke-width="2.5"/>
+              <text x="-8" y="0" font-size="12" font-weight="700" fill="#2563eb">36</text>
+            </svg>
+            <div class="wc-pin" id="wc-pin-36" data-pid="36" style="top:10px; left:0px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-vt4" style="left:620px; top:495px;">
+            <div class="wc-card wc-vm" style="width:48px; padding:5px; background:#fff;">
+              <svg width="34" height="110" viewBox="-17 -55 34 110">
+                <circle cx="0" cy="0" r="14" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <text x="0" y="5" font-size="13" font-weight="600" text-anchor="middle">V</text>
+                <line x1="0" y1="-55" x2="0" y2="-14" stroke="#1e293b" stroke-width="2"/>
+                <line x1="0" y1="14" x2="0" y2="55" stroke="#1e293b" stroke-width="2"/>
+                <text x="-16" y="-42" font-size="11" font-weight="700" fill="#2563eb">28</text>
+                <text x="-16" y="52" font-size="11" font-weight="700" fill="#2563eb">29</text>
+              </svg>
+              <div class="wc-val">VT4</div>
+            </div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-28" data-pid="28" style="top:5px; left:50%;"></div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-29" data-pid="29" style="bottom:5px; left:50%;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-t4" style="left:700px; top:470px;">
+            <div class="wc-card" style="width:90px; padding:6px 0px; position:relative;">
+              <div class="wc-lbl" style="color:#1e293b; font-size:12px; position:absolute; left:8px; top:50%; transform:translateY(-50%); margin:0;">T4</div>
+              <svg width="100%" height="150" viewBox="-55 -100 110 200">
+                <line x1="0" y1="-100" x2="0" y2="-28" stroke="#1e293b" stroke-width="2"/>
+                <line x1="-22" y1="-28" x2="22" y2="-28" stroke="#1e293b" stroke-width="3"/>
+                <polygon points="-20,36 20,36 0,-28" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <line x1="-22" y1="36" x2="22" y2="36" stroke="#1e293b" stroke-width="2.5"/>
+                <line x1="0" y1="36" x2="0" y2="100" stroke="#1e293b" stroke-width="2"/>
+                <line x1="17" y1="-28" x2="34" y2="-46" stroke="#1e293b" stroke-width="2"/>
+                <circle cx="34" cy="-46" r="3.5" fill="#1e293b"/>
+                <text x="-18" y="-85" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">30</text>
+                <text x="-18" y="88" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">31</text>
+                <text x="44" y="-60" font-size="14" font-weight="700" fill="#2563eb" font-family="monospace">32</text>
+              </svg>
+            </div>
+            <div class="wc-pin" id="wc-pin-30" data-pid="30" style="top:-6px; left:50%; transform:translateX(-50%);"></div>
+            <div class="wc-pin" id="wc-pin-31" data-pid="31" style="bottom:-6px; left:50%; transform:translateX(-50%);"></div>
+            <div class="wc-pin" id="wc-pin-32" data-pid="32" style="top:27%; right:-4px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-gp4" style="left:820px; top:480px; cursor: pointer;">
+            <div class="wc-card" style="width:85px; padding:6px;" title="Right Click to edit Firing Angle">
+              <div class="wc-lbl" style="color:#8b5cf6;">GP4 (T4)</div>
+              <svg width="70" height="40" viewBox="-20 -20 35 40">
+                <rect x="-30" y="-15" width="55" height="30" rx="4" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+                <polyline points="-20,5 -20,-5 -8,-5 -8,5 4,5 4,-5 16,-5" stroke="#8b5cf6" stroke-width="1.5" fill="none"/>
+                <line x1="-30" y1="0" x2="-35" y2="0" stroke="#1e293b" stroke-width="2"/>
+                <text x="-38" y="-12" font-size="11" font-weight="700" fill="#2563eb">33</text>
+              </svg>
+              <div class="wc-val gp-val-14">α:60°</div>
+            </div>
+            <div class="wc-pin" id="wc-pin-33" data-pid="33" style="top:50%; left:-4px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-r" style="left:1020px; top:220px; cursor: pointer;">
+            <div class="wc-card" style="padding:10px 10px 12px 36px; width:100px; position:relative;" title="Right Click to edit Resistance">
+              <div class="wc-lbl" id="disp-r" style="color:#1e293b; font-size:12px; position:absolute; left:8px; top:50%; transform:translateY(-50%); margin:0;">R=10Ω</div>
+              <svg width="100%" height="110" viewBox="-30 -55 60 110">
+                <text x="15" y="-40" font-size="14" font-weight="700" fill="#2563eb">37</text>
+                <line x1="0" y1="-55" x2="0" y2="-30" stroke="#1e293b" stroke-width="2"/>
+                <polyline points="0,-30 -12,-20 12,-5 -12,10 12,25 0,35" stroke="#1e293b" stroke-width="2.5" fill="none"/>
+                <line x1="0" y1="35" x2="0" y2="55" stroke="#1e293b" stroke-width="2"/>
+                <text x="15" y="50" font-size="14" font-weight="700" fill="#2563eb">38</text>
+              </svg>
+            </div>
+            <div class="wc-pin" id="wc-pin-37" data-pid="37" style="top:8px; left:65px;"></div>
+            <div class="wc-pin" id="wc-pin-38" data-pid="38" style="bottom:8px; left:65px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-l" style="left:1020px; top:380px; cursor: pointer;">
+            <div class="wc-card" style="padding:10px 10px 12px 36px; width:100px; position:relative;" title="Right Click to edit Inductance">
+              <div class="wc-lbl" id="disp-l" style="color:#1e293b; font-size:12px; position:absolute; left:8px; top:50%; transform:translateY(-50%); margin:0;">L=50mH</div>
+              <svg width="100%" height="110" viewBox="-30 -55 60 110">
+                <text x="15" y="-40" font-size="14" font-weight="700" fill="#2563eb">41</text>
+                <line x1="0" y1="-55" x2="0" y2="-30" stroke="#1e293b" stroke-width="2"/>
+                <path d="M 0,-30 C 18,-30 18,-15 0,-15 C 18,-15 18,0 0,0 C 18,0 18,15 0,15 C 18,15 18,30 0,30" stroke="#1e293b" stroke-width="2.5" fill="none"/>
+                <line x1="0" y1="30" x2="0" y2="55" stroke="#1e293b" stroke-width="2"/>
+                <text x="15" y="50" font-size="14" font-weight="700" fill="#2563eb">42</text>
+              </svg>
+            </div>
+            <div class="wc-pin" id="wc-pin-41" data-pid="41" style="top:8px; left:65px;"></div>
+            <div class="wc-pin" id="wc-pin-42" data-pid="42" style="bottom:8px; left:65px;"></div>
+          </div>
+
+          <div class="wc-comp" id="wc-vload" style="left:1140px; top:230px;">
+            <div class="wc-card wc-vm" style="width:52px; padding:5px; background:#fff;">
+              <svg width="38" height="260" viewBox="-19 -130 38 260">
+                <circle cx="0" cy="0" r="16" stroke="#1e293b" stroke-width="2" fill="#fff"/>
+                <text x="0" y="6" font-size="14" font-weight="600" fill="#1e293b" text-anchor="middle" font-family="monospace">V</text>
+                <line x1="0" y1="-130" x2="0" y2="-16" stroke="#1e293b" stroke-width="2"/>
+                <line x1="0" y1="16"   x2="0" y2="130" stroke="#1e293b" stroke-width="2"/>
+                <text x="-18" y="-115" font-size="11" font-weight="700" fill="#2563eb">39</text>
+                <text x="-18" y="125"  font-size="11" font-weight="700" fill="#2563eb">40</text>
+              </svg>
+              <div class="wc-val">VLOAD</div>
+            </div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-39" data-pid="39" style="top:5px; left:50%;"></div>
+            <div class="wc-pin wc-vm-pin" id="wc-pin-40" data-pid="40" style="bottom:5px; left:50%;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="wc-sidebar">
+        <div id="demo-banner">
+          <span id="demo-text">🎓 Guided Demo — follow the highlighted pins</span>
+        </div>
+
+        <div class="wc-scard">
+          <div class="wc-stitle" id="wc-chk-title">Connections — 0 / 30</div>
+          
+          <div class="wc-divider">INPUT AC & VOLTMETERS</div>
+          <div class="wc-chk" id="wc-chk-w1"><div class="wc-icon"></div><span>VINP+ (1) → AC+ (3)</span></div>
+          <div class="wc-chk" id="wc-chk-w2"><div class="wc-icon"></div><span>VINP- (2) → AC- (4)</span></div>
+          
+          <div class="wc-divider">BRIDGE AC MIDPOINTS</div>
+          <div class="wc-chk" id="wc-chk-w3"><div class="wc-icon"></div><span>AC+ (3) → T1 Cathode (8)</span></div>
+          <div class="wc-chk" id="wc-chk-w4"><div class="wc-icon"></div><span>T1 Cathode (8) → T2 Anode (24)</span></div>
+          <div class="wc-chk" id="wc-chk-w5"><div class="wc-icon"></div><span>AC- (4) → T4 Anode (14)</span></div>
+          <div class="wc-chk" id="wc-chk-w6"><div class="wc-icon"></div><span>T3 Cathode (14) → T4 Anode (30)</span></div>
+          
+          <div class="wc-divider">BRIDGE DC RAILS & LOAD</div>
+          <div class="wc-chk" id="wc-chk-w7"><div class="wc-icon"></div><span>T1 Anode (7) → T3 Anode (13)</span></div>
+          <div class="wc-chk" id="wc-chk-w8"><div class="wc-icon"></div><span>T3 Anode (13) → Ammeter (17)</span></div>
+          <div class="wc-chk" id="wc-chk-w9"><div class="wc-icon"></div><span>Ammeter (18) → Resistor Top (37)</span></div>
+          <div class="wc-chk" id="wc-chk-w24"><div class="wc-icon"></div><span>Resistor Bot (38) → Inductor Top (41)</span></div>
+          <div class="wc-chk" id="wc-chk-w10"><div class="wc-icon"></div><span>Inductor Bot (42) → T4 Cathode (31)</span></div>
+          <div class="wc-chk" id="wc-chk-w11"><div class="wc-icon"></div><span>T4 Cathode (31) → T2 Cathode (25)</span></div>
+
+          <div class="wc-divider">VOLTMETERS (POS & NEG)</div>
+          <div class="wc-chk" id="wc-chk-w12a"><div class="wc-icon"></div><span>VT1+ (5) → T1 Anode (7)</span></div>
+          <div class="wc-chk" id="wc-chk-w12b"><div class="wc-icon"></div><span>VT1- (6) → T1 Cathode (8)</span></div>
+          <div class="wc-chk" id="wc-chk-w13a"><div class="wc-icon"></div><span>VT3+ (11) → T3 Anode (13)</span></div>
+          <div class="wc-chk" id="wc-chk-w13b"><div class="wc-icon"></div><span>VT3- (12) → T3 Cathode (14)</span></div>
+          <div class="wc-chk" id="wc-chk-w14a"><div class="wc-icon"></div><span>VT2+ (22) → T2 Anode (24)</span></div>
+          <div class="wc-chk" id="wc-chk-w14b"><div class="wc-icon"></div><span>VT2- (23) → T2 Cathode (25)</span></div>
+          <div class="wc-chk" id="wc-chk-w15a"><div class="wc-icon"></div><span>VT4+ (28) → T4 Anode (30)</span></div>
+          <div class="wc-chk" id="wc-chk-w15b"><div class="wc-icon"></div><span>VT4- (29) → T4 Cathode (31)</span></div>
+
+          <div class="wc-divider">GATE PULSES & VLOAD</div>
+          <div class="wc-chk" id="wc-chk-w16"><div class="wc-icon"></div><span>GP1 (10) → T1 Gate (9)</span></div>
+          <div class="wc-chk" id="wc-chk-w17a"><div class="wc-icon"></div><span>VGP1+ (19) → T1 Gate (9)</span></div>
+          <div class="wc-chk" id="wc-chk-w17b"><div class="wc-icon"></div><span>VGP1- (20) → GND1 (21)</span></div>
+          <div class="wc-chk" id="wc-chk-w18"><div class="wc-icon"></div><span>GP2 (27) → T2 Gate (26)</span></div>
+          <div class="wc-chk" id="wc-chk-w19a"><div class="wc-icon"></div><span>VGP2+ (34) → T2 Gate (26)</span></div>
+          <div class="wc-chk" id="wc-chk-w19b"><div class="wc-icon"></div><span>VGP2- (35) → GND2 (36)</span></div>
+          <div class="wc-chk" id="wc-chk-w20"><div class="wc-icon"></div><span>GP3 (16) → T3 Gate (15)</span></div>
+          <div class="wc-chk" id="wc-chk-w21"><div class="wc-icon"></div><span>GP4 (33) → T4 Gate (32)</span></div>
+          <div class="wc-chk" id="wc-chk-w22"><div class="wc-icon"></div><span>VLOAD+ (39) → Resistor Top (37)</span></div>
+          <div class="wc-chk" id="wc-chk-w23"><div class="wc-icon"></div><span>VLOAD- (40) → Inductor Bot (42)</span></div>
+        </div>
+        
+        <button id="wc-nextBtn" disabled onclick="window.wcGoNext()">▶ VERIFY CIRCUIT</button>
+        <div class="wc-btn-group">
+          <button class="wc-ubtn" onclick="window.wcUndo()" style="flex-basis: 100%;">↩ Undo Last Connection</button>
+        </div>
+      </div>  
+    
+    <script>
+    (function() {
+      const WC_REQUIRED = [
+        { id:'w1',   pins:['1','3'] },   { id:'w2',   pins:['2','4'] },
+        { id:'w3',   pins:['3','8'] },   { id:'w4',   pins:['8','24'] },
+        { id:'w5',   pins:['4','30'] },  { id:'w6',   pins:['14','30'] },
+        { id:'w7',   pins:['7','13'] },  { id:'w8',   pins:['13','17'] },
+        { id:'w9',   pins:['18','37'] }, 
+        { id:'w24',  pins:['38','41'] }, 
+        { id:'w10',  pins:['42','31'] }, 
+        { id:'w11',  pins:['31','25'] },
+        { id:'w12a', pins:['5','7'] },   { id:'w12b', pins:['6','8'] },
+        { id:'w13a', pins:['11','13'] }, { id:'w13b', pins:['12','14'] },
+        { id:'w14a', pins:['22','24'] }, { id:'w14b', pins:['23','25'] },
+        { id:'w15a', pins:['28','30'] }, { id:'w15b', pins:['29','31'] },
+        { id:'w16',  pins:['10','9'] },
+        { id:'w17a', pins:['19','10'] }, { id:'w17b', pins:['20','21'] },
+        { id:'w18',  pins:['27','26'] },
+        { id:'w19a', pins:['34','27'] }, { id:'w19b', pins:['35','36'] },
+        { id:'w20',  pins:['16','15'] }, { id:'w21',  pins:['33','32'] },
+        { id:'w22',  pins:['39','37'] }, { id:'w23',  pins:['40','42'] }
+      ];
+
+      const checkIDs = WC_REQUIRED.map(x => x.id);
+      const WC_TOTAL = WC_REQUIRED.length;
+      let wcDone = new Set(), wcWires = [], wcFrom = null, wcMM = null;
+
+      const pinReqCount = {};
+      WC_REQUIRED.forEach(r => r.pins.forEach(p => pinReqCount[p] = (pinReqCount[p] || 0) + 1));
+
+      let isDemoActive = false;
+      let demoStepIndex = 0;
+
+      function wcPinCenter(pid) {
+        const el = document.getElementById('wc-pin-' + pid);
+        if (!el) return null;
+        const cr = document.getElementById('wc-inner').getBoundingClientRect();
+        const pr = el.getBoundingClientRect();
+        return { x: pr.left + pr.width/2 - cr.left, y: pr.top + pr.height/2 - cr.top };
+      }
+
+      function wcFlash(a, b) {
+        const p1 = wcPinCenter(a), p2 = wcPinCenter(b);
+        const svg = document.getElementById('wc-svg');
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d', `M${p1.x},${p1.y} L${p1.x},${p2.y} L${p2.x},${p2.y}`);
+        path.setAttribute('stroke','#ef4444'); 
+        path.setAttribute('stroke-width','3');
+        path.setAttribute('stroke-dasharray','5,5');
+        path.setAttribute('fill','none');
+        svg.appendChild(path);
+        setTimeout(() => path.remove(), 500);
+      }
+
+      function wcMakeWire(p1id, p2id) {
+        const p1 = wcPinCenter(p1id), p2 = wcPinCenter(p2id);
+        if (!p1 || !p2) return null;
+        const svg = document.getElementById('wc-svg');
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        const d = `M${p1.x},${p1.y} L${p1.x},${p2.y} L${p2.x},${p2.y}`;
+        path.setAttribute('d', d);
+        path.setAttribute('stroke','#0f172a');
+        path.setAttribute('stroke-width','2.5');
+        path.setAttribute('fill','none');
+        svg.insertBefore(path, document.getElementById('wc-drawLine'));
+        return path;
+      }
+
+      function getTTSFriendlyText(reqId) {
+        const span = document.querySelector(`#wc-chk-${reqId} span`);
+        if (!span) return "";
+        let text = span.textContent;
+        text = text.replace('→', ' to ').replace(/\+/g, ' positive ').replace(/-/g, ' negative ').replace(/\(\d+\)/g, ''); 
+        return "Connect " + text;
+      }
+
+      function demoSpeak(text) {
+        if (!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        if (window.ttsSelectedVoice) utterance.voice = window.ttsSelectedVoice;
+        utterance.rate = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+
+      function updateDemoHighlight() {
+        document.querySelectorAll('.wc-pin').forEach(p => p.classList.remove('demo-target'));
+        if (demoStepIndex >= WC_TOTAL) {
+          document.getElementById('demo-text').textContent = "Demo Complete! Verify Circuit.";
+          demoSpeak("Circuit wiring complete. Click verify circuit.");
+          return;
+        }
+
+        const req = WC_REQUIRED[demoStepIndex];
+        if (wcDone.has(req.id)) {
+          demoStepIndex++;
+          updateDemoHighlight();
+          return;
+        }
+
+        document.getElementById('wc-pin-' + req.pins[0]).classList.add('demo-target');
+        document.getElementById('wc-pin-' + req.pins[1]).classList.add('demo-target');
+        
+        const chkEl = document.getElementById('wc-chk-' + req.id);
+        if(chkEl) chkEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        const friendlyText = getTTSFriendlyText(req.id);
+        document.getElementById('demo-text').textContent = friendlyText;
+        demoSpeak(friendlyText);
+      }
+
+      window.toggleDemo = () => {
+        isDemoActive = !isDemoActive;
+        const btn = document.getElementById('wc-demoBtn');
+        const banner = document.getElementById('demo-banner');
+        if (isDemoActive) {
+          btn.innerHTML = "🛑 Stop Demo";
+          btn.classList.add('active');
+          banner.style.display = 'block';
+          if(wcDone.size === WC_TOTAL) {
+            wcWires.forEach(w => w.el.remove());
+            wcWires = [];
+            wcDone.clear();
+            wcRefresh();
+            wcUpdateUI();
+          }
+          demoStepIndex = 0;
+          updateDemoHighlight();
+        } else {
+          btn.innerHTML = "🎓 Guided Demo";
+          btn.classList.remove('active');
+          banner.style.display = 'none';
+          document.querySelectorAll('.wc-pin').forEach(p => p.classList.remove('demo-target'));
+          if(window.speechSynthesis) window.speechSynthesis.cancel();
+        }
+      };
+
+      function wcConnect(a, b) {
+        if (isDemoActive && demoStepIndex < WC_TOTAL) {
+          const req = WC_REQUIRED[demoStepIndex];
+          const isMatch = (req.pins[0]===a && req.pins[1]===b) || (req.pins[0]===b && req.pins[1]===a);
+          if (!isMatch) {
+            wcFlash(a, b); 
+            demoSpeak("Incorrect. Please " + getTTSFriendlyText(req.id));
+            wcCancel();
+            return;
+          }
+        }
+
+        const req = WC_REQUIRED.find(r => (r.pins[0]===a && r.pins[1]===b) || (r.pins[0]===b && r.pins[1]===a));
+        if (req && !wcDone.has(req.id)) {
+          const el = wcMakeWire(a, b);
+          wcWires.push({rid:req.id, el:el});
+          wcDone.add(req.id);
+          wcRefresh();
+          wcUpdateUI();
+
+          if (isDemoActive) {
+            demoStepIndex++;
+            setTimeout(updateDemoHighlight, 500);
+          }
+        } else {
+          wcFlash(a, b); 
+        }
+        wcCancel();
+      }
+
+      document.querySelectorAll('.wc-pin').forEach(pin => {
+        pin.addEventListener('pointerdown', e => {
+          e.stopPropagation();
+          const pid = pin.dataset.pid;
+          if (wcFrom === null) {
+            wcFrom = pid;
+            pin.classList.add('wc-active');
+            wcBeginLine(pid);
+          } else if (wcFrom === pid) {
+            wcCancel();
+          } else {
+            wcConnect(wcFrom, pid);
+          }
+        });
+      });
+
+      document.getElementById('wc-inner').addEventListener('pointerdown', () => wcCancel());
+
+      function wcBeginLine(pid) {
+        const dl = document.getElementById('wc-drawLine');
+        dl.setAttribute('opacity','1');
+        wcMM = e => {
+          const cr = document.getElementById('wc-inner').getBoundingClientRect();
+          const pp = wcPinCenter(pid);
+          const ex = e.clientX - cr.left;
+          const ey = e.clientY - cr.top;
+          const d = `M${pp.x},${pp.y} L${pp.x},${ey} L${ex},${ey}`;
+          dl.setAttribute('d', d);
+        };
+        document.addEventListener('mousemove', wcMM);
+      }
+
+      function wcCancel() {
+        const dl = document.getElementById('wc-drawLine');
+        if (dl) dl.setAttribute('opacity','0');
+        document.removeEventListener('mousemove', wcMM);
+        document.querySelectorAll('.wc-pin.wc-active').forEach(p => p.classList.remove('wc-active'));
+        wcFrom = null;
+      }
+
+      function wcRefresh() {
+        const pinCurrentCount = {};
+        wcDone.forEach(rid => {
+          const req = WC_REQUIRED.find(r => r.id === rid);
+          if(req) req.pins.forEach(p => pinCurrentCount[p] = (pinCurrentCount[p] || 0) + 1);
+        });
+        
+        document.querySelectorAll('.wc-pin').forEach(el => el.classList.remove('wc-done'));
+        
+        Object.keys(pinReqCount).forEach(p => {
+          if(pinCurrentCount[p] === pinReqCount[p]) {
+            const el = document.getElementById('wc-pin-'+p);
+            if(el) el.classList.add('wc-done');
+          }
+        });
+      }
+
+      function wcUpdateUI() {
+        const n = wcDone.size;
+        document.getElementById('wc-chk-title').textContent = `Connections — ${n} / ${WC_TOTAL}`;
+        checkIDs.forEach(id => {
+          const el = document.getElementById('wc-chk-' + id);
+          if (el) {
+            if (wcDone.has(id)) el.classList.add('wc-chk-done');
+            else el.classList.remove('wc-chk-done');
+          }
+        });
+        const btn = document.getElementById('wc-nextBtn');
+        if (n === WC_TOTAL) {
+          btn.disabled = false;
+          btn.classList.add('wc-unlocked');
+        } else {
+          btn.disabled = true;
+          btn.classList.remove('wc-unlocked');
+        }
+      }
+
+      window.wcUndo = () => {
+        if (isDemoActive) window.toggleDemo(); 
+        const w = wcWires.pop();
+        if (w) {
+          wcDone.delete(w.rid);
+          w.el.remove();
+          wcRefresh(); 
+          wcUpdateUI();
+        }
+      };
+
+      window.wcAutoConnect = () => {
+        if (isDemoActive) window.toggleDemo(); 
+        WC_REQUIRED.forEach(req => {
+          if (!wcDone.has(req.id)) {
+            const el = wcMakeWire(req.pins[0], req.pins[1]);
+            if (el) {
+              wcWires.push({rid: req.id, el: el});
+              wcDone.add(req.id);
+            }
+          }
+        });
+        wcRefresh();
+        wcUpdateUI();
+        
+        const btn = document.getElementById('wc-nextBtn');
+        if (btn && !btn.disabled) {
+            btn.classList.add('btn-attention');
+            if (typeof demoSpeak === 'function') {
+                demoSpeak("Connections complete. Please click on verify circuit.");
+            }
+        }
+      };
+
+      window.wcGoNext = () => {
+        window.circuitVerified = true;
+        if (isDemoActive) window.toggleDemo(); 
+        
+        const btn = document.getElementById('wc-nextBtn');
+        btn.textContent = "Verified ✓";
+        btn.classList.remove('btn-attention');
+
+        document.querySelectorAll('.tb-btn').forEach(b => {
+          b.disabled = false; b.style.opacity = '1'; b.style.cursor = 'pointer';
+        });
+        window.simulate();
+        
+        if (typeof window.startTour === 'function') window.startTour(); 
+      };
+    })();
+    </script>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-logo">
+      <div class="toolbar-logo-icon">⚡</div>
+      SCR<span>/FWR</span> Simulator
+    </div>
+    <div class="tb-badge"><span class="tb-badge-dot"></span>Virtual Lab</div>
+    <div class="tb-sep"></div>
+    <button class="tb-btn run" id="runBtn" onclick="window.simulate()">▶ Run</button>
+    <button class="tb-btn" id="liveBtn" onclick="window.toggleLive()">⦿ Live Mode</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn" id="saveBtn" onclick="window.downloadGraph()">↓ Save Plot</button>
+    <button class="tb-btn reset-btn" id="resetBtn" onclick="window.resetValues()">↺ Reset</button>
+  </div>
+
+  <div class="workspace">
+    <div class="sidebar">
+      <div class="sidebar-info-hint">
+        📋 Use the <strong>Procedure / Nomenclature / Math</strong> tabs above the circuit to learn before simulating.
+      </div>
+      <div class="sidebar-section" id="param-section">
+        <div class="section-title">Block Parameters</div>
+        <div class="field">
+          <div class="field-label">Peak Voltage (Vm) <span class="field-unit">V</span></div>
+          <input type="number" id="vm" value="100" min="1" max="1000" step="1" oninput="window.onParamChange()">
+          <input type="hidden" id="freq" value="50"> 
+        </div>
+        <div class="field">
+          <div class="field-label">Load Resistance (R) <span class="field-unit">Ω</span></div>
+          <input type="number" id="r" value="10" min="0.1" max="1000" step="0.1" oninput="window.onParamChange()">
+        </div>
+        <div class="field">
+          <div class="field-label">Load Inductance (L) <span class="field-unit">mH</span></div>
+          <input type="number" id="l" value="50" min="0" max="1000" step="1" oninput="window.onParamChange()">
+        </div>
+        
+        <div class="field" style="margin-top: 24px;">
+          <div class="field-label" style="color:var(--accent);">Firing Angle Control <span class="field-unit">°</span></div>
+          <div style="display:flex; gap:8px;">
+            <div style="flex:1;">
+              <input type="number" id="alpha1" value="60" min="0" max="180" oninput="window.onParamChange()">
+            </div>
+          </div>
+          <div style="font-size:11px; color:var(--text2); margin-top: 10px; line-height: 1.5; padding: 8px; background: var(--surface2); border-radius: 6px; border: 1px solid var(--border2);">
+            <strong style="color:var(--accent)">T1, T4</strong> fire at <strong>α</strong><br>
+            <strong style="color:var(--purple)">T3, T2</strong> fire at <strong>π + α</strong>
+          </div>
+        </div>
+
+      </div>
+      <div class="sidebar-section" id="result-section">
+        <div class="section-title">Simulation Output</div>
+        <div class="metrics-grid">
+          <div class="metric-card"><div class="mlabel">V<sub>dc</sub></div><div class="mval blue" id="vdc">—</div><div class="munit">V</div></div>
+          <div class="metric-card"><div class="mlabel">V<sub>rms</sub></div><div class="mval blue" id="vrms">—</div><div class="munit">V</div></div>
+          <div class="metric-card"><div class="mlabel">I<sub>dc</sub></div><div class="mval green" id="idc">—</div><div class="munit">A</div></div>
+          <div class="metric-card"><div class="mlabel">I<sub>rms</sub></div><div class="mval green" id="irms">—</div><div class="munit">A</div></div>
+          <div class="metric-card" style="grid-column: 1 / -1;"><div class="mlabel">Extinction Angle (β)</div><div class="mval" id="beta1" style="color:var(--orange);">—</div><div class="munit"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="canvas-area">
+      <div class="plot-card" id="plot-input">
+        <div class="plot-header">
+          <div class="plot-title"><span class="plot-dot" style="background:#94b8e0;"></span>Input Voltage Waveform</div>
+          <div class="plot-legend">
+            <div class="leg-item"><div class="leg-line" style="background:#94b8e0;"></div>v<sub>in</sub>(t)</div>
+          </div>
+        </div>
+        <canvas id="inputGraph" width="900" height="200"></canvas>
+      </div>
+      <div class="plot-card" id="plot-voltage">
+        <div class="plot-header">
+          <div class="plot-title"><span class="plot-dot" style="background:var(--accent);"></span>Output Voltage Waveform</div>
+          <div class="plot-legend">
+            <div class="leg-item"><div class="leg-line" style="background:var(--accent);"></div>v<sub>load</sub>(t)</div>
+          </div>
+        </div>
+        <canvas id="voltageGraph" width="900" height="200"></canvas>
+      </div>
+      <div class="plot-card" id="plot-current">
+        <div class="plot-header">
+          <div class="plot-title"><span class="plot-dot" style="background:var(--green);"></span>Current Waveform</div>
+          <div class="plot-legend">
+            <div class="leg-item"><div class="leg-line" style="background:var(--green);"></div>i<sub>o</sub>(t)</div>
+          </div>
+        </div>
+        <canvas id="currentGraph" width="900" height="200"></canvas>
+      </div>
+      <div class="plot-card" id="plot-gate">
+        <div class="plot-header">
+          <div class="plot-title"><span class="plot-dot" style="background:var(--purple);"></span>Gate Conduction Blocks</div>
+          <div class="plot-legend">
+            <div class="leg-item"><div class="leg-line" style="background:var(--accent);"></div>T1, T4 Pair</div>
+            <div class="leg-item"><div class="leg-line" style="background:var(--purple);"></div>T3, T2 Pair</div>
+          </div>
+        </div>
+        <canvas id="gateGraph" width="900" height="150"></canvas>
+      </div>
+      
+      <div class="plot-card" id="plot-vt14">
+        <div class="plot-header">
+          <div class="plot-title"><span class="plot-dot" style="background:var(--red);"></span>Thyristor Voltage (T1, T4)</div>
+          <div class="plot-legend">
+            <div class="leg-item"><div class="leg-line" style="background:var(--red);"></div>v<sub>T1,4</sub>(t)</div>
+          </div>
+        </div>
+        <canvas id="vt14Graph" width="900" height="200"></canvas>
+      </div>
+
+      <div class="plot-card" id="plot-vt32">
+        <div class="plot-header">
+          <div class="plot-title"><span class="plot-dot" style="background:var(--orange);"></span>Thyristor Voltage (T3, T2)</div>
+          <div class="plot-legend">
+            <div class="leg-item"><div class="leg-line" style="background:var(--orange);"></div>v<sub>T3,2</sub>(t)</div>
+          </div>
+        </div>
+        <canvas id="vt32Graph" width="900" height="200"></canvas>
+      </div>
+
+      <div class="status-strip">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Ready</span>
+        <span style="color: var(--border2);">|</span>
+        <span id="calcInfo">Not yet simulated</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="wc-context-menu" style="display:none; position:fixed; z-index:10000; background:white; border:1px solid var(--border); padding:10px 16px; border-radius:var(--radius); cursor:pointer; font-size:13px; font-weight:600; color:var(--text); box-shadow: var(--shadow-md);" onclick="window.openParamModal()">
+    ⚙ Set Parameters
+  </div>
+
+  <div id="wc-param-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); z-index:10001; align-items:center; justify-content:center; backdrop-filter:blur(3px);">
+    <div style="background:white; padding:28px; border-radius:var(--radius-lg); width:340px; box-shadow:var(--shadow-md); font-family: var(--font-sans);">
+      <h4 id="modal-title" style="margin-top:0; font-size:16px; color:var(--text); border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:20px; font-weight:700;">Configure Component</h4>
+      
+      <div class="param-group" id="grp-vm">
+        <label>Peak Voltage (Vm) [Max 1000V]:</label>
+        <input type="number" id="in-vm" max="1000">
+      </div>
+      <div class="param-group" id="grp-freq">
+        <label>Frequency (Hz) [Max 100Hz]:</label>
+        <input type="number" id="in-freq" max="100">
+      </div>
+      <div class="param-group" id="grp-alpha1">
+        <label>Firing Angle (α°) [Max 180°]:</label>
+        <input type="number" id="in-alpha1" min="0" max="180">
+      </div>
+      <div class="param-group" id="grp-r">
+        <label>Resistance (Ω) [Max 1000Ω]:</label>
+        <input type="number" id="in-r" min="0.1" max="1000">
+      </div>
+      <div class="param-group" id="grp-l">
+        <label>Inductance (mH) [Max 1000mH]:</label>
+        <input type="number" id="in-l" min="0" max="1000">
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+        <button onclick="window.closeParamModal()" style="padding:10px 18px; border:none; border-radius:var(--radius); background:var(--surface2); color:var(--text2); font-weight:600; cursor:pointer; transition:background 0.2s;">Cancel</button>
+        <button onclick="window.applyNewParams()" style="padding:10px 18px; border:none; border-radius:var(--radius); background:var(--accent); color:white; font-weight:600; cursor:pointer; transition:background 0.2s;">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tourOverlay" class="tour-overlay"></div>
+  <div id="tourSpotlight" class="tour-spotlight"></div>
+  <div id="tourPopover" class="tour-popover">
+    <div class="tour-popover-title" id="tourTitle">Title</div>
+    <div class="tour-popover-text" id="tourText">Text</div>
+    <div class="tour-popover-footer">
+      <span class="tour-step-counter" id="tourCounter">1 / 10</span>
+      <div class="tour-btn-group">
+        <button class="tour-btn tour-btn-skip" onclick="window.endTour()">Skip Tour</button>
+        <button class="tour-btn tour-btn-next" id="tourNextBtn" onclick="window.nextTourStep()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  window.liveMode = false;
+  const DPR = window.devicePixelRatio || 1;
+  window.circuitVerified = false;
+  window.waveData = []; 
+  window.waveVm = 100;
+  window.waveMaxI = 1;
+
+  window.onParamChange = function() {
+    let vmEl = document.getElementById('vm');
+    if(vmEl.value !== "") {
+        let v = parseFloat(vmEl.value);
+        if(v > 1000) vmEl.value = 1000;
+    }
+    
+    let rEl = document.getElementById('r');
+    if(rEl.value !== "") {
+        let r = parseFloat(rEl.value);
+        if(r > 1000) rEl.value = 1000;
+    }
+    
+    let lEl = document.getElementById('l');
+    if(lEl.value !== "") {
+        let l = parseFloat(lEl.value);
+        if(l > 1000) lEl.value = 1000;
+    }
+    
+    let alphaEl = document.getElementById('alpha1');
+    if(alphaEl.value !== "") {
+        let a = parseFloat(alphaEl.value);
+        if(a > 180) alphaEl.value = 180;
+    }
+    
+    // Sync values to circuit diagram safely (defaulting empty inputs to 0 for display)
+    let v = vmEl.value === "" ? 0 : vmEl.value;
+    let f = document.getElementById('freq').value || 50;
+    document.getElementById('disp-ac').innerHTML = `${v}V ${f}Hz`;
+    
+    let r = rEl.value === "" ? 0 : rEl.value;
+    document.getElementById('disp-r').innerText = `R=${r}Ω`;
+    
+    let l = lEl.value === "" ? 0 : lEl.value;
+    document.getElementById('disp-l').innerText = `L=${l}mH`;
+    
+    let a = alphaEl.value === "" ? 0 : alphaEl.value;
+    document.querySelectorAll('.gp-val-14, .gp-val-32').forEach(el => el.innerText = `α:${a}°`);
+
+    if (window.liveMode && window.circuitVerified) window.simulate();
+  };
+
+  /* ════════════════════════════════════════
+     TAB SWITCHING 
+  ════════════════════════════════════════ */
+  let activeTab = null;
+  const tabIcons = { proc: '📋', nom: '📖', math: '📐' };
+  const tabLabels = { proc: 'Procedure', nom: 'Nomenclature', math: 'Mathematical Expression' };
+
+  window.switchTab = function(name) {
+    try {
+      const panel = document.getElementById('infoPanel');
+      
+      ['proc','nom','math'].forEach(t => {
+        const content = document.getElementById('content-' + t);
+        if (content) content.classList.remove('active');
+        
+        const b = document.getElementById('tab-' + t);
+        if (b) {
+          b.classList.remove('active-proc','active-nom','active-math');
+          b.innerHTML = `${tabIcons[t]} ${tabLabels[t]}`;
+        }
+      });
+      
+      if (activeTab === name) {
+        if(window.ttsStop) window.ttsStop();
+        activeTab = null;
+        panel.classList.add('collapsed');
+      } else {
+        if(window.ttsStop) window.ttsStop();
+        const newContent = document.getElementById('content-' + name);
+        if (newContent) newContent.classList.add('active');
+        
+        const cls = name === 'proc' ? 'active-proc' : name === 'nom' ? 'active-nom' : 'active-math';
+        const btn = document.getElementById('tab-' + name);
+        if (btn) {
+          btn.classList.add(cls);
+          btn.innerHTML = `${tabIcons[name]} ${tabLabels[name]}`;
+        }
+        
+        activeTab = name;
+        panel.classList.remove('collapsed');
+      }
+    } catch(err) { console.error("Error switching tabs:", err); }
+  };
+
+  /* ════════════════════════════════════════
+     RIGHT-CLICK MODAL LOGIC 
+  ════════════════════════════════════════ */
+  window.currentTarget = '';
+
+  window.addEventListener('contextmenu', e => {
+    const comp = e.target.closest('.wc-comp');
+    if (comp) {
+      const compId = comp.id;
+      if (compId === 'wc-vs') window.currentTarget = 'ac';
+      else if (compId === 'wc-gp1' || compId === 'wc-gp4') window.currentTarget = 'gp14'; 
+      else if (compId === 'wc-gp2' || compId === 'wc-gp3') window.currentTarget = 'gp32'; 
+      else if (compId === 'wc-r') window.currentTarget = 'r';
+      else if (compId === 'wc-l') window.currentTarget = 'l';
+      else return;
+
+      e.preventDefault();
+      const menu = document.getElementById('wc-context-menu');
+      menu.style.display = 'block';
+      menu.style.left = e.clientX + 'px';
+      menu.style.top = e.clientY + 'px';
+    }
+  });
+
+  window.addEventListener('click', e => {
+    const menu = document.getElementById('wc-context-menu');
+    if (menu && e.target !== menu) menu.style.display = 'none';
+  });
+
+  window.openParamModal = () => {
+    document.getElementById('wc-context-menu').style.display = 'none';
+    const title = document.getElementById('modal-title');
+    document.querySelectorAll('.param-group').forEach(g => g.style.display = 'none');
+
+    if (window.currentTarget === 'ac') {
+      title.innerText = "AC Source Parameters";
+      document.getElementById('grp-vm').style.display = 'block';
+      document.getElementById('grp-freq').style.display = 'block';
+      document.getElementById('in-vm').value = document.getElementById('vm').value;
+      document.getElementById('in-freq').value = document.getElementById('freq').value || 50;
+    } else if (window.currentTarget === 'gp14' || window.currentTarget === 'gp32') {
+      title.innerText = "Firing Angle (α)";
+      document.getElementById('grp-alpha1').style.display = 'block';
+      document.getElementById('in-alpha1').value = document.getElementById('alpha1').value;
+    } else if (window.currentTarget === 'r') {
+      title.innerText = "Load Resistance";
+      document.getElementById('grp-r').style.display = 'block';
+      document.getElementById('in-r').value = document.getElementById('r').value;
+    } else if (window.currentTarget === 'l') {
+      title.innerText = "Load Inductance";
+      document.getElementById('grp-l').style.display = 'block';
+      document.getElementById('in-l').value = document.getElementById('l').value;
+    }
+    document.getElementById('wc-param-modal').style.display = 'flex';
+  };
+
+  window.closeParamModal = () => {
+    document.getElementById('wc-param-modal').style.display = 'none';
+  };
+
+  window.applyNewParams = () => {
+    if (window.currentTarget === 'ac') {
+      let v = parseFloat(document.getElementById('in-vm').value);
+      let f = parseFloat(document.getElementById('in-freq').value);
+      if (!isNaN(v)) { if (v > 1000) v = 1000; document.getElementById('vm').value = v; }
+      if (!isNaN(f)) { if (f > 100) f = 100; document.getElementById('freq').value = f; }
+    } else if (window.currentTarget === 'gp14' || window.currentTarget === 'gp32') {
+      let a = parseFloat(document.getElementById('in-alpha1').value);
+      if (!isNaN(a)) {
+        if (a > 180) a = 180;
+        document.getElementById('alpha1').value = a;
+      }
+    } else if (window.currentTarget === 'r') {
+      let r = parseFloat(document.getElementById('in-r').value);
+      if (!isNaN(r)) {
+        if (r > 1000) r = 1000;
+        document.getElementById('r').value = r;
+      }
+    } else if (window.currentTarget === 'l') {
+      let l = parseFloat(document.getElementById('in-l').value);
+      if (!isNaN(l)) {
+        if (l > 1000) l = 1000;
+        document.getElementById('l').value = l;
+      }
+    }
+    
+    window.onParamChange();
+    window.closeParamModal();
+  };
+
+  /* ════════════════════════════════════════
+     SIMULATION ODE & GRAPHING 
+  ════════════════════════════════════════ */
+  function drawLockedPlaceholder(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const W = rect.width || 900; const H = canvas.offsetHeight || 200;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    const ctx = canvas.getContext('2d'); ctx.scale(DPR, DPR);
+    
+    ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+    for (let i = 1; i < 8; i++) { const x = (W/8)*i; ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for (let j = 1; j < 4; j++) { const y = (H/4)*j; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+    
+    const cx = W/2, cy = H/2 - 10;
+    ctx.fillStyle = '#cbd5e1';
+    ctx.beginPath(); ctx.arc(cx, cy - 8, 12, Math.PI, 2*Math.PI); ctx.fill();
+    ctx.fillRect(cx - 15, cy - 8, 30, 24); 
+    ctx.beginPath(); ctx.arc(cx, cy - 8, 8, Math.PI, 2*Math.PI); ctx.fillStyle = '#f8fafc'; ctx.fill();
+    ctx.fillStyle = '#cbd5e1'; ctx.beginPath(); ctx.arc(cx, cy + 4, 5, 0, 2*Math.PI); ctx.fill();
+
+    ctx.fillStyle = '#94a3b8'; ctx.font = '500 13px Inter, sans-serif'; ctx.textAlign = 'center'; 
+    ctx.fillText('Complete wiring to unlock graph', cx, cy + 35);
+  }
+
+  function drawAllLocked() {
+    drawLockedPlaceholder('inputGraph');
+    drawLockedPlaceholder('voltageGraph');
+    drawLockedPlaceholder('currentGraph');
+    drawLockedPlaceholder('gateGraph');
+    drawLockedPlaceholder('vt14Graph');
+    drawLockedPlaceholder('vt32Graph');
+  }
+
+  function prepCanvas(id) {
+    const canvas = document.getElementById(id);
+    const rect = canvas.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    const ctx = canvas.getContext('2d'); ctx.scale(DPR, DPR);
+    return { ctx, W, H };
+  }
+
+  const ML = 56, MR = 20, MT = 22, MB = 30;
+  function waveY(val, maxV, H) { return MT + (H-MT-MB)/2 - (val/maxV)*(H-MT-MB)*0.42; }
+  function waveX(frac, W) { return ML + frac*(W-ML-MR); }
+
+  function runODEEngine() {
+    let parsedVm = parseFloat(document.getElementById('vm').value);
+    const Vm = isNaN(parsedVm) ? 0 : parsedVm;
+    
+    let parsedR = parseFloat(document.getElementById('r').value);
+    const R = (isNaN(parsedR) || parsedR <= 0) ? 0.001 : parsedR;
+
+    let parsedL = parseFloat(document.getElementById('l').value);
+    const L = (isNaN(parsedL) ? 0 : parsedL) / 1000;
+
+    const f = parseFloat(document.getElementById('freq').value) || 50;
+    const w = 2 * Math.PI * f;
+
+    let parsedAlpha = parseFloat(document.getElementById('alpha1').value);
+    const alpha_deg = isNaN(parsedAlpha) ? 0 : parsedAlpha;
+    
+    const a1 = alpha_deg * Math.PI / 180;
+    const a2_shifted = Math.PI + a1;
+
+    const dTh = 0.0005; 
+    let i = 0, state = 0; 
+    let prev_th_mod = -1;
+
+    for(let th = 0; th < 30 * Math.PI; th += dTh) {
+        let th_mod = th % (2 * Math.PI);
+        if(prev_th_mod > th_mod) prev_th_mod = -0.001; 
+
+        if (prev_th_mod < a1 && th_mod >= a1) state = 1;
+        if (prev_th_mod < a2_shifted && th_mod >= a2_shifted) state = 2;
+
+        let vin = Vm * Math.sin(th_mod);
+        let vload = (state === 1) ? vin : ((state === 2) ? -vin : 0);
+
+        if (state !== 0) {
+            if(L > 0) {
+                i += ((vload - R * i) / (w * L)) * dTh;
+                if(i <= 0) { i = 0; state = 0; }
+            } else {
+                i = vload / R;
+                if(i <= 0) { i = 0; state = 0; }
+            }
+        }
+        prev_th_mod = th_mod;
+    }
+
+    window.waveData = [];
+    prev_th_mod = -1;
+    let b1_deg_natural = null;
+    let last_state = state;
+    let next_save = 0;
+    const save_step = 4 * Math.PI / 2000;
+
+    for(let th = 0; th <= 4 * Math.PI; th += dTh) {
+        let th_mod = th % (2 * Math.PI);
+        if(prev_th_mod > th_mod) prev_th_mod = -0.001;
+
+        let trig1 = prev_th_mod < a1 && th_mod >= a1;
+        let trig2 = prev_th_mod < a2_shifted && th_mod >= a2_shifted;
+
+        if(trig1) state = 1;
+        if(trig2) state = 2;
+
+        let vin = Vm * Math.sin(th_mod);
+        let vload = (state === 1) ? vin : ((state === 2) ? -vin : 0);
+
+        if (state !== 0) {
+            if(L > 0) {
+                i += ((vload - R * i) / (w * L)) * dTh;
+                if(i <= 0) { i = 0; state = 0; }
+            } else {
+                i = vload / R;
+                if(i <= 0) { i = 0; state = 0; }
+            }
+        }
+
+        if (th >= 2 * Math.PI) {
+            if(last_state === 1 && state === 0) {
+                let beta_rad = th_mod;
+                if (beta_rad < a1) beta_rad += 2 * Math.PI; 
+                b1_deg_natural = (beta_rad * 180 / Math.PI);
+            }
+        }
+
+        last_state = state;
+        prev_th_mod = th_mod;
+
+        if (th >= next_save) {
+            window.waveData.push({ th, vin, v: vload, i: i, p1: state === 1, p2: state === 2 });
+            next_save += save_step;
+        }
+    }
+
+    let isCCM = (b1_deg_natural === null);
+    let final_beta = isCCM ? (180 + alpha_deg) : b1_deg_natural;
+    document.getElementById('beta1').textContent = final_beta.toFixed(1) + "°";
+
+    return { Vm, isCCM };
+  }
+
+  function drawGridAxes(ctx, W, H, maxV, unit, showZeroCenter = true) {
+    ctx.save();
+    ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 1;
+    const cols = 8, uw = W - ML - MR;
+    for (let i = 1; i < cols; i++) { const x = ML + (uw/cols)*i; ctx.beginPath(); ctx.moveTo(x,MT); ctx.lineTo(x,H-MB); ctx.stroke(); }
+    
+    const mid = showZeroCenter ? MT + (H - MT - MB) / 2 : H - MB;
+    ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(ML, mid); ctx.lineTo(W-MR, mid); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ML, MT); ctx.lineTo(ML, H-MB); ctx.stroke();
+    
+    ctx.fillStyle = '#64748b'; ctx.font = '11px JetBrains Mono, monospace'; ctx.textAlign = 'right';
+    if(showZeroCenter) {
+      ctx.fillText('+' + maxV.toFixed(0) + unit, ML-8, MT+10);
+      ctx.fillText('0', ML-8, mid+4);
+      ctx.fillText('-' + maxV.toFixed(0) + unit, ML-8, H-MB-3);
+    } else {
+      ctx.fillText('+' + maxV.toFixed(0) + unit, ML-8, MT+10);
+      ctx.fillText('0', ML-8, mid+4);
+    }
+
+    ctx.textAlign = 'center'; ctx.fillStyle = '#94a3b8';
+    ctx.fillText('0',  ML,                         H-MB+16);
+    ctx.fillText('π',  ML + (W-ML-MR)*0.25,        H-MB+16);
+    ctx.fillText('2π', ML + (W-ML-MR)*0.5,         H-MB+16);
+    ctx.fillText('3π', ML + (W-ML-MR)*0.75,        H-MB+16);
+    ctx.fillText('4π', W-MR,                       H-MB+16);
+    ctx.restore();
+  }
+
+  window.simulate = function() {
+    if (!window.circuitVerified) return;
+    
+    const { Vm, isCCM } = runODEEngine();
+    window.waveVm = Vm || 0.1; 
+
+    let sumV = 0, sumV2 = 0, sumI = 0, sumI2 = 0;
+    const cycleData = window.waveData.filter(d => d.th >= 2*Math.PI);
+    const dt = 2 * Math.PI / cycleData.length;
+    if(cycleData.length > 0) {
+      cycleData.forEach(d => {
+          sumV += d.v * dt; sumV2 += (d.v * d.v) * dt;
+          sumI += d.i * dt; sumI2 += (d.i * d.i) * dt;
+      });
+    }
+
+    document.getElementById('vdc').textContent = (sumV / (2*Math.PI)).toFixed(2);
+    document.getElementById('vrms').textContent = Math.sqrt(sumV2 / (2*Math.PI)).toFixed(2);
+    document.getElementById('idc').textContent = (sumI / (2*Math.PI)).toFixed(3);
+    document.getElementById('irms').textContent = Math.sqrt(sumI2 / (2*Math.PI)).toFixed(3);
+
+    drawInput(Vm);
+    drawOutput(Vm);
+    
+    document.getElementById('statusText').textContent = 'Simulation complete';
+    document.getElementById('calcInfo').textContent = isCCM ? 'Continuous Conduction Mode (CCM)' : 'Discontinuous Conduction Mode (DCM)';
+    document.getElementById('statusDot').className = 'status-dot';
+  };
+
+  function drawInput(Vm) {
+    const { ctx, W, H } = prepCanvas('inputGraph'); 
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,W,H); 
+    drawGridAxes(ctx,W,H,Vm,'V', true);
+    
+    ctx.strokeStyle = '#94b8e0'; ctx.lineWidth = 2.5; ctx.beginPath(); 
+    window.waveData.forEach((d, i) => { 
+        const x = waveX(d.th/(4*Math.PI), W), y = waveY(d.vin, Vm, H); 
+        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y); 
+    });
+    ctx.stroke(); 
+  }
+
+  function drawOutput(Vm) {
+    const cV = prepCanvas('voltageGraph'), cI = prepCanvas('currentGraph'), cG = prepCanvas('gateGraph');
+    const cT1 = prepCanvas('vt14Graph'), cT3 = prepCanvas('vt32Graph');
+    
+    let maxI = 0.1; window.waveData.forEach(d => maxI = Math.max(maxI, d.i)); maxI *= 1.2;
+    window.waveMaxI = maxI; 
+
+    [cV, cI, cG, cT1, cT3].forEach(c => { c.ctx.fillStyle = '#ffffff'; c.ctx.fillRect(0,0,c.W,c.H); });
+    drawGridAxes(cV.ctx, cV.W, cV.H, Vm, 'V', true); 
+    drawGridAxes(cI.ctx, cI.W, cI.H, maxI, 'A', true); 
+    drawGridAxes(cT1.ctx, cT1.W, cT1.H, Vm, 'V', true); 
+    drawGridAxes(cT3.ctx, cT3.W, cT3.H, Vm, 'V', true);
+    
+    const gH = cG.H, gW = cG.W, plotH = gH - MT - MB;
+    const y1 = MT + plotH * 0.2, y1_low = MT + plotH * 0.45, y2 = MT + plotH * 0.65, y2_low = gH - MB - plotH * 0.05;
+    
+    cG.ctx.save();
+    cG.ctx.strokeStyle = '#f1f5f9'; cG.ctx.lineWidth = 1; 
+    for (let i = 1; i < 8; i++) { const x = ML + ((gW-ML-MR)/8)*i; cG.ctx.beginPath(); cG.ctx.moveTo(x,MT); cG.ctx.lineTo(x,gH-MB); cG.ctx.stroke(); }
+    cG.ctx.strokeStyle = '#cbd5e1'; cG.ctx.beginPath(); cG.ctx.moveTo(ML, y1_low); cG.ctx.lineTo(gW-MR, y1_low); cG.ctx.stroke(); cG.ctx.beginPath(); cG.ctx.moveTo(ML, y2_low); cG.ctx.lineTo(gW-MR, y2_low); cG.ctx.stroke();
+    cG.ctx.fillStyle = '#94a3b8'; cG.ctx.font = '11px JetBrains Mono, monospace'; cG.ctx.textAlign = 'center'; 
+    ['0','π','2π','3π','4π'].forEach((lbl, i) => cG.ctx.fillText(lbl, ML + (gW-ML-MR)*0.25*i, gH-MB+16));
+    cG.ctx.restore();
+
+    cV.ctx.strokeStyle='#2563eb'; cV.ctx.lineWidth=2.5; cV.ctx.beginPath();
+    cI.ctx.strokeStyle='#10b981'; cI.ctx.lineWidth=2.5; cI.ctx.beginPath();
+    cT1.ctx.strokeStyle='#ef4444'; cT1.ctx.lineWidth=2.5; cT1.ctx.beginPath();
+    cT3.ctx.strokeStyle='#ea580c'; cT3.ctx.lineWidth=2.5; cT3.ctx.beginPath();
+
+    let p1_start = null, p2_start = null;
+
+    window.waveData.forEach((sig, i) => {
+      const x = waveX(sig.th/(4*Math.PI), cV.W);
+      const vY = waveY(sig.v, Vm, cV.H); i===0 ? cV.ctx.moveTo(x,vY) : cV.ctx.lineTo(x,vY);
+      const iY = waveY(sig.i, maxI, cI.H); i===0 ? cI.ctx.moveTo(x,iY) : cI.ctx.lineTo(x,iY);
+      
+      let vt1 = sig.p1 ? 0 : (sig.vin - sig.v)/2;
+      const t1Y = waveY(vt1, Vm, cT1.H); i===0 ? cT1.ctx.moveTo(x,t1Y) : cT1.ctx.lineTo(x,t1Y);
+      
+      let vt3 = sig.p2 ? 0 : (-sig.vin - sig.v)/2;
+      const t3Y = waveY(vt3, Vm, cT3.H); i===0 ? cT3.ctx.moveTo(x,t3Y) : cT3.ctx.lineTo(x,t3Y);
+
+      if(sig.p1 && p1_start===null) p1_start = x;
+      if(!sig.p1 && p1_start!==null) { 
+        cG.ctx.fillStyle='rgba(37,99,235,0.15)'; cG.ctx.fillRect(p1_start, y1, x-p1_start, y1_low-y1); 
+        cG.ctx.strokeStyle='#2563eb'; cG.ctx.lineWidth=2; cG.ctx.strokeRect(p1_start, y1, x-p1_start, y1_low-y1);
+        p1_start=null; 
+      }
+      
+      if(sig.p2 && p2_start===null) p2_start = x;
+      if(!sig.p2 && p2_start!==null) { 
+        cG.ctx.fillStyle='rgba(139,92,246,0.15)'; cG.ctx.fillRect(p2_start, y2, x-p2_start, y2_low-y2); 
+        cG.ctx.strokeStyle='#8b5cf6'; cG.ctx.lineWidth=2; cG.ctx.strokeRect(p2_start, y2, x-p2_start, y2_low-y2);
+        p2_start=null; 
+      }
+    });
+    
+    if(p1_start!==null) {
+        cG.ctx.fillRect(p1_start, y1, cG.W-MR-p1_start, y1_low-y1);
+        cG.ctx.strokeRect(p1_start, y1, cG.W-MR-p1_start, y1_low-y1);
+    }
+    if(p2_start!==null) {
+        cG.ctx.fillRect(p2_start, y2, cG.W-MR-p2_start, y2_low-y2);
+        cG.ctx.strokeRect(p2_start, y2, cG.W-MR-p2_start, y2_low-y2);
+    }
+
+    cV.ctx.stroke(); cI.ctx.stroke(); cT1.ctx.stroke(); cT3.ctx.stroke();
+    
+    cG.ctx.fillStyle = '#2563eb'; cG.ctx.textAlign = 'left'; cG.ctx.font = '11px Inter, sans-serif'; cG.ctx.fontWeight = '600'; cG.ctx.fillText('T1 & T4 (Pair 1)', ML + 6, y1 - 6);
+    cG.ctx.fillStyle = '#8b5cf6'; cG.ctx.fillText('T3 & T2 (Pair 2)', ML + 6, y2 - 6);
+  }
+
+  window.toggleLive = function() {
+    window.liveMode = !window.liveMode;
+    const btn = document.getElementById('liveBtn');
+    btn.textContent = window.liveMode ? '⦿ Live: ON' : '⦿ Live Mode';
+    btn.classList.toggle('live-active', window.liveMode);
+  };
+
+  window.resetValues = function() { window.location.reload(); }
+  window.downloadGraph = function() { window.print(); }
+
+  /* ════════════════════════════════════════
+    PROCEDURE TTS LOGIC
+  ════════════════════════════════════════ */
+  const ttsSteps = [
+    { id:'step-1', text:"Step 1. Complete the circuit by making all connections correctly in the circuit diagram below. Connect each component pin as listed in the checklist. Once all connections are made, click Verify Circuit to unlock the simulation." },
+    { id: 'step-2', text: "Step 2. Wire the Circuit. Follow the connection list on the right to complete the physical wiring, ensuring the Resistor and Inductor are correctly placed in series." },
+    { id: 'step-3', text: "Step 3. Set Source Parameters. Use the sidebar to set the Peak Voltage and frequency. The default is 100 volts and 50 Hertz." },
+    { id: 'step-4', text: "Step 4. Configure the Load. Set the Load Resistance and Load Inductance. Increasing the inductance stores more energy, prolonging current flow beyond the half cycle." },
+    { id: 'step-5', text: "Step 5. Set Delay Angles. Assign the firing angle alpha. The upper thyristor pair will trigger at alpha, and the lower pair will automatically trigger at pi plus alpha." },
+    { id: 'step-6', text: "Step 6. Observe Extinction Angle Beta. Run the simulation. The inductor causes current to flow past 180 degrees. If the current drops to zero naturally, it is Discontinuous Conduction Mode. If the opposing pair fires while current is still flowing, it force commutates into Continuous Conduction Mode." },
+    { id: 'step-7', text: "Step 7. Enable Live Mode to see waveforms update in real time as you change parameters. Use the Reset button to restore all default values." }
+  ];
+
+  let ttsCurrentStep = 0, ttsRunning = false, ttsPaused = false;
+  window.ttsVoiceList = []; window.ttsSelectedVoice = null;
+
+  function ttsSetStatus(msg) { document.getElementById('ttsStatus').textContent = msg; }
+  
+  function ttsUpdateButtons(state) {
+    const play = document.getElementById('ttsPlayBtn'), pause = document.getElementById('ttsPauseBtn'), stop = document.getElementById('ttsStopBtn');
+    if(!play || !pause || !stop) return;
+    if (state === 'idle') { play.style.display = ''; play.textContent = '▶ Read Aloud'; pause.style.display = 'none'; stop.style.display = 'none'; document.getElementById('ttsProgressBar').style.width = '0%'; }
+    else if (state === 'playing') { play.style.display = 'none'; pause.style.display = ''; stop.style.display = ''; }
+    else if (state === 'paused') { play.style.display = ''; play.textContent = '▶ Resume'; pause.style.display = 'none'; stop.style.display = ''; }
+  }
+
+  function ttsHighlight(idx) {
+    document.querySelectorAll('.proc-step').forEach(el => el.classList.remove('tts-highlight'));
+    if (idx >= 0 && idx < ttsSteps.length) {
+      const el = document.getElementById(ttsSteps[idx].id);
+      if(el) {
+        el.classList.add('tts-highlight');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+    const pct = ttsSteps.length > 0 ? ((idx + 1) / ttsSteps.length) * 100 : 0;
+    const bar = document.getElementById('ttsProgressBar');
+    if(bar) bar.style.width = Math.min(pct, 100) + '%';
+  }
+
+  function ttsSpeakStep(idx) {
+    if (idx >= ttsSteps.length) { window.ttsStop(); ttsSetStatus('✓ All steps read'); return; }
+    ttsCurrentStep = idx; ttsHighlight(idx);
+    ttsSetStatus('Step ' + (idx + 1) + ' of ' + ttsSteps.length + ' — ' + (window.ttsSelectedVoice ? window.ttsSelectedVoice.name : ''));
+    
+    let u = new SpeechSynthesisUtterance(ttsSteps[idx].text);
+    u.rate = parseFloat(document.getElementById('ttsSpeed').value) || 1.0; 
+    if (window.ttsSelectedVoice) u.voice = window.ttsSelectedVoice;
+    
+    u.onend = () => { if (ttsRunning && !ttsPaused) ttsSpeakStep(idx + 1); };
+    u.onerror = (e) => { if (e.error !== 'interrupted' && e.error !== 'canceled') { ttsSetStatus('Error: ' + e.error); ttsUpdateButtons('idle'); ttsRunning = false; } };
+    
+    window.procUtterance = u;
+    window.speechSynthesis.speak(u);
+  }
+
+  window.ttsPlay = function() {
+    if (!('speechSynthesis' in window)) { alert('Your browser does not support Text-to-Speech.'); return; }
+    if (ttsPaused) { ttsPaused = false; ttsRunning = true; window.speechSynthesis.resume(); ttsUpdateButtons('playing'); ttsSetStatus('Step ' + (ttsCurrentStep + 1) + ' of ' + ttsSteps.length + '…'); return; }
+    window.speechSynthesis.cancel(); ttsRunning = true; ttsPaused = false; ttsCurrentStep = 0;
+    ttsUpdateButtons('playing'); setTimeout(() => ttsSpeakStep(0), 150);
+  }
+
+  window.ttsPause = function() { if (!ttsRunning) return; ttsPaused = true; ttsRunning = false; window.speechSynthesis.pause(); ttsUpdateButtons('paused'); ttsSetStatus('Paused at step ' + (ttsCurrentStep + 1)); }
+  
+  window.ttsStop = function() { 
+    ttsRunning = false; ttsPaused = false; 
+    if(window.speechSynthesis) window.speechSynthesis.cancel(); 
+    ttsHighlight(-1); 
+    ttsSetStatus(window.ttsSelectedVoice ? 'Voice: ' + window.ttsSelectedVoice.name : 'Click Read Aloud to listen'); 
+    ttsUpdateButtons('idle'); ttsCurrentStep = 0; 
+  }
+  
+  window.ttsUpdateVoice = function() {
+    const idx = parseInt(document.getElementById('ttsVoice').value);
+    window.ttsSelectedVoice = window.ttsVoiceList[idx] || null;
+    if (ttsRunning) { window.speechSynthesis.cancel(); ttsRunning = true; ttsSpeakStep(ttsCurrentStep); }
+  }
+  
+  window.ttsUpdateSpeed = function() {
+    if (ttsRunning) { window.speechSynthesis.cancel(); ttsRunning = true; setTimeout(() => ttsSpeakStep(ttsCurrentStep), 80); }
+  }
+
+  function ttsPopulateVoices() {
+    if (!window.speechSynthesis) return;
+    const all = window.speechSynthesis.getVoices();
+    if (!all.length) return;
+    window.ttsVoiceList = all.filter(v => /^en/i.test(v.lang));
+    if (!window.ttsVoiceList.length) window.ttsVoiceList = all;
+    const sel = document.getElementById('ttsVoice');
+    if (!sel) return;
+    sel.innerHTML = '';
+    window.ttsVoiceList.forEach((v, i) => {
+      const opt = document.createElement('option');
+      opt.value = i; opt.textContent = v.name;
+      sel.appendChild(opt);
+    });
+    window.ttsSelectedVoice = window.ttsVoiceList[0];
+    sel.value = 0;
+    ttsSetStatus('Voice: ' + window.ttsSelectedVoice.name);
+  }
+
+  if (window.speechSynthesis) {
+    ttsPopulateVoices(); 
+    window.speechSynthesis.onvoiceschanged = ttsPopulateVoices;
+  }
+
+  /* ════════════════════════════════════════
+    INTERACTIVE HOVER FEATURE
+  ════════════════════════════════════════ */
+  function initGraphHovers() {
+    const tooltip = document.getElementById('wave-tooltip');
+    const graphs = [
+      { id: 'inputGraph', type: 'vin' },
+      { id: 'voltageGraph', type: 'vout' },
+      { id: 'currentGraph', type: 'iout' },
+      { id: 'vt14Graph', type: 'vt14' },
+      { id: 'vt32Graph', type: 'vt32' }
+    ];
+
+    graphs.forEach(g => {
+      const canvas = document.getElementById(g.id);
+      if (!canvas) return;
+
+      canvas.addEventListener('mousemove', e => {
+        if (!window.circuitVerified || window.waveData.length === 0) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+
+        // Ensure we are horizontally inside the graph axes
+        if (offsetX < ML || offsetX > rect.width - MR) {
+          tooltip.style.display = 'none';
+          return;
+        }
+
+        const frac = (offsetX - ML) / (rect.width - ML - MR);
+        let idx = Math.floor(frac * window.waveData.length);
+        if(idx >= window.waveData.length) idx = window.waveData.length - 1;
+        if(idx < 0) idx = 0;
+        
+        const sig = window.waveData[idx];
+        let val = 0, unit = 'V';
+        
+        if (g.id === 'inputGraph') val = sig.vin;
+        else if (g.id === 'voltageGraph') val = sig.v;
+        else if (g.id === 'currentGraph') { val = sig.i; unit = 'A'; }
+        else if (g.id === 'vt14Graph') val = sig.p1 ? 0 : (sig.vin - sig.v)/2;
+        else if (g.id === 'vt32Graph') val = sig.p2 ? 0 : (-sig.vin - sig.v)/2;
+
+        // Removed strict Y-axis hit detection. Always show tooltip if hovering X-axis time slot.
+        tooltip.innerHTML = `<span class="tt-deg">${(frac*720).toFixed(0)}°</span> &nbsp;|&nbsp; <span class="tt-val">${val.toFixed(2)} ${unit}</span>`;
+        tooltip.style.display = 'block'; 
+        tooltip.style.left = (e.pageX + 15) + 'px'; 
+        tooltip.style.top = (e.pageY - 15) + 'px';
+      });
+
+      canvas.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+      });
+    });
+  }
+
+  /* ════════════════════════════════════════
+    INTERACTIVE VERIFICATION TOUR LOGIC
+  ════════════════════════════════════════ */
+  const tourSteps = [
+    { id: '#runBtn', title: 'Run Simulation', text: 'Click this button to execute the simulation and generate the waveforms based on your current inputs.' },
+    { id: '#liveBtn', title: 'Live Mode', text: 'Toggle Live Mode ON to see the waveforms instantly update as you tune the parameters in real-time.' },
+    { id: '#saveBtn', title: 'Save Plot', text: 'Click here to save or print a PDF of your current circuit state and waveform plots.' },
+    { id: '#param-section', title: 'Parameter Settings', text: 'Modify the Input Peak Voltage (Vm), Load Resistance (R), Load Inductance (L), and the unified Firing Angle (α) here.' },
+    { id: '#result-section', title: 'Obtained Values', text: 'This panel shows the exact theoretical values for DC and RMS voltages and currents based on the simulation, as well as the Extinction angle (β).' },
+    { id: '#plot-input', title: 'Input Voltage Graph', text: 'Displays the original alternating (AC) input sine wave supplied to the rectifier.' },
+    { id: '#plot-voltage', title: 'Output Voltage Graph', text: 'Shows the rectified DC output voltage. Notice the two positive pulses per cycle, with negative dips depending on the Inductor energy.' },
+    { id: '#plot-current', title: 'Output Current Graph', text: 'Displays the load current. Because of the Inductor, this lags the voltage and extends beyond 180 degrees.' },
+    { id: '#plot-gate', title: 'Gate Pulses', text: 'Illustrates exactly when the firing pulses are applied. The first pair (T1 & T4) fires at α, and the second pair (T3 & T2) fires at π + α.' },
+    { id: '#plot-vt14', title: 'Thyristor T1 & T4 Voltage', text: 'The voltage across thyristors T1 & T4. It drops to near zero when conducting, and withstands the full reverse voltage when blocking.' },
+    { id: '#plot-vt32', title: 'Thyristor T3 & T2 Voltage', text: 'The corresponding voltage across thyristors T3 & T2 during the negative half-cycles.' }
+  ];
+
+  let currentTourStep = 0;
+  let tourScrollTimeout = null;
+  let autoNextTimeout = null;
+  window.tourUtterance = null; 
+
+  function clearAutoNext() { clearTimeout(autoNextTimeout); }
+
+  function tourSpeak(text) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    
+    window.tourUtterance = new SpeechSynthesisUtterance(text);
+    if (window.ttsSelectedVoice) window.tourUtterance.voice = window.ttsSelectedVoice;
+    window.tourUtterance.rate = parseFloat(document.getElementById('ttsSpeed').value) || 1.0;
+    
+    window.tourUtterance.onstart = () => { clearAutoNext(); };
+    window.tourUtterance.onend = () => {
+        clearAutoNext();
+        autoNextTimeout = setTimeout(() => {
+            if (currentTourStep < tourSteps.length) window.nextTourStep();
+        }, 1500);
+    };
+    
+    window.speechSynthesis.speak(window.tourUtterance);
+  }
+
+  function blockManualScroll(e) { e.preventDefault(); }
+  function blockManualKeys(e) {
+    if(["Space","ArrowUp","ArrowDown","PageUp","PageDown","Home","End"].includes(e.code)) {
+      e.preventDefault();
+    }
+  }
+
+  window.startTour = function() {
+    window.addEventListener('wheel', blockManualScroll, { passive: false });
+    window.addEventListener('touchmove', blockManualScroll, { passive: false });
+    window.addEventListener('keydown', blockManualKeys, { passive: false });
+
+    document.getElementById('tourOverlay').style.display = 'block';
+    currentTourStep = 0;
+    showTourStep();
+  }
+
+  function showTourStep() {
+    clearAutoNext();
+    if (currentTourStep >= tourSteps.length) { window.endTour(); return; }
+    
+    const step = tourSteps[currentTourStep];
+    const targetEl = document.querySelector(step.id);
+    
+    if (!targetEl) { currentTourStep++; showTourStep(); return; } 
+
+    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    tourSpeak(step.text);
+
+    let fallbackDuration = Math.max(5000, step.text.length * 60);
+    autoNextTimeout = setTimeout(() => {
+        if (currentTourStep < tourSteps.length) window.nextTourStep();
+    }, fallbackDuration);
+
+    clearTimeout(tourScrollTimeout);
+    tourScrollTimeout = setTimeout(() => {
+        const rect = targetEl.getBoundingClientRect();
+        const spotlight = document.getElementById('tourSpotlight');
+        
+        spotlight.style.display = 'block';
+        spotlight.style.top = (rect.top - 6) + 'px';
+        spotlight.style.left = (rect.left - 6) + 'px';
+        spotlight.style.width = (rect.width + 12) + 'px';
+        spotlight.style.height = (rect.height + 12) + 'px';
+        
+        document.getElementById('tourTitle').textContent = step.title;
+        document.getElementById('tourText').textContent = step.text;
+        document.getElementById('tourCounter').textContent = `${currentTourStep + 1} / ${tourSteps.length}`;
+        document.getElementById('tourNextBtn').textContent = (currentTourStep === tourSteps.length - 1) ? 'Finish' : 'Next →';
+
+        const popover = document.getElementById('tourPopover');
+        
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const popW = 340; 
+        const popH = 200; 
+        const gap = 20;
+
+        let pLeft, pTop;
+
+        if (rect.width > 500) {
+            pLeft = rect.left + (rect.width / 2) - (popW / 2);
+            if (rect.top > popH + gap + 50) { 
+                pTop = rect.top - popH - gap; 
+            } else { 
+                pTop = rect.bottom + gap; 
+            }
+        } else {
+            pLeft = rect.right + gap;
+            pTop = rect.top;
+        }
+
+        if (pLeft < gap) pLeft = gap;
+        if (pLeft + popW > vw - gap) pLeft = vw - popW - gap;
+        if (pTop < gap) pTop = gap;
+        if (pTop + popH > vh - gap) pTop = vh - popH - gap;
+
+        popover.style.top = pTop + 'px';
+        popover.style.left = pLeft + 'px';
+        popover.style.display = 'block';
+        
+        setTimeout(() => {
+            popover.style.opacity = '1';
+            spotlight.style.opacity = '1';
+        }, 10);
+    }, 400); 
+  }
+
+  window.nextTourStep = function() {
+    clearAutoNext(); 
+    document.getElementById('tourPopover').style.opacity = '0';
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
+    
+    setTimeout(() => {
+        currentTourStep++;
+        showTourStep();
+    }, 250);
+  }
+
+  window.endTour = function() {
+    clearAutoNext();
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
+    
+    window.removeEventListener('wheel', blockManualScroll);
+    window.removeEventListener('touchmove', blockManualScroll);
+    window.removeEventListener('keydown', blockManualKeys);
+
+    const overlay = document.getElementById('tourOverlay');
+    const popover = document.getElementById('tourPopover');
+    const spotlight = document.getElementById('tourSpotlight');
+    
+    popover.style.opacity = '0';
+    spotlight.style.opacity = '0';
+    
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      popover.style.display = 'none';
+      spotlight.style.display = 'none';
+      
+      const banner = document.getElementById('circuitVerifiedBanner');
+      banner.style.display = 'flex';
+      setTimeout(() => {
+          banner.style.opacity = '0';
+          setTimeout(() => banner.style.display = 'none', 500);
+      }, 3000);
+      
+    }, 300);
+  }
+
+  /* ════════════════════════════════════════
+    INTRO MODAL LOGIC (TTS Highlight)
+  ════════════════════════════════════════ */
+  let ittsActive = false, ittsPaused = false, ittsElIndex = 0;
+  let ittsElements = [];
+
+  window.ittsStop = () => {
+      ittsActive = false; ittsPaused = false;
+      window.speechSynthesis.cancel();
+      ittsElements.forEach(e => e.classList.remove('hl-block'));
+      document.getElementById('ittsPlay').style.display='';
+      document.getElementById('ittsPlay').textContent='▶ Read Aloud';
+      document.getElementById('ittsPause').style.display='none';
+      document.getElementById('ittsStop').style.display='none';
+      document.getElementById('ittsPBar').style.width='0%';
+      document.getElementById('ittsStatus').textContent='Press Read Aloud to hear this section';
+  };
+
+  window.ittsSection = function(idx) {
+    window.ittsStop();
+    document.querySelectorAll('.intro-nav-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+    document.querySelectorAll('.intro-section').forEach((s,i)=>s.classList.toggle('active',i===idx));
+    
+    const activeSec = document.querySelector('.intro-section.active');
+    if (activeSec) {
+        ittsElements = Array.from(activeSec.querySelectorAll('.tts-read'));
+    }
+  };
+
+  function ittsSpeakNext() {
+      if (ittsElIndex >= ittsElements.length) {
+          window.ittsStop();
+          return;
+      }
+      
+      const el = ittsElements[ittsElIndex];
+      const text = el.getAttribute('data-speak') || el.textContent;
+      
+      ittsElements.forEach(e => e.classList.remove('hl-block'));
+      el.classList.add('hl-block');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      
+      let u = new SpeechSynthesisUtterance(text);
+      u.rate = parseFloat(document.getElementById('ittsSpeed').value) || 1;
+      if (window.ttsSelectedVoice) u.voice = window.ttsSelectedVoice;
+      
+      u.onend = () => {
+          el.classList.remove('hl-block');
+          if (ittsActive && !ittsPaused) {
+              ittsElIndex++;
+              ittsSpeakNext();
+          }
+      };
+      
+      u.onerror = (e) => {
+          if(e.error !== 'interrupted' && e.error !== 'canceled') {
+               el.classList.remove('hl-block');
+               ittsElIndex++;
+               if(ittsActive && !ittsPaused) ittsSpeakNext();
+          }
+      };
+      
+      window.introUtterance = u; 
+      
+      const pct = (ittsElIndex / ittsElements.length) * 100;
+      document.getElementById('ittsPBar').style.width = pct + '%';
+      document.getElementById('ittsStatus').textContent = `Reading paragraph ${ittsElIndex + 1} of ${ittsElements.length}…`;
+      
+      window.speechSynthesis.speak(u);
+  }
+
+  window.ittsPlay = () => {
+      if (!('speechSynthesis' in window)) return;
+      if (ittsPaused) {
+          ittsPaused = false; ittsActive = true;
+          window.speechSynthesis.resume();
+      } else if (!ittsActive) {
+          ittsActive = true; ittsPaused = false;
+          ittsElIndex = 0;
+          window.speechSynthesis.cancel();
+          ittsSpeakNext();
+      }
+      document.getElementById('ittsPlay').style.display='none';
+      document.getElementById('ittsPause').style.display='';
+      document.getElementById('ittsStop').style.display='';
+  };
+
+  window.ittsPause = () => {
+      if (!ittsActive) return;
+      ittsPaused = true; 
+      window.speechSynthesis.pause();
+      document.getElementById('ittsPause').style.display='none';
+      document.getElementById('ittsPlay').style.display='';
+      document.getElementById('ittsPlay').textContent='▶ Resume';
+  };
+
+  window.closeIntro = () => {
+    window.ittsStop();
+    const overlay = document.getElementById('introOverlay');
+    overlay.style.opacity='0';
+    overlay.style.transition='opacity 0.3s';
+    setTimeout(()=>overlay.style.display='none', 300);
+  };
+
+  window.openIntro = () => {
+    const overlay = document.getElementById('introOverlay');
+    overlay.style.display = 'flex';
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.3s';
+    window.ittsSection(0); 
+    requestAnimationFrame(() => {
+      overlay.style.opacity = '1';
+    });
+  };
+
+  document.getElementById('introOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('introOverlay')) window.closeIntro();
+  });
+
+  document.addEventListener('keydown', e => { if (e.key==='Escape') window.closeIntro(); });
+
+  window.addEventListener('load', () => {
+      initGraphHovers();
+      drawAllLocked();
+      window.openIntro();
+  });
+
+</script>
+
+</body>
+</html>

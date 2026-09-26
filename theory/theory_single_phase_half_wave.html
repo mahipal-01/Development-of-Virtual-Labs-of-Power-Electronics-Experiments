@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Single Phase Half-Wave Controlled Rectifier – Theory</title>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath:  [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']],
+        processEscapes: true,
+        tags: 'none'
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+      startup: { typeset: true }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --surface: #ffffff;
+      --surface2: #f7f8fa;
+      --border: #d0d5dd;
+      --border2: #e4e7ec;
+      --text: #1a1f2e;
+      --text2: #4a5568;
+      --text3: #8898aa;
+      --accent: #0057b8;
+      --accent-lt: #dbeafe;
+      --green: #16a34a;
+      --green-lt: #dcfce7;
+      --orange: #c2440b;
+      --orange-lt: #fff0e6;
+      --purple: #6d28d9;
+      --teal: #0891b2;
+      --teal-lt: #cffafe;
+      --emf: #b91c1c;
+      --emf-lt: #fee2e2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Times New Roman', Times, serif;
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* ── Toolbar (matches simulation page) ── */
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1.5px solid var(--border);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      height: 44px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .toolbar-logo {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: #1a1f2e;
+      letter-spacing: -0.3px;
+      padding-right: 20px;
+      border-right: 1px solid var(--border2);
+      margin-right: 16px;
+      white-space: nowrap;
+    }
+    .toolbar-logo span { font-weight: 400; }
+    .tb-nav {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      height: 44px;
+    }
+    .tb-nav a {
+      height: 44px;
+      padding: 0 18px;
+      background: none;
+      border: none;
+      border-right: 1px solid var(--border2);
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .tb-nav a:hover { background: var(--accent-lt); color: var(--accent); }
+    .tb-nav a.active {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    .tb-sep { width: 1px; background: var(--border2); height: 26px; margin: 0 4px; }
+
+    /* ── Banner (matches simulation exp-banner) ── */
+    .exp-banner {
+      background: var(--surface);
+      border-bottom: 2px solid var(--border);
+      padding: 18px 28px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .exp-tag {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .exp-title {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+    }
+    .exp-title span { color: var(--accent); }
+    .exp-title span.emf-span { color: var(--emf); }
+    .exp-subtitle {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 15px;
+      color: var(--text3);
+      margin-top: 5px;
+      letter-spacing: 0.2px;
+    }
+
+    /* ── Main layout ── */
+    .page-body {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 28px 28px 0;
+    }
+
+    /* ── Section headings ── */
+    .section-heading {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin: 36px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-heading .sh-num {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-heading:first-child { margin-top: 0; }
+
+    /* ── Text ── */
+    .content-block {
+      font-size: 18px;
+      line-height: 1.85;
+      color: var(--text2);
+      margin-bottom: 14px;
+      text-align: justify;
+    }
+
+    /* ── Note box ── */
+    .note-box {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 17px;
+      color: #92400e;
+      line-height: 1.75;
+    }
+    .note-box b { color: #78350f; }
+
+    /* ── Formula box ── */
+    .fbox {
+      background: var(--surface2);
+      border: 1.5px solid var(--border2);
+      border-radius: 6px;
+      padding: 13px 18px;
+      margin: 12px 0;
+      text-align: center;
+      overflow-x: auto;
+    }
+    .fbox:hover {
+      border-color: var(--accent);
+      background: #f0f6ff;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    /* ── Formula label ── */
+    .fbox-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      text-align: left;
+    }
+
+    /* ── Formula grid (two-col for short equations) ── */
+    .fgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .fgrid .fbox { margin: 0; }
+
+    /* ── Image placeholder cards ── */
+    .fig-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 20px 0 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .fig-header {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border2);
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      color: var(--text3);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .fig-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+    .fig-body {
+      padding: 0;
+    }
+    .fig-body svg { display: block; width: 100%; }
+    .fig-caption {
+      font-size: 15px;
+      color: var(--text3);
+      text-align: center;
+      padding: 8px 14px 12px;
+      font-style: italic;
+      border-top: 1px solid var(--border2);
+      background: var(--surface2);
+    }
+
+    /* ── Advantage / Disadvantage / Application cards ── */
+    .list-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border2);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 10px;
+    }
+    .list-card ol, .list-card ul {
+      padding-left: 22px;
+      font-size: 18px;
+      color: var(--text2);
+      line-height: 1.85;
+    }
+    .list-card li { margin-bottom: 5px; }
+
+    /* ── Advantages / Disadvantages in two-col ── */
+    .adv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+    .adv-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border2);
+      border-radius: 6px;
+      padding: 14px 18px;
+    }
+    .adv-card .adv-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .adv-card .adv-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .adv-card ol {
+      padding-left: 18px;
+      font-size: 17px;
+      color: var(--text2);
+      line-height: 1.8;
+    }
+    .adv-card li { margin-bottom: 4px; color: var(--text2); }
+    .adv-card.green .adv-title { color: var(--green); }
+    .adv-card.green .adv-dot { background: var(--green); }
+    .adv-card.green { border-color: #bbf7d0; }
+    .adv-card.green ol, .adv-card.green li { color: var(--text2); }
+    .adv-card.red .adv-title { color: var(--emf); }
+    .adv-card.red .adv-dot { background: var(--emf); }
+    .adv-card.red { border-color: #fecaca; }
+    .adv-card.red ol, .adv-card.red li { color: var(--text2); }
+
+    /* ── Footer ── */
+    .footer {
+      background: var(--surface);
+      border-top: 1.5px solid var(--border);
+      padding: 18px 28px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--text3);
+      margin-top: 40px;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── Fade in ── */
+    .fade-in { animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 700px) {
+      .fgrid { grid-template-columns: 1fr; }
+      .adv-grid { grid-template-columns: 1fr; }
+      .page-body { padding: 16px; }
+      .exp-title { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="toolbar-logo">SCR<span>/HWR-RLE</span> Virtual Lab</div>
+  <nav class="tb-nav">
+    <a href="theory_RLE.html" class="active">📖 Theory</a>
+    <a href="simulation.html">⚙ Simulation</a>
+  </nav>
+</div>
+
+<div class="exp-banner">
+  <div class="exp-tag">Theory · Power Electronics · Rectifiers</div>
+  <div class="exp-title">Single Phase Half-Wave Controlled Rectifier &mdash; <span>R Load</span>, <span>R-L Load</span> &amp; <span>R-L-E Load</span></div>
+  <div class="exp-subtitle">SCR-based controlled rectification · Firing angle α · Extinction angle β · Back-EMF E · 50 Hz system</div>
+</div>
+
+<div class="page-body fade-in">
+
+  <div class="section-heading">
+    <span class="sh-num">i</span>
+    Introduction
+  </div>
+
+  <p class="content-block">
+    A Single Phase Half Wave Controlled Rectifier is a rectifier circuit which converts AC input into DC output only
+    for the positive half cycle of the AC input supply. The word <em>"controlled"</em> means that we can change the
+    starting point of load current by controlling the firing angle of the SCR; the SCR turns ON at a certain point
+    in time when it is forward biased.
+    A Single Phase Half Wave Controlled Rectifier circuit consists of an SCR (thyristor), an AC voltage source and
+    a load. The load may be purely resistive (R), inductive (R-L), or include a back-EMF source (R-L-E).
+  </p>
+
+  <div class="note-box">
+    <b>Key points for controlled rectifier operation:</b><br><br>
+    1) The necessary condition for turn-ON of an SCR is that it should be forward biased <em>and</em> a gate signal must be
+    applied. An SCR will only turn ON when it is forward biased and gated.<br><br>
+    2) An SCR will turn off only when the current through it falls below the holding current and a reverse voltage is
+    applied for a duration greater than the SCR turn-off time.
+  </div>
+
+  <div class="section-heading">
+    <span class="sh-num">1</span>
+    Single Phase Half Wave Controlled Rectifier with Resistive (R) Load
+  </div>
+
+  <p class="content-block">
+    The circuit consists of a thyristor T, AC source V<sub>s</sub> = V<sub>m</sub> sin ωt, and a purely resistive
+    load R. Here V<sub>0</sub> = load output voltage, i<sub>0</sub> = load current and V<sub>T</sub> = voltage across
+    the thyristor T. It is assumed that the peak supply voltage never exceeds the forward and reverse-blocking ratings
+    of the thyristor.
+  </p>
+
+  <div class="fig-card">
+    <div class="fig-header">
+        <span class="fig-dot"></span>
+        Fig. 1 — R Load Circuit Diagram
+    </div>
+
+    <div class="fig-body">
+        <img src="SHW_R_load_circuit.jpg" alt="R Load Circuit Diagram" style="width:100%; height:auto; border-radius:6px;">
+    </div>
+
+    <div class="fig-caption">
+        Fig. 1: Single Phase Half Wave Controlled Rectifier with R Load
+    </div>
+</div>
+
+  <p class="content-block">
+    During the positive half cycle, the thyristor anode is positive w.r.t. its cathode; until gated, it blocks
+    forward current. When fired at angle α, the full supply voltage is applied to the load. With a purely resistive
+    load, the current waveform is identical to the voltage waveform. At the zero crossing (ωt = π), the thyristor
+    turns off by natural commutation. By varying α, the output voltage is controlled. During the negative half cycle
+    the thyristor blocks all current.
+  </p>
+
+  <p class="content-block"><strong>Analysis — Average load voltage:</strong></p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 1 — V<sub>dc</sub> (R Load)</div>
+    \[V_{dc} = \frac{1}{2\pi}\left[\int_{\alpha}^{\pi} V_m\,\sin\omega t\;d(\omega t)\right] = \frac{V_m}{2\pi}(1+\cos\alpha)\]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 2 — Maximum V<sub>dc</sub> (α = 0)</div>
+    \[V_{dc\,max} = \frac{V_m}{\pi}\]
+  </div>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Eq. 3 — Average current (R Load)</div>
+      \[I_{dc} = \frac{V_{dc}}{R} = \frac{V_m}{2\pi R}(1+\cos\alpha)\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Eq. 4 — RMS load voltage</div>
+      \[V_{L\,rms} = \frac{V_m}{2\sqrt{\pi}}\left(\pi-\alpha+\tfrac{1}{2}\sin 2\alpha\right)^{1/2}\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Eq. 5 — V<sub>rms</sub> at α = 0</div>
+      \[V_{L\,rms} = \frac{V_m}{2}\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Eq. 6 — RMS load current</div>
+      \[I_{L\,rms} = \frac{V_{L\,rms}}{R} = \frac{V_m}{2R\sqrt{\pi}}\left(\pi-\alpha+\tfrac{1}{2}\sin 2\alpha\right)^{1/2}\]
+    </div>
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 7 — Average output power</div>
+    \[P_{dc} = V_{dc}\cdot I_{dc} = \frac{V_m^2}{4\pi^2 R}(1+\cos\alpha)^2\]
+  </div>
+
+  
+
+  <div class="fig-card">
+  <div class="fig-header">
+    <span class="fig-dot" style="background:#0057b8;"></span>
+    Fig. 2 — R Load Waveforms
+  </div>
+
+  <div class="fig-body">
+    <img src="SHW_R_load_waveform.png" alt="R Load Waveforms" style="width:100%; height:auto; border-radius:6px;">
+  </div>
+
+  <div class="fig-caption">
+    Fig. 2: input voltage, output voltage, load current, firing pulse V<sub>T</sub>
+  </div>
+</div>
+
+  <div class="section-heading">
+    <span class="sh-num">2</span>
+    Single Phase Half Wave Controlled Rectifier with R-L Load
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-header">
+        <span class="fig-dot"></span>
+        Fig. 1 — R-L Load Circuit Diagram
+    </div>
+
+    <div class="fig-body">
+        <img src="SHW_RL_load_circuit.png" alt="R-L Load Circuit Diagram" style="width:100%; height:auto; border-radius:6px;">
+    </div>
+
+    <div class="fig-caption">
+        Fig. 1: Single Phase Half Wave Controlled Rectifier with R-L Load
+    </div>
+</div>
+
+  <p class="content-block">
+    The circuit consists of a thyristor T, source V<sub>s</sub> and an R-L load.
+    When the thyristor is fired at ωt = α, load voltage equal to the source voltage appears instantaneously across
+    the load. However, because the load is inductive, the current cannot change instantaneously — at ωt = α the
+    current is still zero and rises gradually.
+  </p>
+
+  <p class="content-block">
+    At ωt = π, the load voltage reduces to zero. However, due to inductance L, the load current is not yet zero —
+    the stored magnetic energy forces the current to continue flowing. The thyristor therefore stays ON even though
+    the supply is now negative, conducting until ωt = β. The angle β (extinction angle) is where i<sub>o</sub> = 0
+    and the thyristor turns off by natural commutation. The conduction angle is (β − α).
+  </p>
+
+  <p class="content-block">
+    The circuit turn-off time is t<sub>c</sub> = (2π − β)/ω seconds. This must exceed the thyristor turn-off time
+    to avoid commutation failure.
+  </p>
+
+  <div class="fig-card">
+  <div class="fig-header">
+    <span class="fig-dot" style="background:#0057b8;"></span>
+    Fig. 4 — R-L Load Waveforms
+  </div>
+
+  <div class="fig-body">
+    <img src="SHW_RL_load_waveform.png" alt="R-L Load Waveforms" style="width:100%; height:auto; border-radius:6px;">
+  </div>
+
+  <div class="fig-caption">
+    Fig. 4: Waveforms — input voltage, output voltage, load current, firing pulse V<sub>T</sub>
+  </div>
+</div>
+
+  <p class="content-block"><strong>Voltage equation (KVL):</strong></p>
+
+  <div class="fbox">
+    <div class="fbox-label">KVL — R-L Load</div>
+    \[V_m\sin\omega t = Ri_o + L\,\frac{di_o}{dt}\]
+  </div>
+
+  <p class="content-block">
+    The load current i<sub>o</sub> consists of a steady-state component i<sub>s</sub> and a transient component
+    i<sub>t</sub>:
+  </p>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Steady-state component</div>
+      \[i_s = \frac{V_m}{\sqrt{R^2+X_L^2}}\sin(\omega t-\phi)\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Transient component</div>
+      \[i_t = A\,e^{-(R/L)t}\]
+    </div>
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 8 — General solution</div>
+    \[i_o = \frac{V_m}{Z}\sin(\omega t-\phi) + A\,e^{-(R/L)t}\]
+  </div>
+
+  <p class="content-block">
+    Applying boundary condition i<sub>o</sub> = 0 at ωt = α (i.e. t = α/ω), the constant A is:
+  </p>
+
+  <div class="fbox">
+    \[A = -\frac{V_m}{Z}\sin(\alpha-\phi)\,e^{\,R\alpha/L\omega}\]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 9 — Instantaneous current (R-L Load)</div>
+    \[i_o = \frac{V_m}{Z}\left[\sin(\omega t-\phi) - \sin(\alpha-\phi)\,\exp\!\left\{-\frac{R}{\omega L}(\omega t-\alpha)\right\}\right]\]
+  </div>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Eq. 10 — Average output voltage</div>
+      \[V_o = \frac{V_m}{2\pi}(\cos\alpha - \cos\beta)\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Average load current</div>
+      \[I_o = \frac{V_m}{2\pi R}(\cos\alpha - \cos\beta)\]
+    </div>
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 11 — RMS load voltage</div>
+    \[V_{or} = \frac{V_m}{2\sqrt{\pi}}\sqrt{(\beta-\alpha)-\tfrac{1}{2}(\sin 2\beta - \sin 2\alpha)}\]
+  </div>
+
+  <div class="section-heading">
+    <span class="sh-num">3</span>
+    Single Phase Half Wave Controlled Rectifier with R-L-E Load
+  </div>
+
+  <div class="fig-card">
+    <div class="fig-header">
+        <span class="fig-dot"></span>
+        Fig. 1 — R-L-E Load Circuit Diagram
+    </div>
+
+    <div class="fig-body">
+        <img src="SHW_RLE_load_circuit.png" alt="R-L-E Load Circuit Diagram" style="width:100%; height:auto; border-radius:6px;">
+    </div>
+
+    <div class="fig-caption">
+        Fig. 1: Single Phase Half Wave Controlled Rectifier with RLE Load
+    </div>
+</div>
+
+  <p class="content-block">
+    A counter-EMF E in the load may be due to a battery or a DC motor. The SCR can only turn ON when the
+    instantaneous supply voltage V<sub>m</sub>sin ωt exceeds E. The minimum firing angle θ<sub>1</sub> is obtained from:
+  </p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 12 — Minimum firing angle (α<sub>min</sub>)</div>
+    \[\theta_1 = \sin^{-1}\!\left(\frac{E}{V_m}\right)\]
+  </div>
+
+  <p class="content-block">
+    If the thyristor is fired at α &lt; θ<sub>1</sub>, then E &gt; V<sub>s</sub>, the SCR is reverse biased and
+    will not turn ON. The maximum firing angle is θ<sub>2</sub> = π − θ<sub>1</sub>. During intervals when
+    i<sub>o</sub> = 0, the load voltage v<sub>o</sub> = E. When i<sub>o</sub> &gt; 0, v<sub>o</sub> follows v<sub>s</sub>.
+    The KVL equation during conduction is:
+  </p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 13 — KVL for R-L-E Load</div>
+    \[V_m\sin\omega t = Ri_o + L\,\frac{di_o}{dt} + E\]
+  </div>
+
+  <div class="fig-card">
+  <div class="fig-header">
+    <span class="fig-dot" style="background:#0057b8;"></span>
+    Fig. 4 — R-L-E Load Waveforms
+  </div>
+
+  <div class="fig-body">
+    <img src="SHW_RLE_load_waveform.png" alt="R-L-E Load Waveforms" style="width:100%; height:auto; border-radius:6px;">
+  </div>
+
+  <div class="fig-caption">
+    Fig. 4: Waveforms — input voltage, output voltage, load current, gate pulse V<sub>T</sub>, thyristor voltage
+  </div>
+</div>
+
+  <p class="content-block">
+    The solution is the sum of steady-state components (i<sub>s1</sub> due to V<sub>m</sub>sinωt, i<sub>s2</sub>
+    due to E) and a transient component i<sub>t</sub>:
+  </p>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Due to AC source alone</div>
+      \[i_{s1} = \frac{V_m}{Z}\sin(\omega t-\phi)\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Due to back-EMF E alone</div>
+      \[i_{s2} = -\frac{E}{R}\]
+    </div>
+  </div>
+
+  <p class="content-block">
+    Applying i<sub>o</sub> = 0 at ωt = α gives the constant A:
+  </p>
+
+  <div class="fbox">
+    \[A = \left[\frac{E}{R} - \frac{V_m}{Z}\sin(\alpha-\phi)\right]e^{\,R\alpha/L\omega}\]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 14 — Instantaneous current (R-L-E Load)</div>
+    \[i_o = \frac{V_m}{Z}\!\left[\sin(\omega t-\phi)-\sin(\alpha-\phi)\exp\!\left\{-\frac{R}{\omega L}(\omega t-\alpha)\right\}\right] - \frac{E}{R}\!\left[1-\exp\!\left\{-\frac{R}{\omega L}(\omega t-\alpha)\right\}\right]\]
+  </div>
+
+  <p class="content-block">
+    Valid for α ≤ ωt ≤ β. The extinction angle β depends on E, α, and the impedance angle φ.
+  </p>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 15 — Average load current I<sub>o</sub></div>
+    \[I_o = \frac{1}{2\pi R}\Big[V_m(\cos\alpha-\cos\beta) - E(\beta-\alpha)\Big]\]
+  </div>
+
+  <div class="fbox">
+    <div class="fbox-label">Eq. 16 — Average load voltage V<sub>o</sub></div>
+    \[V_o = E\!\left(1-\frac{\gamma}{2\pi}\right) + \frac{V_m}{\pi}\sin\!\left(\alpha+\frac{\gamma}{2}\right)\sin\!\left(\frac{\gamma}{2}\right), \quad \gamma = \beta-\alpha\]
+  </div>
+
+  <p class="content-block">
+    For zero inductance (L = 0), the extinction angle β = π − θ<sub>1</sub> and γ = π − θ<sub>1</sub> − α:
+  </p>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Eq. 17 — I<sub>o</sub> for L = 0</div>
+      \[I_o = \frac{1}{2\pi R}\Big[V_m(\cos\alpha+\cos\theta_1) - E(\pi-\theta_1-\alpha)\Big]\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Eq. 18 — RMS current for L = 0</div>
+      \[I_{or} = \left[\frac{1}{2\pi R^2}\int_\alpha^{\pi-\alpha}(V_m\sin\omega t - E)^2\,d(\omega t)\right]^{1/2}\]
+    </div>
+  </div>
+
+  <div class="fgrid">
+    <div class="fbox">
+      <div class="fbox-label">Eq. 19 — Power delivered to load</div>
+      \[P = I_{or}^2 R + I_o E\]
+    </div>
+    <div class="fbox">
+      <div class="fbox-label">Supply power factor</div>
+      \[\text{PF} = \frac{I_{or}^2 R + I_o E}{V_s\,I_{or}}\]
+    </div>
+  </div>
+
+  <div class="section-heading">
+    <span class="sh-num">4</span>
+    Advantages, Disadvantages &amp; Applications
+  </div>
+
+  <div class="adv-grid">
+    <div class="list-card">
+  <div style="font-size:13px;font-weight:700;letter-spacing:0.8px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px;">
+    <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+    Advantages
+  </div>
+  <ol>
+    <li>Simple circuit, easy to construct.</li>
+    <li>Low cost, fewer components.</li>
+    <li>Economical at initial stage.</li>
+  </ol>
+</div>
+    <div class="list-card">
+  <div style="font-size:13px;font-weight:700;letter-spacing:0.8px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px;">
+    <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+    Disadvantages
+  </div>
+  <ol>
+    <li>Low transformer utilization factor.</li>
+    <li>Low output voltage.</li>
+    <li>DC saturation of transformer core causing harmonics and hysteresis losses.</li>
+    <li>Power delivered only in one half cycle.</li>
+    <li>High ripple factor — requires heavy filtering.</li>
+  </ol>
+</div>
+
+  <div class="list-card">
+    <div style="font-size:13px;font-weight:700;letter-spacing:0.8px;color:var(--accent);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+      Applications
+    </div>
+    <ol>
+      <li>AM radio demodulation</li>
+      <li>Pulse-generation circuits</li>
+      <li>Signal demodulation</li>
+      <li>Voltage multiplier circuits</li>
+    </ol>
+  </div>
+
+</div><div class="footer">
+  <p>© 2026 Virtual Labs &nbsp;|&nbsp; Power Electronics Laboratory</p>
+  <p>Developed for educational purposes &nbsp;|&nbsp; <a href="#">Report Issues</a> &nbsp;|&nbsp; <a href="#">Feedback</a></p>
+  <p style="margin-top:6px;font-size:13px;color:#aab2bf;">Last Updated: April 2026</p>
+</div>
+
+<script>
+  window.addEventListener('load', function() {
+    if (window.MathJax) MathJax.typeset();
+  });
+</script>
+</body>
+</html>
